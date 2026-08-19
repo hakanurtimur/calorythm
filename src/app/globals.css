@@ -9,17 +9,45 @@
   --fat-ultramarine: #5367e8;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--carbon);
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--carbon);
   color: var(--bone);
   font-family: "Manrope Variable", sans-serif;
+  margin: 0;
+  min-width: 20rem;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--carbohydrate-solar);
+  color: var(--carbon);
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--carbohydrate-solar);
+  outline-offset: 0.35rem;
 }
 
 .skip-link {
+  background: var(--bone);
+  color: var(--carbon);
   left: 1rem;
+  padding: 0.75rem 1rem;
   position: fixed;
   top: 1rem;
   transform: translateY(-200%);
+  z-index: 10;
 }
 
 .skip-link:focus-visible {

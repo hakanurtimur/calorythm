@@ -1,8 +1,11 @@
 .siteHeader {
-  align-items: center;
+  align-items: baseline;
+  background: var(--carbon);
   display: flex;
   justify-content: space-between;
   padding: 1.5rem clamp(1.25rem, 4vw, 4rem);
+  position: relative;
+  z-index: 2;
 }
 
 .wordmark {
@@ -23,17 +26,22 @@
 .index,
 .annotations,
 .concepts {
-  color: var(--mineral);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.6875rem;
   letter-spacing: 0.08em;
+}
+
+.prototypeNav span,
+.eyebrow,
+.index {
+  color: var(--mineral);
 }
 
 .scene {
   isolation: isolate;
   min-height: 76svh;
   overflow: clip;
-  padding: clamp(4rem, 12vw, 10rem) clamp(1.25rem, 8vw, 9rem);
+  padding: clamp(4.5rem, 10vw, 9rem) clamp(1.25rem, 8vw, 9rem);
   position: relative;
 }
 
@@ -43,9 +51,24 @@
   z-index: 1;
 }
 
+.hero,
+.response {
+  background: var(--carbon);
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
 .hero {
   align-items: center;
-  display: grid;
+  min-height: calc(100svh - 4.5rem);
+}
+
+.hero .copy {
+  grid-column: 1 / 10;
+}
+
+.response .copy {
+  grid-column: 3 / 12;
 }
 
 .eyebrow,
@@ -58,27 +81,29 @@
   color: var(--bone);
   font-family: "Bodoni Moda Variable", serif;
   font-weight: 500;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.04em;
   line-height: 0.95;
   margin: 0;
+  text-wrap: balance;
 }
 
 .heroTitle {
-  font-size: clamp(3.5rem, 10vw, 9rem);
+  font-size: clamp(3.5rem, 8.5vw, 6rem);
   max-width: 13ch;
 }
 
 .sceneTitle {
-  font-size: clamp(3rem, 7vw, 6.5rem);
+  font-size: clamp(3rem, 6.5vw, 6rem);
   max-width: 13ch;
 }
 
 .description {
   color: var(--bone);
   font-size: clamp(1rem, 1.8vw, 1.25rem);
-  line-height: 1.6;
+  line-height: 1.65;
   margin: 1.75rem 0 0;
   max-width: 43rem;
+  text-wrap: pretty;
 }
 
 .cta {
@@ -87,42 +112,183 @@
   display: inline-block;
   font-weight: 700;
   margin-top: 2rem;
-  padding-bottom: 0.4rem;
+  padding-block: 0.35rem;
   text-decoration: none;
 }
 
 .heroForm,
-.matterSurface,
 .responseField {
   inset: 0;
   pointer-events: none;
   position: absolute;
 }
 
-.heroForm {
-  background: radial-gradient(circle at 73% 52%, color-mix(in srgb, var(--fat-ultramarine) 42%, transparent), transparent 33%);
+.heroForm::before,
+.heroForm::after {
+  border: 1px solid color-mix(in srgb, var(--fat-ultramarine) 34%, transparent);
+  content: "";
+  height: min(56vw, 38rem);
+  position: absolute;
+  right: -12vw;
+  top: 14%;
+  transform: rotate(18deg);
+  width: min(25vw, 18rem);
+}
+
+.heroForm::after {
+  border-color: color-mix(in srgb, var(--protein-coral) 24%, transparent);
+  right: 3vw;
+  top: 23%;
+  transform: rotate(-7deg);
 }
 
 .matter {
-  background: color-mix(in srgb, var(--bone) 5%, var(--carbon));
+  background: var(--bone);
+  color: var(--carbon);
+}
+
+.matter::before {
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--carbon) 28%, transparent) 0.5px, transparent 0.65px);
+  background-size: 4px 4px;
+  content: "";
+  inset: 0;
+  opacity: 0.22;
+  pointer-events: none;
+  position: absolute;
+}
+
+.matterGrid {
+  column-gap: clamp(1rem, 2vw, 2rem);
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  row-gap: clamp(2rem, 4vw, 4.5rem);
+}
+
+.matterCopy {
+  grid-column: 1 / 9;
+  grid-row: 1;
+}
+
+.matter .index,
+.matter .description {
+  color: color-mix(in srgb, var(--carbon) 78%, var(--bone));
+}
+
+.matter .sceneTitle {
+  color: var(--carbon);
+}
+
+.matter .description {
+  max-width: 36rem;
 }
 
 .matterSurface {
-  background: linear-gradient(125deg, transparent 52%, color-mix(in srgb, var(--protein-coral) 16%, transparent));
+  --crop-one-x: 0%;
+  --crop-one-y: 8%;
+  --crop-one-width: 29%;
+  --crop-one-height: 70%;
+  --crop-two-x: 33%;
+  --crop-two-y: 21%;
+  --crop-two-width: 29%;
+  --crop-two-height: 71%;
+  --crop-three-x: 66%;
+  --crop-three-y: 0%;
+  --crop-three-width: 34%;
+  --crop-three-height: 78%;
+  aspect-ratio: 4 / 3;
+  grid-column: 5 / 13;
+  grid-row: 2;
+  margin: 0;
+  overflow: hidden;
+  position: relative;
 }
 
-.annotations,
-.concepts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
+.matterImage {
+  -webkit-mask:
+    linear-gradient(#000 0 0) var(--crop-one-x) var(--crop-one-y) / var(--crop-one-width) var(--crop-one-height) no-repeat,
+    linear-gradient(#000 0 0) var(--crop-two-x) var(--crop-two-y) / var(--crop-two-width) var(--crop-two-height) no-repeat,
+    linear-gradient(#000 0 0) var(--crop-three-x) var(--crop-three-y) / var(--crop-three-width) var(--crop-three-height) no-repeat;
+  mask:
+    linear-gradient(#000 0 0) var(--crop-one-x) var(--crop-one-y) / var(--crop-one-width) var(--crop-one-height) no-repeat,
+    linear-gradient(#000 0 0) var(--crop-two-x) var(--crop-two-y) / var(--crop-two-width) var(--crop-two-height) no-repeat,
+    linear-gradient(#000 0 0) var(--crop-three-x) var(--crop-three-y) / var(--crop-three-width) var(--crop-three-height) no-repeat;
+  object-fit: cover;
+}
+
+.cropWindow {
+  border: 1px solid color-mix(in srgb, var(--carbon) 22%, transparent);
+  pointer-events: none;
+  position: absolute;
+}
+
+.cropWindowLeft {
+  height: var(--crop-one-height);
+  left: var(--crop-one-x);
+  top: var(--crop-one-y);
+  width: var(--crop-one-width);
+}
+
+.cropWindowCenter {
+  height: var(--crop-two-height);
+  left: var(--crop-two-x);
+  top: var(--crop-two-y);
+  width: var(--crop-two-width);
+}
+
+.cropWindowRight {
+  height: var(--crop-three-height);
+  left: var(--crop-three-x);
+  top: var(--crop-three-y);
+  width: var(--crop-three-width);
+}
+
+.annotations {
+  align-items: start;
+  color: var(--carbon);
+  display: grid;
+  gap: 1rem clamp(1rem, 2vw, 2rem);
+  grid-column: 5 / 13;
+  grid-row: 3;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   list-style: none;
-  margin: 2rem 0 0;
+  margin: 0;
   padding: 0;
 }
 
+.annotations li {
+  align-items: baseline;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: max-content minmax(1rem, 1fr);
+  white-space: nowrap;
+}
+
+.annotations li::after {
+  background: currentcolor;
+  content: "";
+  height: 1px;
+  opacity: 0.45;
+}
+
+.response {
+  min-height: 92svh;
+}
+
 .responseField {
-  background: radial-gradient(circle at 55% 48%, color-mix(in srgb, var(--carbohydrate-solar) 15%, transparent), transparent 48%);
+  border-block: 1px solid color-mix(in srgb, var(--bone) 13%, transparent);
+}
+
+.responseField::before {
+  background: var(--carbohydrate-solar);
+  content: "";
+  height: 1px;
+  left: 8%;
+  opacity: 0.48;
+  position: absolute;
+  top: 50%;
+  transform: rotate(-6deg);
+  transform-origin: left center;
+  width: 84%;
 }
 
 .titleLine {
@@ -131,9 +297,26 @@
 
 .concepts {
   color: var(--bone);
+  display: flex;
+  flex-wrap: wrap;
   font-family: "Manrope Variable", sans-serif;
   font-size: clamp(1rem, 2vw, 1.4rem);
+  gap: 0;
   letter-spacing: 0;
+  list-style: none;
+  margin: 2.5rem 0 0;
+  padding: 0;
+}
+
+.concepts li {
+  align-items: center;
+  display: flex;
+}
+
+.concepts li:not(:last-child)::after {
+  color: var(--protein-coral);
+  content: "·";
+  margin-inline: 0.75rem;
 }
 
 @media (max-width: 48rem) {
@@ -145,5 +328,63 @@
 
   .prototypeNav {
     gap: 1rem;
+  }
+
+  .scene {
+    min-height: auto;
+    padding-block: clamp(4.5rem, 18vw, 7rem);
+  }
+
+  .hero,
+  .response {
+    display: block;
+  }
+
+  .hero {
+    min-height: calc(100svh - 7.5rem);
+  }
+
+  .matterGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    min-width: 0;
+  }
+
+  .matterSurface {
+    --crop-one-x: 0%;
+    --crop-one-y: 0%;
+    --crop-one-width: 100%;
+    --crop-one-height: 29%;
+    --crop-two-x: 8%;
+    --crop-two-y: 35%;
+    --crop-two-width: 84%;
+    --crop-two-height: 29%;
+    --crop-three-x: 0%;
+    --crop-three-y: 70%;
+    --crop-three-width: 100%;
+    --crop-three-height: 30%;
+    aspect-ratio: 3 / 4;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .matterImage {
+    object-position: 52% 50%;
+  }
+
+  .annotations {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    width: 100%;
+  }
+
+  .annotations li {
+    width: 100%;
+  }
+
+  .response .copy {
+    max-width: 100%;
   }
 }

@@ -36,4 +36,17 @@ describe("homepage scenes", () => {
       expect(screen.getByText(concept)).toBeInTheDocument();
     }
   });
+
+  it("presents one meaningful matter image through three crop windows", () => {
+    render(<Home />);
+
+    const matterScene = screen.getByRole("region", { name: "Sahne 02: Madde" });
+    const matterImage = screen.getByRole("img", {
+      name: "Koyu ekmek dokusu, yakut renkli narenciye ve zeytinyağının makro görünümü",
+    });
+
+    expect(matterScene).toContainElement(matterImage);
+    expect(matterScene.querySelectorAll("img")).toHaveLength(1);
+    expect(matterScene.querySelectorAll("[data-crop-window]")).toHaveLength(3);
+  });
 });
