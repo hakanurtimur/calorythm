@@ -386,6 +386,7 @@
 
 .responseField {
   border-block: 1px solid color-mix(in srgb, var(--bone) 13%, transparent);
+  overflow: hidden;
 }
 
 .responseField::before {
@@ -401,32 +402,48 @@
   width: 84%;
 }
 
+.responseCanvas {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
 .titleLine {
   display: block;
 }
 
 .concepts {
   color: var(--bone);
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   font-family: "Manrope Variable", sans-serif;
   font-size: clamp(1rem, 2vw, 1.4rem);
-  gap: 0;
+  gap: 1rem clamp(1.5rem, 5vw, 4.5rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   letter-spacing: 0;
   list-style: none;
   margin: 2.5rem 0 0;
+  max-width: 52rem;
   padding: 0;
 }
 
 .concepts li {
   align-items: center;
-  display: flex;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: max-content minmax(1.5rem, 1fr) max-content;
+  min-width: 0;
 }
 
-.concepts li:not(:last-child)::after {
+.conceptIndex {
   color: var(--protein-coral);
-  content: "·";
-  margin-inline: 0.75rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+}
+
+.conceptConnector {
+  background: color-mix(in srgb, var(--bone) 28%, transparent);
+  height: 1px;
 }
 
 @media (max-width: 48rem) {
@@ -507,5 +524,14 @@
 
   .response .copy {
     max-width: 100%;
+  }
+
+  .concepts {
+    gap: 1rem 1.25rem;
+  }
+
+  .concepts li {
+    gap: 0.5rem;
+    grid-template-columns: max-content minmax(0.75rem, 1fr) max-content;
   }
 }
