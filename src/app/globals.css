@@ -18,6 +18,7 @@
 html {
   background: var(--carbon);
   scroll-behavior: smooth;
+  scroll-padding-top: 1rem;
 }
 
 body {
@@ -35,21 +36,46 @@ body {
 }
 
 :where(a, button, input, select, textarea):focus-visible {
-  outline: 2px solid var(--carbohydrate-solar);
-  outline-offset: 0.35rem;
+  outline: 3px solid var(--carbohydrate-solar);
+  outline-offset: 0.25rem;
 }
 
 .skip-link {
+  align-items: center;
   background: var(--bone);
   color: var(--carbon);
-  left: 1rem;
+  display: inline-flex;
+  font-weight: 700;
+  left: max(1rem, env(safe-area-inset-left));
+  min-height: 2.75rem;
   padding: 0.75rem 1rem;
   position: fixed;
-  top: 1rem;
+  top: max(1rem, env(safe-area-inset-top));
   transform: translateY(-200%);
   z-index: 10;
 }
 
 .skip-link:focus-visible {
   transform: translateY(0);
+}
+
+main:focus {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-delay: 0s !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+  }
 }

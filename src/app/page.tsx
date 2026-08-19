@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <HomeSceneOrchestrator>
       <SiteHeader />
-      <main id="ana-icerik">
+      <main id="ana-icerik" tabIndex={-1}>
         <RhythmStageClient progress={0} scene={1} />
         <Scene01Hero />
         <Scene02Matter />

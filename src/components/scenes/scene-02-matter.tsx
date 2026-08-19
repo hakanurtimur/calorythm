@@ -28,9 +28,16 @@ export function Scene02Matter() {
             sizes="(max-width: 768px) calc(100vw - 40px), 62vw"
             src="/images/matter-source.webp"
           />
-          <span aria-hidden="true" className={`${styles.cropWindow} ${styles.cropWindowLeft}`} data-crop-window="left" />
-          <span aria-hidden="true" className={`${styles.cropWindow} ${styles.cropWindowCenter}`} data-crop-window="center" />
-          <span aria-hidden="true" className={`${styles.cropWindow} ${styles.cropWindowRight}`} data-crop-window="right" />
+          <span
+            aria-hidden="true"
+            className={`${styles.cropWindow} ${styles.cropWindowDetailOne}`}
+            data-detail-window="one"
+          />
+          <span
+            aria-hidden="true"
+            className={`${styles.cropWindow} ${styles.cropWindowDetailTwo}`}
+            data-detail-window="two"
+          />
         </figure>
 
         <ul aria-label="Besin değerleri" className={styles.annotations} data-motion="matter-annotations">
