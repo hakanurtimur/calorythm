@@ -43,6 +43,7 @@
   overflow: clip;
   padding: clamp(4.5rem, 10vw, 9rem) clamp(1.25rem, 8vw, 9rem);
   position: relative;
+  z-index: 1;
 }
 
 .copy {
@@ -53,9 +54,93 @@
 
 .hero,
 .response {
-  background: var(--carbon);
+  background: transparent;
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.rhythmStage {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+}
+
+.rhythmCanvas {
+  inset: 0;
+  position: absolute !important;
+  z-index: 1;
+}
+
+.rhythmFallback {
+  inset: 0;
+  opacity: 0.62;
+  position: absolute;
+}
+
+.rhythmBand {
+  --fiber-color: var(--bone);
+  --fiber-rotate: -19deg;
+  --fiber-scale: 1;
+  border: clamp(0.75rem, 1.5vw, 1.35rem) solid color-mix(in srgb, var(--fiber-color) 60%, transparent);
+  border-radius: 50%;
+  height: min(36vw, 31rem);
+  position: absolute;
+  right: clamp(-10rem, -5vw, -2rem);
+  top: 15%;
+  transform: rotate(var(--fiber-rotate)) scale(var(--fiber-scale));
+  width: min(48vw, 44rem);
+}
+
+.rhythmBand:nth-child(2) {
+  --fiber-color: var(--protein-coral);
+  --fiber-rotate: -8deg;
+  --fiber-scale: 0.92;
+  right: -1%;
+  top: 20%;
+}
+
+.rhythmBand:nth-child(3) {
+  --fiber-color: var(--mineral);
+  --fiber-rotate: 7deg;
+  --fiber-scale: 0.84;
+  right: 2%;
+  top: 24%;
+}
+
+.rhythmBand:nth-child(4) {
+  --fiber-rotate: 18deg;
+  --fiber-scale: 0.76;
+  right: 5%;
+  top: 27%;
+}
+
+.rhythmBand:nth-child(5) {
+  --fiber-color: var(--protein-coral);
+  --fiber-rotate: 31deg;
+  --fiber-scale: 0.68;
+  right: 8%;
+  top: 30%;
+}
+
+.rhythmBand:nth-child(6) {
+  --fiber-color: var(--mineral);
+  --fiber-rotate: 45deg;
+  --fiber-scale: 0.6;
+  right: 11%;
+  top: 33%;
+}
+
+.rhythmBand:nth-child(7) {
+  --fiber-rotate: 58deg;
+  --fiber-scale: 0.52;
+  right: 14%;
+  top: 36%;
+}
+
+.rhythmStage[data-rendering="webgl"] .rhythmFallback {
+  opacity: 0;
 }
 
 .hero {
@@ -342,6 +427,17 @@
 
   .hero {
     min-height: calc(100svh - 7.5rem);
+  }
+
+  .rhythmFallback {
+    opacity: 0.48;
+  }
+
+  .rhythmBand {
+    height: 42vw;
+    right: -28vw;
+    top: 24%;
+    width: 78vw;
   }
 
   .matterGrid {
