@@ -8,6 +8,7 @@ import { deriveGraphicsQuality } from "@/lib/graphics-quality";
 import type { GraphicsQuality } from "@/lib/graphics-quality";
 import styles from "@/components/scenes/home-scenes.module.css";
 import { LivingRhythm } from "./living-rhythm";
+import { probeWebGL2Support } from "./webgl-support";
 
 export type RhythmStageProps = {
   scene?: 1 | 2 | 3;
@@ -77,7 +78,7 @@ function readWebGLSupport() {
 
   try {
     const probe = document.createElement("canvas");
-    cachedWebGLSupport = Boolean(probe.getContext("webgl2") || probe.getContext("webgl"));
+    cachedWebGLSupport = probeWebGL2Support(probe);
   } catch {
     cachedWebGLSupport = false;
   }
