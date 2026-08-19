@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+:root {
+  --carbon: #11110f;
+  --bone: #ece7dc;
+  --mineral: #98968e;
+  --protein-coral: #f05a42;
+  --carbohydrate-solar: #d8f34a;
+  --fat-ultramarine: #5367e8;
+}
+
+body {
+  background: var(--carbon);
+  color: var(--bone);
+  font-family: "Manrope Variable", sans-serif;
+}
+
+.skip-link {
+  left: 1rem;
+  position: fixed;
+  top: 1rem;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
