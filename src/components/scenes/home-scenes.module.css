@@ -8,6 +8,31 @@
   z-index: 2;
 }
 
+.sceneOrchestrator {
+  position: relative;
+}
+
+.sceneOrchestrator[data-motion-profile="full"] :is(
+    [data-motion="hero-title"],
+    [data-motion="hero-description"],
+    [data-motion="hero-cta"],
+    [data-motion="hero-form"],
+    [data-motion="matter-surface"],
+    [data-motion="matter-annotations"] li,
+    [data-motion="response-field"],
+    [data-motion="response-title"],
+    [data-motion="response-body"],
+    [data-motion="response-concepts"] li
+  ) {
+  will-change: opacity, transform;
+}
+
+.sceneOrchestrator[data-motion-profile="reduced"] [data-motion] {
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+}
+
 .wordmark {
   color: var(--bone);
   font-size: 0.8125rem;
