@@ -33,6 +33,6 @@ export function readMotionProfile(
 
   return {
     animate,
-    pin: animate && environment.width > 768,
+    pin: animate && environment.width >= 768,
   };
 }

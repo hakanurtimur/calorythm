@@ -25,7 +25,7 @@ export function Scene02Matter() {
             alt="Koyu ekmek dokusu, yakut renkli narenciye ve zeytinyağının makro görünümü"
             className={styles.matterImage}
             fill
-            sizes="(max-width: 768px) calc(100vw - 40px), 62vw"
+            sizes="(max-width: 767px) calc(100vw - 40px), 62vw"
             src="/images/matter-source.webp"
           />
           <span

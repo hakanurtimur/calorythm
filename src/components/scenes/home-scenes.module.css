@@ -449,7 +449,7 @@
   height: 1px;
 }
 
-@media (max-width: 48rem) {
+@media (max-width: 47.9375rem) {
   .siteHeader {
     align-items: flex-start;
     flex-direction: column;
@@ -596,6 +596,7 @@
 
   .concepts {
     gap: 1rem 1.25rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .concepts li {

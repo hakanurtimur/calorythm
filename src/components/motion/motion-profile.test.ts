@@ -22,4 +22,14 @@ describe("readMotionProfile", () => {
       pin: false,
     });
   });
+
+  it.each([
+    { pin: false, width: 767 },
+    { pin: true, width: 768 },
+  ])("uses 768px as the desktop pin boundary at $width px", ({ pin, width }) => {
+    expect(readMotionProfile(() => ({ reducedMotion: false, saveData: false, width }))).toEqual({
+      animate: true,
+      pin,
+    });
+  });
 });

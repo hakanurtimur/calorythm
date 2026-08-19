@@ -8,13 +8,24 @@ import { setSceneState } from "./scene-state-store";
 
 type HomeSceneOrchestratorProps = {
   children: ReactNode;
+  loadRuntime?: () => Promise<HomeMotionRuntime>;
 };
 
 type NavigatorWithConnection = Navigator & {
   connection?: EventTarget & { saveData?: boolean };
 };
 
-export function HomeSceneOrchestrator({ children }: HomeSceneOrchestratorProps) {
+type HomeMotionRuntime = {
+  ScrollTrigger: (typeof import("gsap/ScrollTrigger"))["ScrollTrigger"];
+  gsap: (typeof import("gsap"))["gsap"];
+};
+
+async function loadHomeMotionRuntime(): Promise<HomeMotionRuntime> {
+  const [{ gsap }, { ScrollTrigger }] = await Promise.all([import("gsap"), import("gsap/ScrollTrigger")]);
+  return { gsap, ScrollTrigger };
+}
+
+export function HomeSceneOrchestrator({ children, loadRuntime = loadHomeMotionRuntime }: HomeSceneOrchestratorProps) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,7 +57,7 @@ export function HomeSceneOrchestrator({ children }: HomeSceneOrchestratorProps) 
         return;
       }
 
-      const [{ gsap }, { ScrollTrigger }] = await Promise.all([import("gsap"), import("gsap/ScrollTrigger")]);
+      const { gsap, ScrollTrigger } = await loadRuntime();
       if (!active || version !== configurationVersion) return;
 
       if (!readProfile().animate) {
@@ -58,8 +69,8 @@ export function HomeSceneOrchestrator({ children }: HomeSceneOrchestratorProps) 
       media = gsap.matchMedia(scope);
       media.add(
         {
-          isDesktop: "(min-width: 48.0625rem)",
-          isMobile: "(max-width: 48rem)",
+          isDesktop: "(min-width: 768px)",
+          isMobile: "(max-width: 767px)",
         },
         (context) => {
           const conditions = context.conditions as { isDesktop: boolean; isMobile: boolean } | undefined;
@@ -200,7 +211,7 @@ export function HomeSceneOrchestrator({ children }: HomeSceneOrchestratorProps) 
       connection?.removeEventListener("change", handleConstraintChange);
       media?.revert();
     };
-  }, []);
+  }, [loadRuntime]);
 
   return (
     <div className={styles.sceneOrchestrator} data-motion-profile="pending" ref={rootRef}>

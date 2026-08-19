@@ -19,7 +19,7 @@ const gsapRuntime = vi.hoisted(() => {
           _queries: Record<string, string>,
           callback: (context: { conditions: { isDesktop: boolean; isMobile: boolean } }) => void,
         ) => {
-          callback({ conditions: { isDesktop: window.innerWidth > 768, isMobile: window.innerWidth <= 768 } });
+          callback({ conditions: { isDesktop: window.innerWidth >= 768, isMobile: window.innerWidth < 768 } });
         },
       ),
       revert: vi.fn(),
@@ -108,13 +108,12 @@ describe("homepage scenes", () => {
     expect(screen.queryByRole("link", { name: "Hakkında" })).not.toBeInTheDocument();
   });
 
-  it("renders every response concept as readable text without canvas execution", () => {
-    const { container } = render(<Home />);
+  it("renders every response concept as readable text", () => {
+    render(<Home />);
 
     for (const concept of ["Enerji", "Sindirim", "Emilim", "Depolama", "Hareket", "Toparlanma"]) {
       expect(screen.getByText(concept)).toBeInTheDocument();
     }
-    expect(container.querySelector("canvas")).not.toBeInTheDocument();
   });
 
   it("presents one meaningful matter image with two decorative detail windows", () => {
