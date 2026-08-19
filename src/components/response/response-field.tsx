@@ -65,7 +65,7 @@ export function ResponseField() {
     const particles = createResponseParticles({ count: quality === "high" ? 64 : 28, seed: 43_103 });
     let cssWidth = 0;
     let cssHeight = 0;
-    let fieldVisible = true;
+    let fieldVisible = false;
     let pageVisible = document.visibilityState !== "hidden";
     let previousTime = 0;
     let animationFrame: number | null = null;
@@ -127,12 +127,13 @@ export function ResponseField() {
       animationFrame = null;
     };
 
-    const resize = () => {
-      const bounds = canvas.getBoundingClientRect();
+    const resize = (entry?: ResizeObserverEntry) => {
+      const layoutWidth = entry?.contentRect.width ?? canvas.clientWidth;
+      const layoutHeight = entry?.contentRect.height ?? canvas.clientHeight;
       const dprCap = quality === "high" ? 1.5 : 1.25;
       const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
-      cssWidth = Math.max(0, bounds.width);
-      cssHeight = Math.max(0, bounds.height);
+      cssWidth = Math.max(0, layoutWidth);
+      cssHeight = Math.max(0, layoutHeight);
       const pixelWidth = Math.max(1, Math.round(cssWidth * dpr));
       const pixelHeight = Math.max(1, Math.round(cssHeight * dpr));
 
@@ -145,12 +146,13 @@ export function ResponseField() {
       draw(0);
     };
 
-    const resizeObserver = new ResizeObserver(resize);
+    const resizeObserver = new ResizeObserver(([entry]) => resize(entry));
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       fieldVisible = entry?.isIntersecting === true;
       if (fieldVisible) start();
       else stop();
     });
+    const handleWindowResize = () => resize();
     const handleVisibilityChange = () => {
       pageVisible = document.visibilityState !== "hidden";
       if (pageVisible) start();
@@ -159,14 +161,15 @@ export function ResponseField() {
 
     resizeObserver.observe(canvas);
     intersectionObserver.observe(canvas);
+    window.addEventListener("resize", handleWindowResize, { passive: true });
     document.addEventListener("visibilitychange", handleVisibilityChange);
     resize();
-    start();
 
     return () => {
       stop();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      window.removeEventListener("resize", handleWindowResize);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [quality]);

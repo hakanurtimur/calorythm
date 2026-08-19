@@ -11,7 +11,10 @@ describe("response particle model", () => {
 
   it("does not move when intensity is zero", () => {
     const particle = createResponseParticles({ count: 1, seed: 7 })[0]!;
-    expect(advanceResponseParticle(particle, 2, 0)).toEqual(particle);
+    const before = { ...particle };
+
+    expect(advanceResponseParticle(particle, 2, 0)).toEqual(before);
+    expect(particle).toEqual(before);
   });
 
   it("uses elapsed time for bounded horizontal transfer", () => {
