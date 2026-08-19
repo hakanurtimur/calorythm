@@ -1,7 +1,17 @@
+import { SiteHeader } from "@/components/layout/site-header";
+import { Scene01Hero } from "@/components/scenes/scene-01-hero";
+import { Scene02Matter } from "@/components/scenes/scene-02-matter";
+import { Scene03Response } from "@/components/scenes/scene-03-response";
+
 export default function Home() {
   return (
-    <main id="ana-icerik">
-      <h1>CALORYTHM</h1>
-    </main>
+    <>
+      <SiteHeader />
+      <main id="ana-icerik">
+        <Scene01Hero />
+        <Scene02Matter />
+        <Scene03Response />
+      </main>
+    </>
   );
 }
