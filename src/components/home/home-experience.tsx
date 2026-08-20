@@ -4,14 +4,21 @@ import { orbitalHomeContent } from "@/content/orbital-home";
 import { HomeSplash } from "./home-splash";
 import styles from "./home.module.css";
 
-function sectionAnchor(id: (typeof orbitalHomeContent.sections)[number]["id"]) {
-  if (id === "03") return "konular";
-  if (id === "06") return "journal";
-  if (id === "07") return "hakkinda";
-  return `section-${id}`;
+type EditorialSection = (typeof orbitalHomeContent.sections)[number];
+
+function SceneTitle({ section }: { section: EditorialSection }) {
+  return (
+    <h2 id={`section-${section.id}-title`}>
+      <span>{section.title[0]}</span>{" "}
+      <span>{section.title[1]}</span>
+    </h2>
+  );
 }
 
 export function HomeExperience() {
+  const [knowledge, stories, clarity, thought, flagship, journal, finale] =
+    orbitalHomeContent.sections;
+
   return (
     <div className={styles.home} data-home-experience="" id="top">
       <HomeSplash />
@@ -62,31 +69,193 @@ export function HomeExperience() {
         </div>
       </section>
 
-      {orbitalHomeContent.sections.map((section) => (
-        <section
-          aria-labelledby={`section-${section.id}-title`}
-          className={styles.scene}
-          data-scene={section.id}
-          id={sectionAnchor(section.id)}
-          key={section.id}
-        >
-          <div className={styles.sceneInner}>
-            <p aria-hidden="true" className={styles.sceneNumber}>
-              {section.id}
-            </p>
-            <div className={styles.sceneCopy}>
-              <h2 id={`section-${section.id}-title`}>
-                <span>{section.title[0]}</span>{" "}
-                <span>{section.title[1]}</span>
-              </h2>
-              {section.body ? <p className={styles.sceneBody}>{section.body}</p> : null}
-              {"emphasis" in section ? (
-                <p className={styles.sceneEmphasis}>{section.emphasis}</p>
-              ) : null}
+      <section
+        aria-labelledby="section-01-title"
+        className={`${styles.scene} ${styles.knowledgeScene}`}
+        data-scene="01"
+        id="section-01"
+      >
+        <div className={`${styles.sceneInner} ${styles.knowledgeInner}`}>
+          <p aria-hidden="true" className={styles.sceneNumber}>01</p>
+          <div aria-hidden="true" className={styles.knowledgeMarkFrame}>
+            <OrbitalMark className={styles.knowledgeMark} tone="brand" variant="atlas" />
+          </div>
+          <div aria-hidden="true" className={styles.knowledgeFragments}>
+            {orbitalHomeContent.knowledgeFragments.map((fragment, index) => (
+              <span data-motion="knowledge-fragment" key={fragment}>
+                <small>0{index + 1}</small>{fragment}
+              </span>
+            ))}
+          </div>
+          <div className={`${styles.sceneCopy} ${styles.knowledgeCopy}`}>
+            <SceneTitle section={knowledge} />
+            <p className={styles.sceneBody}>{knowledge.body}</p>
+          </div>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="section-02-title"
+        className={`${styles.scene} ${styles.macroScene}`}
+        data-scene="02"
+        id="section-02"
+      >
+        <div className={styles.macroViewport} data-pin="02">
+          <div className={`${styles.sceneInner} ${styles.macroInner}`}>
+            <p aria-hidden="true" className={styles.sceneNumber}>02</p>
+            <div className={`${styles.sceneCopy} ${styles.macroCopy}`}>
+              <SceneTitle section={stories} />
+              <p className={styles.sceneBody}>{stories.body}</p>
+            </div>
+            <OrbitalMark className={styles.macroMark} tone="brand" variant="atlas" />
+            <ol aria-label="Makro besin rotaları" className={styles.macroRoutes}>
+              {orbitalHomeContent.macroRoutes.map((route, index) => (
+                <li
+                  data-motion="macro-route"
+                  data-tone={route.tone}
+                  key={route.id}
+                >
+                  <span className={styles.routeIndex}>0{index + 1}</span>
+                  <div>
+                    <h3>{route.title}</h3>
+                    <p>{route.statement}</p>
+                  </div>
+                  <small>{route.detail}</small>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="section-03-title"
+        className={`${styles.scene} ${styles.atlasScene}`}
+        data-scene="03"
+        id="konular"
+      >
+        <div className={`${styles.sceneInner} ${styles.atlasInner}`}>
+          <p aria-hidden="true" className={styles.sceneNumber}>03</p>
+          <div className={`${styles.sceneCopy} ${styles.atlasCopy}`}>
+            <SceneTitle section={clarity} />
+            <p className={styles.sceneBody}>{clarity.body}</p>
+          </div>
+          <ol aria-label="Beslenme konuları" className={styles.topicAtlas}>
+            {orbitalHomeContent.topicAtlas.map((topic, index) => (
+              <li data-motion="topic-atlas-item" key={topic.title}>
+                <span>0{index + 1}</span>
+                <h3>{topic.title}</h3>
+                <p>{topic.note}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="section-04-title"
+        className={`${styles.scene} ${styles.thoughtScene}`}
+        data-scene="04"
+        id="section-04"
+      >
+        <div className={styles.thoughtViewport} data-pin="04">
+          <OrbitalMark className={styles.thoughtMark} tone="ivory" variant="portal" />
+          <div className={`${styles.sceneInner} ${styles.thoughtInner}`}>
+            <p aria-hidden="true" className={styles.sceneNumber}>04</p>
+            <div className={`${styles.sceneCopy} ${styles.thoughtCopy}`}>
+              <SceneTitle section={thought} />
+              <p className={styles.sceneBody}>{thought.body}</p>
+              <p className={styles.thoughtEmphasis} data-motion="thought-resolution">
+                <span>Amaç yalnızca bilgi vermek değil.</span>
+                <strong>Anlaşılmasını sağlamak.</strong>
+              </p>
             </div>
           </div>
-        </section>
-      ))}
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="section-05-title"
+        className={`${styles.scene} ${styles.flagshipScene}`}
+        data-scene="05"
+        id="section-05"
+      >
+        <div className={`${styles.sceneInner} ${styles.flagshipInner}`}>
+          <p className={styles.flagshipLabel}>İlk hikâye <span>001</span></p>
+          <div aria-hidden="true" className={styles.flagshipMarkFrame} data-motion="flagship-mark">
+            <OrbitalMark className={styles.flagshipMark} tone="ivory" variant="portal" />
+          </div>
+          <div className={`${styles.sceneCopy} ${styles.flagshipCopy}`}>
+            <SceneTitle section={flagship} />
+            <p className={styles.sceneBody}>{flagship.body}</p>
+            <p className={styles.flagshipEmphasis}>{flagship.emphasis}</p>
+            <OrbitalLink unavailable>Hikâyeyi keşfet</OrbitalLink>
+          </div>
+          <p aria-hidden="true" className={styles.flagshipNotation}>
+            YAPI <i /> ONARIM <i /> ENZİM <i /> SİNYAL
+          </p>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="section-06-title"
+        className={`${styles.scene} ${styles.journalScene}`}
+        data-scene="06"
+        id="journal"
+      >
+        <div className={`${styles.sceneInner} ${styles.journalInner}`}>
+          <div className={styles.journalLead}>
+            <p aria-hidden="true" className={styles.sceneNumber}>06</p>
+            <div className={`${styles.sceneCopy} ${styles.journalCopy}`}>
+              <SceneTitle section={journal} />
+              <p>Bir sonraki merakını seç.</p>
+            </div>
+          </div>
+          <ol
+            aria-label="Journal konuları"
+            className={styles.journalTopics}
+            data-journal-orbit=""
+          >
+            {orbitalHomeContent.journalTopics.map((topic, index) => (
+              <li
+                data-motion="journal-topic"
+                data-tone={topic.tone}
+                key={topic.id}
+              >
+                <span>0{index + 1}</span>
+                <div>
+                  <h3>{topic.title}</h3>
+                  <p>{topic.description}</p>
+                </div>
+                <i aria-hidden="true">↗</i>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="section-07-title"
+        className={`${styles.scene} ${styles.finaleScene}`}
+        data-scene="07"
+        id="hakkinda"
+      >
+        <div className={`${styles.sceneInner} ${styles.finaleInner}`}>
+          <OrbitalMark className={styles.finaleMark} tone="brand" variant="finale" />
+          <p aria-hidden="true" className={styles.sceneNumber}>07</p>
+          <div className={`${styles.sceneCopy} ${styles.finaleCopy}`}>
+            <SceneTitle section={finale} />
+            <p className={styles.sceneBody}>{finale.body}</p>
+            <p className={styles.finaleEmphasis}>{finale.emphasis}</p>
+            <OrbitalLink href="#journal">Journal’ı keşfet</OrbitalLink>
+          </div>
+          <footer className={styles.finaleFooter}>
+            <a href="#top">CALORYTHM</a>
+            <span>Beslenme bilimi için bağımsız yayın</span>
+            <span>İstanbul · 2026</span>
+          </footer>
+        </div>
+      </section>
     </div>
   );
 }

@@ -28,4 +28,18 @@ describe("HomeExperience", () => {
     expect(container.querySelector("canvas")).not.toBeInTheDocument();
     expect(container.querySelector("video")).not.toBeInTheDocument();
   });
+
+  it("uses authored editorial structures instead of a repeated card grid", () => {
+    const { container } = render(<HomeExperience />);
+
+    expect(screen.getByRole("list", { name: "Makro besin rotaları" }).children).toHaveLength(3);
+    expect(screen.getByRole("list", { name: "Beslenme konuları" }).children).toHaveLength(5);
+    expect(screen.getByRole("list", { name: "Journal konuları" }).children).toHaveLength(8);
+    expect(container.querySelectorAll('[data-motion="journal-topic"]')).toHaveLength(8);
+    expect(container.querySelectorAll("[data-orbit-mark]")).toHaveLength(7);
+    expect(screen.getByText("Hikâyeyi keşfet").closest("[aria-disabled]")).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+  });
 });
