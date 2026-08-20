@@ -22,7 +22,10 @@ function readBrowserMotionEnvironment(): MotionEnvironment {
 
   return {
     height: window.innerHeight,
-    reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    reducedMotion:
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        : false,
     saveData: (navigator as NavigatorWithConnection).connection?.saveData === true,
     width: window.innerWidth,
   };

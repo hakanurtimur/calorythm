@@ -135,3 +135,341 @@
     stroke-dashoffset: 0;
   }
 }
+
+.home {
+  --home-gutter: clamp(2rem, 5vw, 6rem);
+  --home-width: 100rem;
+  --ivory: #f6f1e8;
+  --ink: #20211e;
+  --orange: #f3a65a;
+  --coral: #ea735d;
+  --ochre: #c79a45;
+  --olive: #a7be89;
+  background: var(--ivory);
+  color: var(--ink);
+  overflow: clip;
+  position: relative;
+}
+
+.hero,
+.scene {
+  position: relative;
+}
+
+.hero {
+  min-height: 100svh;
+}
+
+.heroViewport {
+  background: var(--ivory);
+  min-height: 100svh;
+  overflow: hidden;
+  position: relative;
+}
+
+.siteHeader {
+  align-items: center;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(12rem, 1fr) auto minmax(12rem, 1fr);
+  left: 50%;
+  max-width: var(--home-width);
+  padding: max(1.75rem, env(safe-area-inset-top)) var(--home-gutter) 0;
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  z-index: 5;
+}
+
+.wordmark {
+  color: inherit;
+  font-size: 0.9rem;
+  font-weight: 740;
+  letter-spacing: 0.38em;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.navigation {
+  align-items: center;
+  display: flex;
+  gap: clamp(1.4rem, 2.4vw, 2.8rem);
+  justify-content: center;
+}
+
+.navigation a,
+.headerCta {
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+  font-size: 0.72rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.navigation a {
+  padding-block: 0.75rem;
+  position: relative;
+}
+
+.navigation a::after {
+  background: var(--coral);
+  bottom: 0.48rem;
+  content: "";
+  height: 1px;
+  left: 0;
+  position: absolute;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+}
+
+.navigation a:hover::after,
+.navigation a:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.headerCta {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.65rem;
+  justify-self: end;
+  min-height: 2.75rem;
+}
+
+.headerCta span {
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--ink) 28%, transparent);
+  border-radius: 50%;
+  display: inline-flex;
+  height: 2.25rem;
+  justify-content: center;
+  width: 2.25rem;
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  margin: 0 auto;
+  max-width: var(--home-width);
+  min-height: 100svh;
+  padding: 7.5rem var(--home-gutter) 5rem;
+  position: relative;
+}
+
+.heroCopy {
+  align-self: center;
+  grid-column: 1 / span 6;
+  position: relative;
+  z-index: 3;
+}
+
+.heroPrelude {
+  color: color-mix(in srgb, var(--ink) 65%, transparent);
+  font-size: clamp(0.75rem, 0.9vw, 0.88rem);
+  margin: 0 0 clamp(1.5rem, 2.4vw, 2.5rem);
+}
+
+.heroCopy h1,
+.sceneCopy h2 {
+  letter-spacing: -0.04em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.heroCopy h1 {
+  font-family: "Manrope Variable", sans-serif;
+  font-size: clamp(4rem, 6.8vw, 6rem);
+  font-weight: 520;
+  line-height: 0.9;
+  max-width: 10ch;
+}
+
+.heroCopy h1 span {
+  display: block;
+}
+
+.heroCopy h1 span:last-child {
+  font-family: "Bodoni Moda Variable", serif;
+  font-weight: 470;
+  letter-spacing: -0.03em;
+  margin-top: 0.14em;
+}
+
+.heroBody,
+.sceneBody {
+  font-size: clamp(1rem, 1.08vw, 1.12rem);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.heroBody {
+  color: color-mix(in srgb, var(--ink) 74%, transparent);
+  margin: clamp(1.8rem, 2.8vw, 2.75rem) 0 1.5rem;
+  max-width: 40ch;
+}
+
+.heroMarkFrame {
+  align-self: center;
+  grid-column: 7 / -1;
+  height: min(72svh, 47rem);
+  position: relative;
+  z-index: 1;
+}
+
+.heroMark {
+  height: 100%;
+  width: 100%;
+}
+
+.heroNotation {
+  align-items: center;
+  bottom: 1.8rem;
+  display: flex;
+  font-size: 0.56rem;
+  gap: 0.7rem;
+  left: 50%;
+  letter-spacing: 0.1em;
+  margin: 0;
+  opacity: 0.58;
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.heroNotation i {
+  background: currentColor;
+  border-radius: 50%;
+  height: 0.2rem;
+  width: 0.2rem;
+}
+
+.scene {
+  min-height: 100svh;
+}
+
+.sceneInner {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  margin: 0 auto;
+  max-width: var(--home-width);
+  min-height: 100svh;
+  padding: clamp(5rem, 9vw, 9rem) var(--home-gutter);
+}
+
+.sceneNumber {
+  align-self: start;
+  font-size: 0.72rem;
+  grid-column: 1 / span 1;
+  margin: 0;
+}
+
+.sceneCopy {
+  align-self: center;
+  grid-column: 3 / span 8;
+}
+
+.sceneCopy h2 {
+  font-family: "Manrope Variable", sans-serif;
+  font-size: clamp(3rem, 5.7vw, 6rem);
+  font-weight: 520;
+  line-height: 0.96;
+}
+
+.sceneCopy h2 span {
+  display: block;
+}
+
+.sceneCopy h2 span:last-child {
+  font-family: "Bodoni Moda Variable", serif;
+  font-weight: 470;
+  letter-spacing: -0.03em;
+}
+
+.sceneBody {
+  color: color-mix(in srgb, var(--ink) 76%, transparent);
+  margin: clamp(2rem, 3.5vw, 3.5rem) 0 0 auto;
+  max-width: 46ch;
+}
+
+.sceneEmphasis {
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(1.5rem, 2.2vw, 2.4rem);
+  line-height: 1.1;
+  margin: 1.6rem 0 0 auto;
+  max-width: 28ch;
+}
+
+@media (max-width: 63.9375rem) {
+  .siteHeader {
+    grid-template-columns: 1fr auto;
+  }
+
+  .navigation {
+    display: none;
+  }
+
+  .heroCopy {
+    grid-column: 1 / span 7;
+  }
+
+  .heroMarkFrame {
+    grid-column: 7 / -1;
+    opacity: 0.76;
+  }
+
+  .sceneCopy {
+    grid-column: 2 / -1;
+  }
+}
+
+@media (max-width: 47.9375rem) {
+  .home {
+    --home-gutter: max(1.25rem, env(safe-area-inset-left));
+  }
+
+  .heroGrid {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 7rem;
+  }
+
+  .heroCopy {
+    width: 100%;
+  }
+
+  .heroCopy h1 {
+    font-size: clamp(3.2rem, 15vw, 5rem);
+  }
+
+  .heroMarkFrame {
+    inset: auto -34% -20% 32%;
+    opacity: 0.38;
+    position: absolute;
+  }
+
+  .heroNotation {
+    display: none;
+  }
+
+  .sceneInner {
+    display: block;
+    min-height: auto;
+    padding-block: 7rem;
+  }
+
+  .sceneNumber {
+    margin-bottom: 3rem;
+  }
+
+  .sceneCopy h2 {
+    font-size: clamp(2.7rem, 12vw, 4.4rem);
+  }
+
+  .sceneBody,
+  .sceneEmphasis {
+    margin-left: 0;
+  }
+}
