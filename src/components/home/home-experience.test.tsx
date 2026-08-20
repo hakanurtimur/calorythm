@@ -25,6 +25,7 @@ describe("HomeExperience", () => {
     const { container } = render(<HomeExperience />);
 
     expect(screen.getByText("Beslenme bilimini ezberlerle değil, anlayarak keşfet.")).toBeInTheDocument();
+    expect(container.querySelector("[data-motion-profile]")).toBeInTheDocument();
     expect(container.querySelector("canvas")).not.toBeInTheDocument();
     expect(container.querySelector("video")).not.toBeInTheDocument();
   });

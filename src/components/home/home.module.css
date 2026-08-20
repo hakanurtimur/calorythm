@@ -151,6 +151,10 @@
   position: relative;
 }
 
+.motionRoot {
+  position: relative;
+}
+
 .hero,
 .scene {
   position: relative;

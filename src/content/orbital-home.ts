@@ -15,6 +15,13 @@ export type JournalTopic = {
   tone: "orange" | "coral" | "ochre" | "olive";
 };
 
+export type OrbitalSection = {
+  id: OrbitalSectionId;
+  title: readonly [string, string];
+  body?: string;
+  emphasis?: string;
+};
+
 export const orbitalHomeContent = {
   splash: {
     label: "CALORYTHM",
@@ -69,12 +76,15 @@ export const orbitalHomeContent = {
       body: "Her hafta yeni hikâyeler. Yeni araştırmalar. Yeni bakış açıları.",
       emphasis: "Beslenme bilimini ezberlerle değil, anlayarak keşfet.",
     },
-  ] satisfies ReadonlyArray<{
-    id: OrbitalSectionId;
-    title: readonly [string, string];
-    body?: string;
-    emphasis?: string;
-  }>,
+  ] as const satisfies readonly [
+    OrbitalSection,
+    OrbitalSection,
+    OrbitalSection,
+    OrbitalSection,
+    OrbitalSection,
+    OrbitalSection,
+    OrbitalSection,
+  ],
   knowledgeFragments: ["Oku", "Bağla", "Anla"],
   topicAtlas: [
     { title: "Metabolizma", note: "Enerjinin yönetimi" },

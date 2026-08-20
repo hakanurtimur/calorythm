@@ -1,6 +1,7 @@
 import { OrbitalLink } from "@/components/orbital/orbital-link";
 import { OrbitalMark } from "@/components/orbital/orbital-mark";
 import { orbitalHomeContent } from "@/content/orbital-home";
+import { HomeMotion } from "./home-motion";
 import { HomeSplash } from "./home-splash";
 import styles from "./home.module.css";
 
@@ -22,8 +23,8 @@ export function HomeExperience() {
   return (
     <div className={styles.home} data-home-experience="" id="top">
       <HomeSplash />
-
-      <section aria-labelledby="home-hero-title" className={styles.hero} data-scene="hero">
+      <HomeMotion>
+        <section aria-labelledby="home-hero-title" className={styles.hero} data-scene="hero">
         <div className={styles.heroViewport} data-pin="hero">
           <header className={styles.siteHeader}>
             <a aria-label="CALORYTHM ana sayfa" className={styles.wordmark} href="#top">
@@ -67,9 +68,9 @@ export function HomeExperience() {
             <span>TOPARLANMA</span>
           </p>
         </div>
-      </section>
+        </section>
 
-      <section
+        <section
         aria-labelledby="section-01-title"
         className={`${styles.scene} ${styles.knowledgeScene}`}
         data-scene="01"
@@ -92,9 +93,9 @@ export function HomeExperience() {
             <p className={styles.sceneBody}>{knowledge.body}</p>
           </div>
         </div>
-      </section>
+        </section>
 
-      <section
+        <section
         aria-labelledby="section-02-title"
         className={`${styles.scene} ${styles.macroScene}`}
         data-scene="02"
@@ -126,9 +127,9 @@ export function HomeExperience() {
             </ol>
           </div>
         </div>
-      </section>
+        </section>
 
-      <section
+        <section
         aria-labelledby="section-03-title"
         className={`${styles.scene} ${styles.atlasScene}`}
         data-scene="03"
@@ -150,9 +151,9 @@ export function HomeExperience() {
             ))}
           </ol>
         </div>
-      </section>
+        </section>
 
-      <section
+        <section
         aria-labelledby="section-04-title"
         className={`${styles.scene} ${styles.thoughtScene}`}
         data-scene="04"
@@ -172,9 +173,9 @@ export function HomeExperience() {
             </div>
           </div>
         </div>
-      </section>
+        </section>
 
-      <section
+        <section
         aria-labelledby="section-05-title"
         className={`${styles.scene} ${styles.flagshipScene}`}
         data-scene="05"
@@ -195,9 +196,9 @@ export function HomeExperience() {
             YAPI <i /> ONARIM <i /> ENZİM <i /> SİNYAL
           </p>
         </div>
-      </section>
+        </section>
 
-      <section
+        <section
         aria-labelledby="section-06-title"
         className={`${styles.scene} ${styles.journalScene}`}
         data-scene="06"
@@ -232,9 +233,9 @@ export function HomeExperience() {
             ))}
           </ol>
         </div>
-      </section>
+        </section>
 
-      <section
+        <section
         aria-labelledby="section-07-title"
         className={`${styles.scene} ${styles.finaleScene}`}
         data-scene="07"
@@ -255,7 +256,8 @@ export function HomeExperience() {
             <span>İstanbul · 2026</span>
           </footer>
         </div>
-      </section>
+        </section>
+      </HomeMotion>
     </div>
   );
 }
