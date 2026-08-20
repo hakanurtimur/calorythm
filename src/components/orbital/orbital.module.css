@@ -1,0 +1,100 @@
+.mark {
+  color: currentColor;
+  display: block;
+  height: auto;
+  overflow: visible;
+  width: 100%;
+}
+
+.mark path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+  transform-box: fill-box;
+  transform-origin: center;
+  vector-effect: non-scaling-stroke;
+}
+
+.mark[data-tone="ivory"] {
+  color: var(--ivory, #f6f1e8);
+}
+
+.mark[data-tone="ink"] {
+  color: var(--ink, #20211e);
+}
+
+.orbitalLink {
+  align-items: center;
+  color: inherit;
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 650;
+  gap: 1rem;
+  min-height: 2.75rem;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.linkLabel {
+  position: relative;
+}
+
+.linkLabel::after {
+  background: currentColor;
+  bottom: -0.25rem;
+  content: "";
+  height: 1px;
+  left: 0;
+  position: absolute;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+}
+
+.linkTerminal {
+  align-items: center;
+  border: 1px solid color-mix(in srgb, currentColor 42%, transparent);
+  border-left-color: var(--coral, #ea735d);
+  border-radius: 50%;
+  display: inline-flex;
+  height: 2.75rem;
+  justify-content: center;
+  transition:
+    background-color 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  width: 2.75rem;
+}
+
+.linkTerminal > span {
+  display: block;
+  font-size: 1rem;
+  line-height: 1;
+  transform: translateX(-0.04rem);
+}
+
+.orbitalLink:not([data-unavailable="true"]):hover .linkLabel::after,
+.orbitalLink:not([data-unavailable="true"]):focus-visible .linkLabel::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.orbitalLink:not([data-unavailable="true"]):hover .linkTerminal,
+.orbitalLink:not([data-unavailable="true"]):focus-visible .linkTerminal {
+  background: var(--ink, #20211e);
+  color: var(--ivory, #f6f1e8);
+  transform: rotate(-18deg);
+}
+
+.orbitalLink[data-unavailable="true"] {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .linkLabel::after,
+  .linkTerminal {
+    transition: none;
+  }
+}
