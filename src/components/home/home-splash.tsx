@@ -18,8 +18,8 @@ export function HomeSplash({ durationOverride }: HomeSplashProps) {
     const duration = durationOverride ?? readMotionProfile().splashDuration;
 
     if (duration === 0) {
-      setVisible(false);
-      return;
+      const immediateTimeout = window.setTimeout(dismiss, 0);
+      return () => window.clearTimeout(immediateTimeout);
     }
 
     const timeout = window.setTimeout(dismiss, duration);

@@ -43,4 +43,13 @@ describe("HomeExperience", () => {
       "true",
     );
   });
+
+  it("keeps every available action valid and exposes only one unavailable destination", () => {
+    const { container } = render(<HomeExperience />);
+
+    expect(screen.getAllByRole("link").every((link) => Boolean(link.getAttribute("href")))).toBe(true);
+    expect(container.querySelectorAll('[aria-disabled="true"]')).toHaveLength(1);
+    expect(container.querySelector("canvas")).not.toBeInTheDocument();
+    expect(container.querySelector("video")).not.toBeInTheDocument();
+  });
 });

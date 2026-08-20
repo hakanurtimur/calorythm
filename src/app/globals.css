@@ -1,12 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --carbon: #11110f;
-  --bone: #ece7dc;
-  --mineral: #98968e;
-  --protein-coral: #f05a42;
-  --carbohydrate-solar: #d8f34a;
-  --fat-ultramarine: #5367e8;
+  --ivory: #f6f1e8;
+  --ink: #20211e;
+  --apricot: #f3a65a;
+  --orange: var(--apricot);
+  --coral: #ea735d;
+  --ochre: #c79a45;
+  --pistachio: #a7be89;
+  --olive: var(--pistachio);
+  --butter: #f1cd6c;
+  --powder-blue: #a9c9d8;
+  --carbon: var(--ink);
+  --bone: var(--ivory);
+  --mineral: #696a63;
+  --protein-coral: var(--coral);
+  --carbohydrate-solar: var(--butter);
+  --fat-ultramarine: #6575d7;
 }
 
 *,
@@ -16,14 +26,14 @@
 }
 
 html {
-  background: var(--carbon);
+  background: var(--ivory);
   scroll-behavior: smooth;
   scroll-padding-top: 1rem;
 }
 
 body {
-  background: var(--carbon);
-  color: var(--bone);
+  background: var(--ivory);
+  color: var(--ink);
   font-family: "Manrope Variable", sans-serif;
   margin: 0;
   min-width: 20rem;
@@ -31,19 +41,19 @@ body {
 }
 
 ::selection {
-  background: var(--carbohydrate-solar);
-  color: var(--carbon);
+  background: var(--orange);
+  color: var(--ink);
 }
 
 :where(a, button, input, select, textarea):focus-visible {
-  outline: 3px solid var(--carbohydrate-solar);
+  outline: 3px solid var(--coral);
   outline-offset: 0.25rem;
 }
 
 .skip-link {
   align-items: center;
-  background: var(--bone);
-  color: var(--carbon);
+  background: var(--ink);
+  color: var(--ivory);
   display: inline-flex;
   font-weight: 700;
   left: max(1rem, env(safe-area-inset-left));

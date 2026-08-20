@@ -56,7 +56,10 @@ function createRuntime() {
     }),
     matchMedia: vi.fn(() => media),
     registerPlugin: vi.fn(),
-    timeline: vi.fn((_config: TimelineConfig) => timeline),
+    timeline: vi.fn((config: TimelineConfig) => {
+      void config;
+      return timeline;
+    }),
   };
   const ScrollTrigger = {
     create: vi.fn(),

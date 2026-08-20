@@ -136,6 +136,14 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .motionRoot [data-motion],
+  .motionRoot [data-orbit-path] {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+}
+
 .home {
   --home-gutter: clamp(2rem, 5vw, 6rem);
   --home-width: 100rem;
