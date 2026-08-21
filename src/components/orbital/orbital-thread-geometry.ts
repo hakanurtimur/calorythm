@@ -157,6 +157,7 @@ export function createEditorialSignalGeometry(
   if (sceneProgress === 0) return source;
 
   const morphProgress = smoothstep(0.04, 0.42, sceneProgress);
+  const straightenProgress = smoothstep(0.18, 0.42, sceneProgress);
   const noiseProgress = smoothstep(0.16, 0.5, sceneProgress) *
     (1 - smoothstep(0.68, 0.96, sceneProgress));
   const safeLayerIndex = Number.isFinite(layerIndex) ? Math.max(0, layerIndex) : 0;
@@ -165,27 +166,29 @@ export function createEditorialSignalGeometry(
   const centerY = 50 + (safeLayerIndex - 1.5) * safeLayerSpacing;
   const safeRadiusX = Number.isFinite(radiusX) ? Math.max(1, radiusX) : 70;
   const safeRadiusY = Number.isFinite(radiusY) ? Math.max(1, radiusY) : 9;
+  const activeRadiusY = safeRadiusY * (1 - straightenProgress);
   const horizontalControl = safeRadiusX * 0.56;
-  const verticalControl = safeRadiusY * 0.64;
+  const verticalControl = activeRadiusY * 0.64;
   const target: RingPoint[] = [
-    { x: centerX, y: centerY - safeRadiusY },
-    { x: centerX + horizontalControl, y: centerY - safeRadiusY },
+    { x: centerX, y: centerY - activeRadiusY },
+    { x: centerX + horizontalControl, y: centerY - activeRadiusY },
     { x: centerX + safeRadiusX, y: centerY - verticalControl },
     { x: centerX + safeRadiusX, y: centerY },
     { x: centerX + safeRadiusX, y: centerY + verticalControl },
-    { x: centerX + horizontalControl, y: centerY + safeRadiusY },
-    { x: centerX, y: centerY + safeRadiusY },
-    { x: centerX - horizontalControl, y: centerY + safeRadiusY },
+    { x: centerX + horizontalControl, y: centerY + activeRadiusY },
+    { x: centerX, y: centerY + activeRadiusY },
+    { x: centerX - horizontalControl, y: centerY + activeRadiusY },
     { x: centerX - safeRadiusX, y: centerY + verticalControl },
     { x: centerX - safeRadiusX, y: centerY },
     { x: centerX - safeRadiusX, y: centerY - verticalControl },
-    { x: centerX - horizontalControl, y: centerY - safeRadiusY },
-    { x: centerX, y: centerY - safeRadiusY },
+    { x: centerX - horizontalControl, y: centerY - activeRadiusY },
+    { x: centerX, y: centerY - activeRadiusY },
   ];
   const phase = (Number.isFinite(elapsedMs) ? elapsedMs : 0) * waveSpeed +
     safeLayerIndex * 0.74;
-  const amplitude = Math.max(0, settledWaveAmplitude) +
-    Math.max(0, noiseAmplitude) * noiseProgress;
+  const amplitude =
+    (Math.max(0, settledWaveAmplitude) + Math.max(0, noiseAmplitude) * noiseProgress) *
+    (1 - straightenProgress);
   const uniqueCount = target.length - 1;
   const pointerAnchorX = centerX + Math.max(-1, Math.min(1, pointerX)) * safeRadiusX;
   const pointerAnchorY = centerY + Math.max(-1, Math.min(1, pointerY)) * safeRadiusY;
@@ -205,7 +208,8 @@ export function createEditorialSignalGeometry(
       Math.max(0, pointerStrength) *
       Math.max(0, pointerBoost) *
       pointerInfluence *
-      Math.max(1, noiseAmplitude * 0.55);
+      Math.max(1, noiseAmplitude * 0.55) *
+      (1 - straightenProgress);
 
     return {
       x: point.x + Math.cos(perimeter) * (primary + detail + pointerWave) * 0.08,

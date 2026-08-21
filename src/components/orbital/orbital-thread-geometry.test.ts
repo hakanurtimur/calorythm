@@ -159,12 +159,12 @@ describe("orbital thread geometry", () => {
     const animatedMidpoint = createEditorialSignalGeometry(source, {
       ...input,
       elapsedMs: 1650,
-      progress: 0.55,
+      progress: 0.3,
     });
     const initialMidpoint = createEditorialSignalGeometry(source, {
       ...input,
       elapsedMs: 0,
-      progress: 0.55,
+      progress: 0.3,
     });
 
     expect(createEditorialSignalGeometry(source, { ...input, progress: 0 })).toEqual(source);
@@ -174,5 +174,36 @@ describe("orbital thread geometry", () => {
     expect(lowerLayer[0]!.y).toBeGreaterThan(signal[0]!.y + 5);
     expect(animatedMidpoint).not.toEqual(initialMidpoint);
     expect(signal.flatMap(({ x, y }) => [x, y]).every(Number.isFinite)).toBe(true);
+  });
+
+  it("settles each editorial signal into an exact horizontal line before the copy enters", () => {
+    const source = parseCubicLoopPath(orbitalPaths[0].d);
+    const input = {
+      elapsedMs: 1200,
+      layerIndex: 1,
+      layerSpacing: 2.4,
+      noiseAmplitude: 7,
+      pointerBoost: 1.35,
+      pointerStrength: 1,
+      pointerX: 0.35,
+      pointerY: -0.2,
+      progress: 0.45,
+      radiusX: 70,
+      radiusY: 9,
+      settledWaveAmplitude: 1.2,
+      waveLobes: 3.2,
+      waveSpeed: 0.001,
+    };
+    const signal = orbitalGeometry.createEditorialSignalGeometry(source, input);
+    const laterSignal = orbitalGeometry.createEditorialSignalGeometry(source, {
+      ...input,
+      elapsedMs: 3600,
+    });
+
+    expect(new Set(signal.map(({ y }) => Number(y.toFixed(6))))).toHaveProperty("size", 1);
+    expect(
+      Math.max(...signal.map(({ x }) => x)) - Math.min(...signal.map(({ x }) => x)),
+    ).toBeGreaterThan(130);
+    expect(laterSignal).toEqual(signal);
   });
 });
