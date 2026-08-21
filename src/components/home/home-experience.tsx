@@ -1,8 +1,10 @@
+import { BrandWordmark } from "@/components/brand/brand-wordmark";
 import { OrbitalLink } from "@/components/orbital/orbital-link";
 import { OrbitalMark } from "@/components/orbital/orbital-mark";
 import { orbitalHomeContent } from "@/content/orbital-home";
 import { HomeMotion } from "./home-motion";
 import { HomeSplash } from "./home-splash";
+import { OrbitalThreadStage } from "./orbital-thread-stage";
 import styles from "./home.module.css";
 
 type EditorialSection = (typeof orbitalHomeContent.sections)[number];
@@ -28,7 +30,7 @@ export function HomeExperience() {
         <div className={styles.heroViewport} data-pin="hero">
           <header className={styles.siteHeader}>
             <a aria-label="CALORYTHM ana sayfa" className={styles.wordmark} href="#top">
-              CALORYTHM
+              <BrandWordmark className={styles.wordmarkImage} priority />
             </a>
             <nav aria-label="Ana navigasyon" className={styles.navigation}>
               {orbitalHomeContent.navigation.map((item) => (
@@ -50,11 +52,18 @@ export function HomeExperience() {
                 <span>bir ritmi var.</span>
               </h1>
               <p className={styles.heroBody}>{orbitalHomeContent.hero.body}</p>
-              <OrbitalLink href="#section-01">{orbitalHomeContent.hero.cta}</OrbitalLink>
+              <OrbitalLink href="#section-01" variant="orbit">
+                {orbitalHomeContent.hero.cta}
+              </OrbitalLink>
             </div>
 
-            <div aria-hidden="true" className={styles.heroMarkFrame} data-motion="hero-mark">
-              <OrbitalMark className={styles.heroMark} tone="brand" variant="frame" />
+            <div
+              aria-hidden="true"
+              className={styles.heroMarkFrame}
+              data-orbital-anchor="hero"
+              data-splash-handoff-target=""
+            >
+              <OrbitalThreadStage />
             </div>
           </div>
 
@@ -251,7 +260,9 @@ export function HomeExperience() {
             <OrbitalLink href="#journal">Journal’ı keşfet</OrbitalLink>
           </div>
           <footer className={styles.finaleFooter}>
-            <a href="#top">CALORYTHM</a>
+            <a aria-label="CALORYTHM ana sayfa" href="#top">
+              <BrandWordmark className={styles.finaleWordmark} />
+            </a>
             <span>Beslenme bilimi için bağımsız yayın</span>
             <span>İstanbul · 2026</span>
           </footer>
