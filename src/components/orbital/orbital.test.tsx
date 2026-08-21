@@ -23,7 +23,7 @@ describe("orbital brand primitives", () => {
     );
   });
 
-  it("gives an orbital CTA four independently animated brand threads", () => {
+  it("keeps the orbital CTA semantic while the persistent stage owns its threads", () => {
     render(
       <OrbitalLink href="#konular" variant="orbit">
         Keşfet
@@ -32,11 +32,10 @@ describe("orbital brand primitives", () => {
 
     const link = screen.getByRole("link", { name: "Keşfet" });
     expect(link).toHaveAttribute("data-variant", "orbit");
-    expect(
-      Array.from(link.querySelectorAll("[data-link-orbit-path]"), (path) =>
-        path.getAttribute("data-link-orbit-path"),
-      ),
-    ).toEqual(["orange", "coral", "ochre", "olive"]);
+    expect(link).toHaveAttribute("data-orbital-anchor", "hero-cta");
+    expect(link.style.getPropertyValue("--orbital-fill-progress")).toBe("0");
+    expect(link.querySelector("svg")).toBeNull();
+    expect(link.querySelector("[data-link-orbit-path]")).toBeNull();
   });
 
   it("never exposes an unavailable destination as a dead link", () => {

@@ -58,40 +58,14 @@
     var(--orange, #f3a65a) 64%,
     var(--coral, #ea735d) 100%
   );
-  clip-path: circle(0 at calc(100% - 1.6rem) 50%);
+  clip-path: circle(
+    calc(var(--orbital-fill-progress, 0) * 145%)
+    at calc(100% - 1.6rem) 50%
+  );
   content: "";
   inset: 0;
   position: absolute;
-  transition: clip-path 460ms cubic-bezier(0.16, 1, 0.3, 1);
   z-index: -2;
-}
-
-.linkOrbit {
-  height: 100%;
-  inset: 0;
-  opacity: 0;
-  overflow: visible;
-  pointer-events: none;
-  position: absolute;
-  transform: rotate(-145deg) scale(0.18);
-  transform-origin: calc(100% - 1.6rem) 50%;
-  transition:
-    opacity 90ms linear,
-    transform 480ms cubic-bezier(0.16, 1, 0.3, 1);
-  width: 100%;
-  z-index: -1;
-}
-
-.linkOrbit path {
-  mix-blend-mode: multiply;
-  opacity: 0.94;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.35;
-  transition: stroke-dashoffset 390ms cubic-bezier(0.22, 1, 0.36, 1);
-  vector-effect: non-scaling-stroke;
 }
 
 .orbitalLink[data-variant="orbit"] .linkLabel,
@@ -163,49 +137,6 @@
   transform: translateY(-1px);
 }
 
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover::before,
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible::before {
-  clip-path: circle(145% at calc(100% - 1.6rem) 50%);
-}
-
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover .linkOrbit,
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible .linkOrbit {
-  opacity: 1;
-  transform: rotate(0) scale(1);
-}
-
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover .linkOrbit path,
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible .linkOrbit path {
-  stroke-dashoffset: 0;
-}
-
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover
-  .linkOrbit
-  path:nth-child(2),
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible
-  .linkOrbit
-  path:nth-child(2) {
-  transition-delay: 25ms;
-}
-
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover
-  .linkOrbit
-  path:nth-child(3),
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible
-  .linkOrbit
-  path:nth-child(3) {
-  transition-delay: 50ms;
-}
-
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover
-  .linkOrbit
-  path:nth-child(4),
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible
-  .linkOrbit
-  path:nth-child(4) {
-  transition-delay: 75ms;
-}
-
 .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover .linkTerminal,
 .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible .linkTerminal {
   background: color-mix(in srgb, var(--ivory, #f6f1e8) 32%, transparent);
@@ -225,15 +156,7 @@
 @media (prefers-reduced-motion: reduce) {
   .linkLabel::after,
   .linkTerminal,
-  .linkOrbit,
-  .linkOrbit path,
-  .orbitalLink[data-variant="orbit"],
-  .orbitalLink[data-variant="orbit"]::before {
+  .orbitalLink[data-variant="orbit"] {
     transition: none;
-  }
-
-  .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover .linkOrbit,
-  .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible .linkOrbit {
-    transform: none;
   }
 }

@@ -1,5 +1,4 @@
-import type { ReactNode } from "react";
-import { orbitalPaths } from "./orbital-paths";
+import type { CSSProperties, ReactNode } from "react";
 import styles from "./orbital.module.css";
 
 type OrbitalLinkProps = {
@@ -10,35 +9,9 @@ type OrbitalLinkProps = {
   variant?: "default" | "orbit";
 };
 
-function LinkContent({
-  children,
-  variant,
-}: Pick<OrbitalLinkProps, "children" | "variant">) {
+function LinkContent({ children }: Pick<OrbitalLinkProps, "children">) {
   return (
     <>
-      {variant === "orbit" ? (
-        <svg
-          aria-hidden="true"
-          className={styles.linkOrbit}
-          data-link-orbit=""
-          fill="none"
-          focusable="false"
-          preserveAspectRatio="none"
-          viewBox="0 0 240 60"
-        >
-          <g transform="translate(5 0) scale(2.3 .55)">
-            {orbitalPaths.map((path) => (
-              <path
-                d={path.d}
-                data-link-orbit-path={path.id}
-                key={path.id}
-                pathLength="1"
-                stroke={path.color}
-              />
-            ))}
-          </g>
-        </svg>
-      ) : null}
       <span className={styles.linkLabel}>{children}</span>
       <span aria-hidden="true" className={styles.linkTerminal}>
         <span>→</span>
@@ -55,6 +28,13 @@ export function OrbitalLink({
   variant = "default",
 }: OrbitalLinkProps) {
   const classes = className ? `${styles.orbitalLink} ${className}` : styles.orbitalLink;
+  const orbitalAttributes =
+    variant === "orbit"
+      ? {
+          "data-orbital-anchor": "hero-cta",
+          style: { "--orbital-fill-progress": 0 } as CSSProperties,
+        }
+      : {};
 
   if (unavailable || !href) {
     return (
@@ -63,15 +43,16 @@ export function OrbitalLink({
         className={classes}
         data-unavailable="true"
         data-variant={variant}
+        {...orbitalAttributes}
       >
-        <LinkContent variant={variant}>{children}</LinkContent>
+        <LinkContent>{children}</LinkContent>
       </span>
     );
   }
 
   return (
-    <a className={classes} data-variant={variant} href={href}>
-      <LinkContent variant={variant}>{children}</LinkContent>
+    <a className={classes} data-variant={variant} href={href} {...orbitalAttributes}>
+      <LinkContent>{children}</LinkContent>
     </a>
   );
 }

@@ -11,6 +11,9 @@ import {
 import { createPortal } from "react-dom";
 import { readMotionProfile } from "@/components/motion/motion-profile";
 import {
+  computeThreadDash,
+  createCtaThreadGeometry,
+  interpolateProgressiveGeometry,
   parseCubicLoopPath,
   serializeCubicLoopPath,
   type RingPoint,
@@ -19,6 +22,7 @@ import { orbitalPaths } from "@/components/orbital/orbital-paths";
 import {
   getOrbitalThreadSnapshot,
   setOrbitalBaseState,
+  setOrbitalCtaState,
   setOrbitalPointer,
   subscribeOrbitalThreadState,
 } from "@/components/orbital/orbital-thread-store";
@@ -43,6 +47,8 @@ type ThreadResponse = {
 const subscribeToHydration = () => () => undefined;
 const RING_CENTER = 50;
 const POINTER_ANCHOR_RADIUS = 61;
+const CTA_RESPONSE = 10;
+const CTA_PATH_LAGS = [1, 0.92, 0.84, 0.76] as const;
 
 const threadResponses: ThreadResponse[] = [
   { amplitude: 5.2, directionX: 1, directionY: 0, phase: 0.2, response: 8.2, strength: 0 },
@@ -107,6 +113,30 @@ function centeredSquare(rect: DOMRect) {
   };
 }
 
+function laggedCtaProgress(progress: number, lag: number) {
+  return clamp((progress - (1 - lag)) / lag, 0, 1);
+}
+
+function leadingPointForTarget(source: RingPoint[], target: RingPoint[]) {
+  const uniqueTargetPoints = target.slice(0, -1);
+  const targetCenter = uniqueTargetPoints.reduce(
+    (center, point) => ({ x: center.x + point.x, y: center.y + point.y }),
+    { x: 0, y: 0 },
+  );
+  targetCenter.x /= uniqueTargetPoints.length || 1;
+  targetCenter.y /= uniqueTargetPoints.length || 1;
+
+  // The current hero point nearest the measured CTA center leads. Ties resolve to
+  // the lowest index, making the CTA-facing choice stable for every path.
+  return source.slice(0, -1).reduce(
+    (nearest, point, index) => {
+      const distance = Math.hypot(point.x - targetCenter.x, point.y - targetCenter.y);
+      return distance < nearest.distance ? { distance, index } : nearest;
+    },
+    { distance: Number.POSITIVE_INFINITY, index: 0 },
+  ).index;
+}
+
 export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps) {
   const [phase, setPhase] = useState<OrbitalThreadPhase>("intro");
   const isHydrated = useSyncExternalStore(subscribeToHydration, () => true, () => false);
@@ -118,10 +148,69 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
   const snapshotRef = useRef(orbitalSnapshot);
   const stageRef = useRef<SVGSVGElement>(null);
   const targetRef = useRef<HTMLElement | null>(null);
+  const ctaAnchorRef = useRef<HTMLElement | null>(null);
+  const ctaRectRef = useRef<DOMRect | null>(null);
 
   useLayoutEffect(() => {
     snapshotRef.current = orbitalSnapshot;
   }, [orbitalSnapshot]);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    const ctaAnchor = document.querySelector<HTMLElement>(
+      '[data-orbital-anchor="hero-cta"]',
+    );
+    if (!ctaAnchor) return;
+
+    ctaAnchorRef.current = ctaAnchor;
+    let hasPointer = false;
+    let hasFocus = false;
+    let wasActive = false;
+
+    const syncCtaState = () => {
+      const active = hasPointer || hasFocus;
+      if (active && !wasActive) {
+        ctaRectRef.current = ctaAnchor.getBoundingClientRect();
+      }
+      wasActive = active;
+      setOrbitalCtaState({ active, anchorId: active ? "hero-cta" : null });
+    };
+    const handlePointerEnter = () => {
+      hasPointer = true;
+      syncCtaState();
+    };
+    const handlePointerLeave = () => {
+      hasPointer = false;
+      syncCtaState();
+    };
+    const handleFocus = () => {
+      hasFocus = true;
+      syncCtaState();
+    };
+    const handleBlur = () => {
+      hasFocus = false;
+      syncCtaState();
+    };
+
+    ctaAnchor.addEventListener("pointerenter", handlePointerEnter);
+    ctaAnchor.addEventListener("pointerleave", handlePointerLeave);
+    ctaAnchor.addEventListener("focus", handleFocus);
+    ctaAnchor.addEventListener("blur", handleBlur);
+
+    return () => {
+      ctaAnchor.removeEventListener("pointerenter", handlePointerEnter);
+      ctaAnchor.removeEventListener("pointerleave", handlePointerLeave);
+      ctaAnchor.removeEventListener("focus", handleFocus);
+      ctaAnchor.removeEventListener("blur", handleBlur);
+      ctaAnchor.style.removeProperty("--orbital-fill-progress");
+      ctaAnchorRef.current = null;
+      ctaRectRef.current = null;
+      if (getOrbitalThreadSnapshot().cta.anchorId === "hero-cta") {
+        setOrbitalCtaState({ active: false, anchorId: null });
+      }
+    };
+  }, [isHydrated]);
 
   const settleIntoHero = useCallback(() => {
     const target =
@@ -182,6 +271,10 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
     const paths = Array.from(stage.querySelectorAll<SVGPathElement>("[data-orbit-path]"));
     const responses = threadResponses.map((response) => ({ ...response }));
     let animationFrame = 0;
+    let ctaProgress = 0;
+    let ctaTargets: RingPoint[][] | null = null;
+    let leadingPoints: Array<number | null> = orbitalPaths.map(() => null);
+    let wasCtaActive = false;
     let firstTimestamp: number | null = null;
     let lastTimestamp: number | null = null;
 
@@ -191,8 +284,28 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         lastTimestamp === null ? 1 / 60 : Math.min((timestamp - lastTimestamp) / 1000, 0.05);
       const elapsed = timestamp - firstTimestamp;
       const entrance = clamp(elapsed / 800, 0, 1);
-      const pointer = snapshotRef.current.pointer;
+      const snapshot = snapshotRef.current;
+      const pointer = snapshot.pointer;
+      const ctaActive = snapshot.cta.active && snapshot.cta.anchorId === "hero-cta";
+      const ctaTargetProgress = ctaActive ? 1 : 0;
+      const ctaEasing = 1 - Math.exp(-CTA_RESPONSE * delta);
+      ctaProgress += (ctaTargetProgress - ctaProgress) * ctaEasing;
+      if (Math.abs(ctaTargetProgress - ctaProgress) < 0.001) {
+        ctaProgress = ctaTargetProgress;
+      }
       lastTimestamp = timestamp;
+
+      if (ctaActive && (!wasCtaActive || !ctaTargets)) {
+        const stageRect = stage.getBoundingClientRect();
+        const ctaRect = ctaRectRef.current;
+        if (ctaRect && stageRect.width > 0 && stageRect.height > 0) {
+          ctaTargets = orbitalPaths.map((_, pathIndex) =>
+            createCtaThreadGeometry({ ctaRect, pathIndex, stageRect }),
+          );
+          leadingPoints = orbitalPaths.map(() => null);
+        }
+      }
+      wasCtaActive = ctaActive;
 
       responses.forEach((response, index) => {
         const basePoints = baseThreadPoints[index];
@@ -202,9 +315,34 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         response.directionY += (pointer.y - response.directionY) * easing;
         response.strength += (pointer.strength - response.strength) * easing;
 
-        const morphedPoints = morphThreadPath(basePoints, response, elapsed, entrance);
-        paths[index]?.setAttribute("d", serializeCubicLoopPath(morphedPoints));
+        const heroPoints = morphThreadPath(basePoints, response, elapsed, entrance);
+        const ctaTarget = ctaTargets?.[index];
+        const pathLag = CTA_PATH_LAGS[index] ?? 1;
+        const pathProgress = laggedCtaProgress(ctaProgress, pathLag);
+        let renderedPoints = heroPoints;
+
+        if (ctaTarget) {
+          leadingPoints[index] ??= leadingPointForTarget(heroPoints, ctaTarget);
+          renderedPoints = interpolateProgressiveGeometry(
+            heroPoints,
+            ctaTarget,
+            pathProgress,
+            { leadingPointIndex: leadingPoints[index] ?? 0 },
+          );
+        }
+
+        const path = paths[index];
+        const dash = computeThreadDash(pathProgress, index);
+        path?.setAttribute("d", serializeCubicLoopPath(renderedPoints));
+        path?.setAttribute("stroke-dasharray", dash.dasharray);
+        path?.setAttribute("stroke-dashoffset", `${dash.dashoffset}`);
       });
+
+      const fillProgress = clamp((ctaProgress - 0.45) / 0.55, 0, 1);
+      ctaAnchorRef.current?.style.setProperty(
+        "--orbital-fill-progress",
+        `${fillProgress}`,
+      );
 
       animationFrame = window.requestAnimationFrame(renderMorph);
     };
@@ -242,6 +380,8 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       paths.forEach((path, index) => {
         const basePath = orbitalPaths[index];
         if (basePath) path.setAttribute("d", basePath.d);
+        path.removeAttribute("stroke-dasharray");
+        path.removeAttribute("stroke-dashoffset");
       });
     };
   }, [phase]);
@@ -316,6 +456,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
               data-splash-thread={path.id}
               data-tone={path.id}
               key={path.id}
+              pathLength="1"
               stroke={path.color}
             />
           ))}

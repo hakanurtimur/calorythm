@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import {
   getOrbitalThreadSnapshot,
   resetOrbitalThreadState,
+  resolveOrbitalMode,
 } from "@/components/orbital/orbital-thread-store";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HomeExperience } from "./home-experience";
@@ -74,7 +75,7 @@ describe("HomeExperience", () => {
     expect(screen.getAllByRole("link", { name: "CALORYTHM ana sayfa" })).toHaveLength(2);
   });
 
-  it("uses the four-thread orbital treatment for the primary hero action", () => {
+  it("uses the persistent stage as the primary hero action's only orbital treatment", () => {
     const { container } = render(<HomeExperience />);
 
     const heroAction = container
@@ -82,7 +83,9 @@ describe("HomeExperience", () => {
       ?.querySelector<HTMLAnchorElement>('a[href="#section-01"]');
     expect(heroAction).not.toBeNull();
     expect(heroAction).toHaveAttribute("data-variant", "orbit");
-    expect(heroAction?.querySelectorAll("[data-link-orbit-path]")).toHaveLength(4);
+    expect(heroAction).toHaveAttribute("data-orbital-anchor", "hero-cta");
+    expect(heroAction?.querySelector("svg")).toBeNull();
+    expect(heroAction?.querySelector("[data-link-orbit-path]")).toBeNull();
   });
 
   it("keeps one four-path stage without a handoff clone", () => {
@@ -272,6 +275,88 @@ describe("HomeExperience", () => {
     expect(motionGroup?.style.getPropertyValue("--ring-pointer-x")).toBe("");
     expect(motionGroup?.style.getPropertyValue("--ring-pointer-y")).toBe("");
     expect(getComputedStyle(motionGroup!).transform).toBe("none");
+  });
+
+  it("morphs the same persistent paths into the CTA and returns them", () => {
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    const { container } = render(<HomeExperience />);
+    const stage = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]")!;
+    const cta = container.querySelector<HTMLElement>(
+      '[data-motion="hero-copy"] a[href="#section-01"]',
+    )!;
+    const firstPath = stage.querySelector<SVGPathElement>("[data-orbit-path]")!;
+    const heroPath = firstPath.getAttribute("d");
+
+    stage.getBoundingClientRect = () =>
+      ({ left: 288, top: 18, width: 864, height: 864, right: 1152, bottom: 882, x: 288, y: 18, toJSON: () => ({}) }) as DOMRect;
+    cta.getBoundingClientRect = () =>
+      ({ left: 640, top: 650, width: 160, height: 52, right: 800, bottom: 702, x: 640, y: 650, toJSON: () => ({}) }) as DOMRect;
+
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+    fireEvent.pointerEnter(cta);
+    act(() => frames.shift()?.(0));
+    expect(Number(cta.style.getPropertyValue("--orbital-fill-progress"))).toBe(0);
+
+    act(() => [120, 240, 480, 720].forEach((time) => frames.shift()?.(time)));
+    expect(firstPath.getAttribute("d")).not.toBe(heroPath);
+    expect(Number(cta.style.getPropertyValue("--orbital-fill-progress"))).toBeGreaterThan(0.45);
+    expect(cta.querySelector("svg")).toBeNull();
+
+    act(() =>
+      [780, 840, 900, 960, 1020, 1080, 1140, 1200, 1260, 1320].forEach((time) =>
+        frames.shift()?.(time),
+      ),
+    );
+    const contractedPath = firstPath.getAttribute("d");
+    const contractedPaths = Array.from(
+      stage.querySelectorAll<SVGPathElement>("[data-orbit-path]"),
+      (path) => path.getAttribute("d"),
+    );
+    expect(Number(cta.style.getPropertyValue("--orbital-fill-progress"))).toBe(1);
+    expect(firstPath.getAttribute("stroke-dasharray")).toBe("1 0");
+    expect(new Set(contractedPaths)).toHaveProperty("size", 4);
+
+    fireEvent.pointerLeave(cta);
+    act(() => [1380, 1440, 1500, 1560].forEach((time) => frames.shift()?.(time)));
+    expect(firstPath.getAttribute("d")).not.toBe(contractedPath);
+    expect(Number(cta.style.getPropertyValue("--orbital-fill-progress"))).toBeLessThan(0.1);
+  });
+
+  it("uses the same CTA state for keyboard focus", () => {
+    const { container } = render(<HomeExperience />);
+    const cta = container.querySelector<HTMLElement>(
+      '[data-motion="hero-copy"] a[href="#section-01"]',
+    )!;
+
+    fireEvent.focus(cta);
+    expect(resolveOrbitalMode(getOrbitalThreadSnapshot())).toEqual({
+      kind: "cta",
+      anchorId: "hero-cta",
+    });
+    fireEvent.blur(cta);
+    expect(resolveOrbitalMode(getOrbitalThreadSnapshot()).kind).not.toBe("cta");
+  });
+
+  it("keeps CTA state active until both pointer and focus have left", () => {
+    const { container } = render(<HomeExperience />);
+    const cta = container.querySelector<HTMLElement>(
+      '[data-motion="hero-copy"] a[href="#section-01"]',
+    )!;
+
+    fireEvent.pointerEnter(cta);
+    fireEvent.focus(cta);
+    fireEvent.pointerLeave(cta);
+    expect(resolveOrbitalMode(getOrbitalThreadSnapshot())).toEqual({
+      kind: "cta",
+      anchorId: "hero-cta",
+    });
+
+    fireEvent.blur(cta);
+    expect(resolveOrbitalMode(getOrbitalThreadSnapshot()).kind).not.toBe("cta");
   });
 
   it("keeps pointer motion disabled when reduced motion is preferred", () => {
