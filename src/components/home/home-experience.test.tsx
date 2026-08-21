@@ -576,4 +576,137 @@ describe("HomeExperience", () => {
     fireEvent.focus(cta);
     expect(resolveOrbitalMode(getOrbitalThreadSnapshot()).kind).not.toBe("cta");
   });
+
+  it("returns an active stage to static hero geometry when reduced motion changes at runtime", () => {
+    const frames = new Map<number, FrameRequestCallback>();
+    const reducedMotionListeners = new Set<(event: MediaQueryListEvent) => void>();
+    let nextFrame = 0;
+    let reducedMotion = false;
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) => {
+        if (query === "(prefers-reduced-motion: reduce)") {
+          return {
+            addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) =>
+              reducedMotionListeners.add(listener),
+            get matches() {
+              return reducedMotion;
+            },
+            media: query,
+            removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) =>
+              reducedMotionListeners.delete(listener),
+          };
+        }
+
+        return {
+          addEventListener: vi.fn(),
+          matches: query === "(pointer: fine)",
+          media: query,
+          removeEventListener: vi.fn(),
+        };
+      }),
+    );
+    const requestAnimationFrame = vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      nextFrame += 1;
+      frames.set(nextFrame, callback);
+      return nextFrame;
+    });
+    const cancelAnimationFrame = vi.spyOn(window, "cancelAnimationFrame").mockImplementation((frame) => {
+      frames.delete(frame);
+    });
+    const runPendingFrame = (timestamp: number) => {
+      const pending = frames.entries().next().value as [number, FrameRequestCallback] | undefined;
+      if (!pending) return;
+      frames.delete(pending[0]);
+      pending[1](timestamp);
+    };
+    const { container } = render(<HomeExperience />);
+    const stage = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]")!;
+    const cta = container.querySelector<HTMLElement>('[data-orbital-anchor="hero-cta"]')!;
+    const firstPath = stage.querySelector<SVGPathElement>("[data-orbit-path]")!;
+    const authoredPath = firstPath.getAttribute("d");
+    const target = container.querySelector<HTMLElement>("[data-splash-handoff-target]")!;
+    target.getBoundingClientRect = () =>
+      ({ bottom: 700, height: 600, left: 900, right: 1300, top: 100, width: 400, x: 900, y: 100, toJSON: () => ({}) }) as DOMRect;
+
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+    fireEvent.pointerMove(window, { clientX: 1200, clientY: 600, pointerType: "mouse" });
+    act(() => runPendingFrame(0));
+    expect(firstPath).toHaveAttribute("stroke-dasharray");
+    expect(frames.size).toBe(1);
+
+    reducedMotion = true;
+    reducedMotionListeners.forEach((listener) => listener({ matches: true } as MediaQueryListEvent));
+
+    expect(cancelAnimationFrame).toHaveBeenCalledWith(2);
+    expect(frames.size).toBe(0);
+    expect(firstPath).toHaveAttribute("d", authoredPath!);
+    expect(firstPath).not.toHaveAttribute("stroke-dasharray");
+    expect(firstPath).not.toHaveAttribute("stroke-dashoffset");
+    expect(stage).toHaveAttribute("data-cta-layer", "idle");
+    expect(stage.style.zIndex).toBe("");
+    expect(cta.style.getPropertyValue("--orbital-fill-progress")).toBe("0");
+
+    fireEvent.focus(cta);
+    expect(requestAnimationFrame).toHaveBeenCalledTimes(2);
+
+    reducedMotion = false;
+    reducedMotionListeners.forEach((listener) => listener({ matches: false } as MediaQueryListEvent));
+    reducedMotionListeners.forEach((listener) => listener({ matches: false } as MediaQueryListEvent));
+    expect(requestAnimationFrame).toHaveBeenCalledTimes(3);
+    expect(frames.size).toBe(1);
+    act(() => runPendingFrame(240));
+    expect(firstPath).toHaveAttribute("stroke-dasharray");
+  });
+
+  it("ignores touch input on a fine-capable device while keyboard focus still activates CTA geometry", () => {
+    const frames: FrameRequestCallback[] = [];
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) => ({
+        addEventListener: vi.fn(),
+        matches: query === "(pointer: fine)",
+        media: query,
+        removeEventListener: vi.fn(),
+      })),
+    );
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    const { container } = render(<HomeExperience />);
+    const stage = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]")!;
+    const cta = container.querySelector<HTMLElement>('[data-orbital-anchor="hero-cta"]')!;
+    const target = container.querySelector<HTMLElement>("[data-splash-handoff-target]")!;
+    target.getBoundingClientRect = () =>
+      ({ bottom: 700, height: 600, left: 900, right: 1300, top: 100, width: 400, x: 900, y: 100, toJSON: () => ({}) }) as DOMRect;
+    stage.getBoundingClientRect = () =>
+      ({ left: 288, top: 18, width: 864, height: 864, right: 1152, bottom: 882, x: 288, y: 18, toJSON: () => ({}) }) as DOMRect;
+    cta.getBoundingClientRect = () =>
+      ({ left: 640, top: 650, width: 160, height: 52, right: 800, bottom: 702, x: 640, y: 650, toJSON: () => ({}) }) as DOMRect;
+    const touchPointerEvent = (type: string) => {
+      const event = new Event(type, { bubbles: true }) as PointerEvent;
+      Object.defineProperty(event, "pointerType", { value: "touch" });
+      return event;
+    };
+
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+    window.dispatchEvent(touchPointerEvent("pointermove"));
+    cta.dispatchEvent(touchPointerEvent("pointerenter"));
+    cta.dispatchEvent(touchPointerEvent("pointerdown"));
+    fireEvent.focus(cta);
+
+    expect(getOrbitalThreadSnapshot().pointer.strength).toBe(0);
+    expect(resolveOrbitalMode(getOrbitalThreadSnapshot()).kind).not.toBe("cta");
+    expect(cta.style.getPropertyValue("--orbital-fill-progress")).toBe("0");
+
+    fireEvent.blur(cta);
+    fireEvent.focus(cta);
+    expect(resolveOrbitalMode(getOrbitalThreadSnapshot())).toEqual({
+      kind: "cta",
+      anchorId: "hero-cta",
+    });
+    act(() => frames.shift()?.(0));
+    expect(stage).toHaveAttribute("data-cta-layer", "foreground");
+  });
 });
