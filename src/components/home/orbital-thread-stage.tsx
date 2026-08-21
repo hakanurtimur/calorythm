@@ -168,8 +168,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       typeof window.matchMedia !== "function" || window.matchMedia("(pointer: fine)").matches;
     let hasPointer = false;
     let hasFocus = false;
-    let touchFocusPending = false;
-    let touchFocusResetTimer = 0;
+    let lastInputModality: PointerEvent["pointerType"] | "keyboard" | null = null;
     let wasActive = false;
 
     const syncCtaState = () => {
@@ -180,30 +179,32 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       wasActive = active;
       setOrbitalCtaState({ active, anchorId: active ? "hero-cta" : null });
     };
+    const recordPointerModality = (event: PointerEvent) => {
+      if (event.pointerType) lastInputModality = event.pointerType;
+    };
     const handlePointerEnter = (event: PointerEvent) => {
+      recordPointerModality(event);
       if (event.pointerType === "touch") return;
       hasPointer = true;
       syncCtaState();
     };
     const handlePointerLeave = (event: PointerEvent) => {
+      recordPointerModality(event);
       if (event.pointerType === "touch") return;
       hasPointer = false;
       syncCtaState();
     };
     const handlePointerDown = (event: PointerEvent) => {
-      if (event.pointerType !== "touch") return;
-      touchFocusPending = true;
-      window.clearTimeout(touchFocusResetTimer);
-      touchFocusResetTimer = window.setTimeout(() => {
-        touchFocusPending = false;
-      }, 0);
+      recordPointerModality(event);
+    };
+    const handlePointerUp = (event: PointerEvent) => {
+      recordPointerModality(event);
+    };
+    const handleKeyboardInput = () => {
+      lastInputModality = "keyboard";
     };
     const handleFocus = () => {
-      if (touchFocusPending) {
-        touchFocusPending = false;
-        window.clearTimeout(touchFocusResetTimer);
-        return;
-      }
+      if (lastInputModality === "touch") return;
       hasFocus = true;
       syncCtaState();
     };
@@ -216,19 +217,22 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       ctaAnchor.addEventListener("pointerenter", handlePointerEnter);
       ctaAnchor.addEventListener("pointerleave", handlePointerLeave);
       ctaAnchor.addEventListener("pointerdown", handlePointerDown);
+      ctaAnchor.addEventListener("pointerup", handlePointerUp);
     }
     ctaAnchor.addEventListener("focus", handleFocus);
     ctaAnchor.addEventListener("blur", handleBlur);
+    window.addEventListener("keydown", handleKeyboardInput);
 
     return () => {
       if (hasFinePointer) {
         ctaAnchor.removeEventListener("pointerenter", handlePointerEnter);
         ctaAnchor.removeEventListener("pointerleave", handlePointerLeave);
         ctaAnchor.removeEventListener("pointerdown", handlePointerDown);
+        ctaAnchor.removeEventListener("pointerup", handlePointerUp);
       }
       ctaAnchor.removeEventListener("focus", handleFocus);
       ctaAnchor.removeEventListener("blur", handleBlur);
-      window.clearTimeout(touchFocusResetTimer);
+      window.removeEventListener("keydown", handleKeyboardInput);
       ctaAnchor.style.removeProperty("--orbital-fill-progress");
       ctaAnchorRef.current = null;
       ctaRectRef.current = null;

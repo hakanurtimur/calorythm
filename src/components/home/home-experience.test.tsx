@@ -659,8 +659,9 @@ describe("HomeExperience", () => {
     expect(firstPath).toHaveAttribute("stroke-dasharray");
   });
 
-  it("ignores touch input on a fine-capable device while keyboard focus still activates CTA geometry", () => {
+  it("keeps delayed touch focus static on a fine-capable device until keyboard input takes ownership", () => {
     const frames: FrameRequestCallback[] = [];
+    vi.useFakeTimers();
     vi.stubGlobal(
       "matchMedia",
       vi.fn((query: string) => ({
@@ -694,6 +695,8 @@ describe("HomeExperience", () => {
     window.dispatchEvent(touchPointerEvent("pointermove"));
     cta.dispatchEvent(touchPointerEvent("pointerenter"));
     cta.dispatchEvent(touchPointerEvent("pointerdown"));
+    cta.dispatchEvent(touchPointerEvent("pointerup"));
+    act(() => vi.advanceTimersByTime(1));
     fireEvent.focus(cta);
 
     expect(getOrbitalThreadSnapshot().pointer.strength).toBe(0);
@@ -701,6 +704,7 @@ describe("HomeExperience", () => {
     expect(cta.style.getPropertyValue("--orbital-fill-progress")).toBe("0");
 
     fireEvent.blur(cta);
+    fireEvent.keyDown(window, { key: "Tab" });
     fireEvent.focus(cta);
     expect(resolveOrbitalMode(getOrbitalThreadSnapshot())).toEqual({
       kind: "cta",
