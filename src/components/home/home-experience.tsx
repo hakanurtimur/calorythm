@@ -41,7 +41,7 @@ export function HomeExperience() {
               ))}
             </nav>
             <a className={styles.headerCta} href="#journal">
-              Konuları keşfet <span aria-hidden="true">↘</span>
+              Yazıları keşfet <span aria-hidden="true">↘</span>
             </a>
           </header>
 
@@ -116,8 +116,8 @@ export function HomeExperience() {
               <SceneTitle section={stories} />
               <p className={styles.sceneBody}>{stories.body}</p>
             </div>
-            <ol aria-label="Makro besin rotaları" className={styles.macroRoutes}>
-              {orbitalHomeContent.macroRoutes.map((route, index) => (
+            <ol aria-label="Editoryal yaklaşım" className={styles.macroRoutes}>
+              {orbitalHomeContent.editorialPrinciples.map((route, index) => (
                 <li
                   data-motion="macro-route"
                   data-tone={route.tone}
@@ -212,11 +212,11 @@ export function HomeExperience() {
             <p aria-hidden="true" className={styles.sceneNumber}>06</p>
             <div className={`${styles.sceneCopy} ${styles.journalCopy}`}>
               <SceneTitle section={journal} />
-              <p>Bir sorudan başla.</p>
+              <p>Arşiv bu başlıklar etrafında büyüyecek.</p>
             </div>
           </div>
           <ol
-            aria-label="Journal konuları"
+            aria-label="Yayın konuları"
             className={styles.journalTopics}
             data-journal-orbit=""
           >
@@ -250,13 +250,13 @@ export function HomeExperience() {
             <SceneTitle section={finale} />
             <p className={styles.sceneBody}>{finale.body}</p>
             <p className={styles.finaleEmphasis}>{finale.emphasis}</p>
-            <OrbitalLink href="#journal">Konuları keşfet</OrbitalLink>
+            <OrbitalLink href="#journal">Yazıları keşfet</OrbitalLink>
           </div>
           <footer className={styles.finaleFooter}>
             <a aria-label="CALORYTHM ana sayfa" href="#top">
               <BrandWordmark className={styles.finaleWordmark} />
             </a>
-            <span>Bağımsız beslenme yayını</span>
+            <span>Bağımsız beslenme dergisi</span>
             <span>İstanbul · 2026</span>
           </footer>
         </div>

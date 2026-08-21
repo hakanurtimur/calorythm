@@ -7,7 +7,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "CALORYTHM",
   description:
-    "Besinlerin bedende nasıl çalıştığını gösteren bağımsız beslenme yayını.",
+    "Beslenme bilimini güvenilir kaynaklarla ele alan bağımsız dijital dergi.",
 };
 
 export const viewport: Viewport = {

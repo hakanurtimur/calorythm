@@ -25,24 +25,25 @@ describe("orbitalHomeContent", () => {
     ]);
   });
 
-  it("promises understanding without marketing implementation features", () => {
+  it("centers reliable editorial work without marketing implementation features", () => {
     const publicCopy = JSON.stringify(orbitalHomeContent).toLocaleLowerCase("tr");
 
     expect(publicCopy).not.toMatch(/interaktif makale|scroll|animasyon/);
-    expect(publicCopy).toContain("besinlerin bedende nasıl çalıştığını");
+    expect(publicCopy).toContain("bilgi kirliliği");
+    expect(publicCopy).toContain("güvenilir kaynak");
   });
 
-  it("positions the brand as an independent publication with a quiet founder signature", () => {
-    expect(orbitalHomeContent.hero.body).toBe(
-      "Ne yiyeceğini söyleyen bir site değil. Besinlerin bedende nasıl çalıştığını gösteren bağımsız bir yayın.",
-    );
+  it("positions the brand as an independent journal with editorial standards and a quiet founder signature", () => {
+    expect(orbitalHomeContent.hero.prelude).toBe("Bağımsız beslenme dergisi");
     expect(orbitalHomeContent.hero.attribution).toBe(
-      "Bir diyetisyen ve yazılımcı tarafından hazırlanır.",
+      "Bir diyetisyen ve yazılımcı tarafından kuruldu.",
     );
-    expect(orbitalHomeContent.sections[0].title).toEqual([
-      "Beslenme bilgisi çok.",
-      "Bağlamı az.",
+    expect(orbitalHomeContent.editorialPrinciples.map(({ title }) => title)).toEqual([
+      "Kaynak",
+      "Bağlam",
+      "Anlatım",
     ]);
+    expect(orbitalHomeContent.sections[6].body).toContain("uzmanların ve yazarların metinlerine");
   });
 
   it("keeps the first editorial file open until its subject is chosen", () => {

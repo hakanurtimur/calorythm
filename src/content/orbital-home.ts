@@ -1,7 +1,7 @@
 export type OrbitalSectionId = "01" | "02" | "03" | "04" | "05" | "06" | "07";
 
-export type MacroRoute = {
-  id: "protein" | "karbonhidrat" | "yag";
+export type EditorialPrinciple = {
+  id: "kaynak" | "baglam" | "anlatim";
   title: string;
   statement: string;
   detail: string;
@@ -30,53 +30,53 @@ export const orbitalHomeContent = {
   navigation: [
     { label: "Keşfet", href: "#section-01" },
     { label: "Konular", href: "#konular" },
-    { label: "Journal", href: "#journal" },
+    { label: "Yazılar", href: "#journal" },
     { label: "Hakkımızda", href: "#hakkinda" },
   ],
   hero: {
     title: "Beslenmenin bir ritmi var.",
-    prelude: "Bağımsız beslenme yayını",
-    body: "Ne yiyeceğini söyleyen bir site değil. Besinlerin bedende nasıl çalıştığını gösteren bağımsız bir yayın.",
-    cta: "Konuları keşfet",
-    attribution: "Bir diyetisyen ve yazılımcı tarafından hazırlanır.",
+    prelude: "Bağımsız beslenme dergisi",
+    body: "CALORYTHM, beslenme alanındaki bilgi kirliliği içinde güvenilir kaynaklara dayanan, özenle hazırlanmış yazılar yayımlar.",
+    cta: "Yazıları keşfet",
+    attribution: "Bir diyetisyen ve yazılımcı tarafından kuruldu.",
   },
   sections: [
     {
       id: "01",
-      title: ["Beslenme bilgisi çok.", "Bağlamı az."],
-      body: "Her gün yeni bir beslenme iddiası dolaşıma giriyor. CALORYTHM iddiaları değil; mekanizmaları, kanıtı ve insan bedenini takip eder.",
+      title: ["Beslenme hakkında", "çok fazla gürültü var."],
+      body: "Her gün yeni bir iddia, kesin bir sonuç ve bir öncekini geçersiz kılan başka bir öneri dolaşıma giriyor. Kaynağı belirsiz içeriklerin arasında neye güvenileceğini ayırt etmek giderek zorlaşıyor.",
     },
     {
       id: "02",
-      title: ["Bir besin,", "tek bir sonuç değildir."],
-      body: "Etkisi; miktara, zamana, harekete, uykuya ve bedenin o anki koşullarına göre değişir.",
+      title: ["Her iddia,", "aynı ağırlıkta değildir."],
+      body: "Bir yazı yayımlamadan önce kaynağına, kanıtın gücüne ve hangi koşullarda geçerli olduğuna bakıyoruz.",
     },
     {
       id: "03",
-      title: ["Ne yapacağını ezberleme.", "Nedenini anla."],
-      body: "Her konu tek bir sorudan başlar; mekanizmasına iner, kanıtı tartar ve günlük yaşamla bağlantısını kurar.",
+      title: ["Her dosya,", "tek bir soruyla başlar."],
+      body: "Konuyu yüzeyde bırakmayız. Kanıtları karşılaştırır, yanlış anlaşılan noktaları ayırır ve günlük hayattaki karşılığını açıklarız.",
     },
     {
       id: "04",
-      title: ["Konuyu seç.", "Derinine in."],
-      body: "Protein, karbonhidrat, yağ, metabolizma, lif, hidrasyon ve mikro besinler. Her dosya tek bir soruyu yüzeyde bırakmadan ele alır.",
-      emphasis: ["Mekanizmayı gör.", "Kanıtı tart. Bağlamı koru."],
+      title: ["Doğru bilgi,", "iyi anlatılmayı hak eder."],
+      body: "Bilimsel bilgiyi anlaşılır hâle getirmek, onu basitleştirip eksiltmek değildir. Her dosyayı kendi görsel dili ve editoryal kurgusuyla hazırlıyoruz.",
+      emphasis: ["Önce doğru anla.", "Sonra iyi anlat."],
     },
     {
       id: "05",
       title: ["İlk dosya", "hazırlanıyor."],
-      body: "İlk CALORYTHM dosyası, beslenme hakkında sık sorulan tek bir soruyu mekanizmasından gündelik karşılığına kadar takip edecek.",
-      emphasis: "Yalnızca cevabı değil, cevaba nasıl ulaşıldığını da göreceksin.",
+      body: "İlk CALORYTHM dosyası, beslenme alanında en çok bilgi kirliliği üreten sorulardan birini güvenilir kaynaklar eşliğinde ele alacak.",
+      emphasis: "Konu ve yayın tarihi yakında açıklanacak.",
     },
     {
       id: "06",
-      title: ["Merak ettiğin", "yerden başla."],
+      title: ["Üzerinde çalıştığımız", "konular."],
     },
     {
       id: "07",
-      title: ["Beslenme bilimi,", "anlaşıldığında işe yarar."],
-      body: "Yeni dosyalar, yeni sorular ve daha sağlam bir kavrayış için.",
-      emphasis: "Ezberden önce mekanizmayı, iddiadan önce kanıtı takip et.",
+      title: ["CALORYTHM,", "katkılarla büyüyecek."],
+      body: "Kendi dosyalarımızın yanında, beslenme bilimine özenle yaklaşan uzmanların ve yazarların metinlerine de yer vereceğiz.",
+      emphasis: "Her katkı; kaynak, dil ve anlatım açısından editoryal süreçten geçecek.",
     },
   ] as const satisfies readonly [
     OrbitalSection,
@@ -95,29 +95,29 @@ export const orbitalHomeContent = {
     { title: "Hidrasyon", note: "Sıvı dengesi, dolaşım ve ısı" },
     { title: "Mikro besinler", note: "Az miktarda, kritik görevler" },
   ],
-  macroRoutes: [
+  editorialPrinciples: [
     {
-      id: "protein",
-      title: "Protein",
-      statement: "Yapı kurar, onarır ve taşır.",
-      detail: "Kasın ötesinde: enzimler, antikorlar ve dokular.",
+      id: "kaynak",
+      title: "Kaynak",
+      statement: "Bilginin nereden geldiğine bakarız.",
+      detail: "Araştırmayı, yöntemi ve kanıtın niteliğini inceleriz.",
       tone: "coral",
     },
     {
-      id: "karbonhidrat",
-      title: "Karbonhidrat",
-      statement: "Enerjiyi erişilebilir kılar.",
-      detail: "Glikoz, glikojen ve lif; aynı başlığın farklı işleri.",
+      id: "baglam",
+      title: "Bağlam",
+      statement: "Sonucu sınırlarıyla birlikte okuruz.",
+      detail: "Kimin için, hangi koşullarda geçerli olduğunu gözetiriz.",
       tone: "orange",
     },
     {
-      id: "yag",
-      title: "Yağ",
-      statement: "Depolar, zar kurar ve emilimi destekler.",
-      detail: "Hücre zarları, sinyalleşme ve yağda çözünen vitaminler.",
+      id: "anlatim",
+      title: "Anlatım",
+      statement: "Karmaşık olanı açık hâle getiririz.",
+      detail: "Bilgiyi çarpıtmadan, özenli bir yayına dönüştürürüz.",
       tone: "olive",
     },
-  ] satisfies readonly MacroRoute[],
+  ] satisfies readonly EditorialPrinciple[],
   journalTopics: [
     { id: "protein", title: "Protein", description: "Kasın ötesinde: yapı, enzim ve taşıma.", tone: "coral" },
     { id: "karbonhidrat", title: "Karbonhidrat", description: "Enerji, depolama ve lifin farklı rolleri.", tone: "orange" },

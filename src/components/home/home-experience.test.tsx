@@ -31,16 +31,16 @@ describe("HomeExperience", () => {
 
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
-      "Beslenme bilgisi çok. Bağlamı az.",
-      "Bir besin, tek bir sonuç değildir.",
-      "Ne yapacağını ezberleme. Nedenini anla.",
-      "Konuyu seç. Derinine in.",
+      "Beslenme hakkında çok fazla gürültü var.",
+      "Her iddia, aynı ağırlıkta değildir.",
+      "Her dosya, tek bir soruyla başlar.",
+      "Doğru bilgi, iyi anlatılmayı hak eder.",
       "İlk dosya hazırlanıyor.",
-      "Merak ettiğin yerden başla.",
-      "Beslenme bilimi, anlaşıldığında işe yarar.",
+      "Üzerinde çalıştığımız konular.",
+      "CALORYTHM, katkılarla büyüyecek.",
     ]);
     expect(
-      screen.getByText("Bir diyetisyen ve yazılımcı tarafından hazırlanır."),
+      screen.getByText("Bir diyetisyen ve yazılımcı tarafından kuruldu."),
     ).toBeInTheDocument();
     expect(container.querySelectorAll("[data-scene]")).toHaveLength(8);
   });
@@ -48,19 +48,27 @@ describe("HomeExperience", () => {
   it("keeps the complete reading experience available without a graphics runtime", () => {
     const { container } = render(<HomeExperience />);
 
-    expect(screen.getByText("Yeni dosyalar, yeni sorular ve daha sağlam bir kavrayış için.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Kendi dosyalarımızın yanında, beslenme bilimine özenle yaklaşan uzmanların ve yazarların metinlerine de yer vereceğiz.",
+      ),
+    ).toBeInTheDocument();
     expect(container.querySelector("[data-motion-profile]")).toBeInTheDocument();
     expect(container.querySelector("canvas")).not.toBeInTheDocument();
     expect(container.querySelector("video")).not.toBeInTheDocument();
   });
 
-  it("uses authored editorial structures instead of a repeated card grid", () => {
+  it("presents the journal's editorial standards as a distinct reading structure", () => {
     const { container } = render(<HomeExperience />);
     fireEvent.pointerDown(screen.getByTestId("home-splash"));
 
-    expect(screen.getByRole("list", { name: "Makro besin rotaları" }).children).toHaveLength(3);
+    expect(screen.getByRole("link", { name: "Yazılar" })).toHaveAttribute("href", "#journal");
+    expect(screen.getByRole("list", { name: "Editoryal yaklaşım" }).children).toHaveLength(3);
+    expect(screen.getByRole("heading", { level: 3, name: "Kaynak" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: "Bağlam" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: "Anlatım" })).toBeInTheDocument();
     expect(screen.getByRole("list", { name: "Beslenme konuları" }).children).toHaveLength(5);
-    expect(screen.getByRole("list", { name: "Journal konuları" }).children).toHaveLength(8);
+    expect(screen.getByRole("list", { name: "Yayın konuları" }).children).toHaveLength(8);
     expect(container.querySelectorAll('[data-motion="journal-topic"]')).toHaveLength(8);
     expect(container.querySelector("[data-orbit-mark]")).not.toBeInTheDocument();
     expect(screen.getByText("İlk dosya yakında").closest("[aria-disabled]")).toHaveAttribute(
