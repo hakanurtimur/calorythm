@@ -2,6 +2,9 @@ const KAPPA = 0.5522847498;
 const STAGE_VIEWBOX_SIZE = 128;
 const AUTHORED_GROUP_OFFSET = 8;
 const AUTHORED_GROUP_SCALE = 1.12;
+const CTA_SEGMENT_LENGTH = 0.21;
+const CTA_SEGMENT_SLOT = 0.25;
+const CTA_SEGMENT_SETTLE_START = 0.62;
 const SVG_NUMBER = "[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?";
 const SVG_POINT = `(${SVG_NUMBER})[\\s,]+(${SVG_NUMBER})`;
 const SVG_CUBIC_SEGMENT = `\\s*C\\s*${SVG_POINT}[\\s,]+${SVG_POINT}[\\s,]+${SVG_POINT}`;
@@ -39,6 +42,11 @@ export type ProgressiveGeometryInput = {
 function clampUnit(value: number) {
   if (!Number.isFinite(value)) return 0;
   return Math.min(1, Math.max(0, value));
+}
+
+function smoothstep(value: number) {
+  const amount = clampUnit(value);
+  return amount * amount * (3 - 2 * amount);
 }
 
 function formatCoordinate(value: number) {
@@ -137,7 +145,6 @@ export function interpolateProgressiveGeometry(
 
 export function createCtaThreadGeometry({
   ctaRect,
-  pathIndex,
   stageRect,
 }: CtaThreadGeometryInput): RingPoint[] {
   const left = toAuthoredLocal(mapToStage(ctaRect.left, stageRect.left, stageRect.width));
@@ -150,9 +157,8 @@ export function createCtaThreadGeometry({
   );
   const centerX = (left + right) / 2;
   const centerY = (top + bottom) / 2;
-  const inset = Math.max(0, Number.isFinite(pathIndex) ? pathIndex : 0) * 0.9;
-  const radiusX = Math.max(0, Math.abs(right - left) / 2 - inset);
-  const radiusY = Math.max(0, Math.abs(bottom - top) / 2 - inset);
+  const radiusX = Math.max(0, Math.abs(right - left) / 2);
+  const radiusY = Math.max(0, Math.abs(bottom - top) / 2);
   const controlX = radiusX * KAPPA;
   const controlY = radiusY * KAPPA;
 
@@ -175,14 +181,25 @@ export function createCtaThreadGeometry({
 
 export function computeThreadDash(progress: number, pathIndex: number) {
   const amount = clampUnit(progress);
-  if (amount === 0 || amount === 1) {
+  if (amount === 0) {
     return { dasharray: "1 0", dashoffset: 0 };
   }
 
-  const gap = Math.sin(amount * Math.PI) * (0.2 + pathIndex * 0.025);
+  const safePathIndex = Number.isFinite(pathIndex) ? Math.max(0, pathIndex) : 0;
+  const travellingGap = Math.sin(amount * Math.PI) * (0.2 + safePathIndex * 0.025);
+  const travellingLength = 1 - travellingGap;
+  const travellingOffset = amount * (0.18 + safePathIndex * 0.035);
+  const settleProgress = smoothstep(
+    (amount - CTA_SEGMENT_SETTLE_START) / (1 - CTA_SEGMENT_SETTLE_START),
+  );
+  const segmentLength =
+    travellingLength + (CTA_SEGMENT_LENGTH - travellingLength) * settleProgress;
+  const segmentGap = 1 - segmentLength;
+  const terminalOffset = -safePathIndex * CTA_SEGMENT_SLOT;
+  const dashoffset = travellingOffset + (terminalOffset - travellingOffset) * settleProgress;
 
   return {
-    dasharray: gap <= 0.0001 ? "1 0" : `${Number((1 - gap).toFixed(3))} ${Number(gap.toFixed(3))}`,
-    dashoffset: Number((amount * (0.18 + pathIndex * 0.035)).toFixed(3)),
+    dasharray: `${Number(segmentLength.toFixed(3))} ${Number(segmentGap.toFixed(3))}`,
+    dashoffset: Number(dashoffset.toFixed(3)),
   };
 }

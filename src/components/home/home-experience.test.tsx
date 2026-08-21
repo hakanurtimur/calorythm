@@ -411,9 +411,27 @@ describe("HomeExperience", () => {
       stage.querySelectorAll<SVGPathElement>("[data-orbit-path]"),
       (path) => path.getAttribute("d"),
     );
+    const contractedDashes = Array.from(
+      stage.querySelectorAll<SVGPathElement>("[data-orbit-path]"),
+      (path) => ({
+        dasharray: path.getAttribute("stroke-dasharray"),
+        dashoffset: path.getAttribute("stroke-dashoffset"),
+      }),
+    );
     expect(Number(cta.style.getPropertyValue("--orbital-fill-progress"))).toBe(1);
-    expect(firstPath.getAttribute("stroke-dasharray")).toBe("1 0");
-    expect(new Set(contractedPaths)).toHaveProperty("size", 4);
+    expect(new Set(contractedPaths)).toHaveProperty("size", 1);
+    expect(contractedDashes.map(({ dasharray }) => dasharray)).toEqual([
+      "0.21 0.79",
+      "0.21 0.79",
+      "0.21 0.79",
+      "0.21 0.79",
+    ]);
+    expect(contractedDashes.map(({ dashoffset }) => dashoffset)).toEqual([
+      "0",
+      "-0.25",
+      "-0.5",
+      "-0.75",
+    ]);
 
     fireEvent.pointerLeave(cta);
     act(() => [1380, 1440, 1500, 1560].forEach((time) => frames.shift()?.(time)));
