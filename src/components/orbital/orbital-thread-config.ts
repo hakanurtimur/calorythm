@@ -23,20 +23,25 @@ export type OrbitalThreadConfig = {
     entranceMs: number;
     inhaleExpansion: number;
     inhaleStrokeWidth: number;
+    layerPhaseStep: number;
+    pointerWaveBoost: number;
     primaryWaveAmplitude: number;
+    primaryWaveLobes: number;
     primaryWaveSpeed: number;
     revealDurationMs: number;
     revealStaggerMs: number;
     restStrokeWidth: number;
     secondaryWaveAmplitude: number;
+    secondaryWaveLobes: number;
     secondaryWaveSpeed: number;
+    tangentialWaveAmplitude: number;
+    tangentialWaveSpeedRatio: number;
   };
   pointer: {
     anchorRadius: number;
     intensity: number;
     threads: readonly {
       amplitude: number;
-      phase: number;
       response: number;
     }[];
   };
@@ -53,13 +58,19 @@ export const orbitalThreadDefaults: OrbitalThreadConfig = {
     entranceMs: 800,
     inhaleExpansion: 0.16,
     inhaleStrokeWidth: 20,
-    primaryWaveAmplitude: 0.34,
-    primaryWaveSpeed: 0.00105,
+    layerPhaseStep: 0.62,
+    pointerWaveBoost: 0.65,
+    primaryWaveAmplitude: 1.35,
+    primaryWaveLobes: 2.25,
+    primaryWaveSpeed: 0.00115,
     revealDurationMs: 900,
     revealStaggerMs: 40,
     restStrokeWidth: 12,
-    secondaryWaveAmplitude: 0.09,
-    secondaryWaveSpeed: 0.00172,
+    secondaryWaveAmplitude: 0.42,
+    secondaryWaveLobes: 3.6,
+    secondaryWaveSpeed: 0.00165,
+    tangentialWaveAmplitude: 0.28,
+    tangentialWaveSpeedRatio: 0.72,
   },
   cta: {
     fillStart: 0.45,
@@ -83,10 +94,10 @@ export const orbitalThreadDefaults: OrbitalThreadConfig = {
     anchorRadius: 61,
     intensity: 1,
     threads: [
-      { amplitude: 5.2, phase: 0.2, response: 8.2 },
-      { amplitude: 4.6, phase: 1.6, response: 6.8 },
-      { amplitude: 4, phase: 3.1, response: 5.6 },
-      { amplitude: 3.5, phase: 4.7, response: 4.7 },
+      { amplitude: 5.2, response: 8.2 },
+      { amplitude: 4.6, response: 6.8 },
+      { amplitude: 4, response: 5.6 },
+      { amplitude: 3.5, response: 4.7 },
     ],
   },
 };

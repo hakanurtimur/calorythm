@@ -70,6 +70,7 @@ function morphThreadPath(
   config: OrbitalThreadConfig,
   elapsed: number,
   entrance: number,
+  layerIndex: number,
 ) {
   const directionLength = Math.hypot(response.directionX, response.directionY) || 1;
   const directionX = response.directionX / directionLength;
@@ -77,8 +78,9 @@ function morphThreadPath(
   const anchorX = RING_CENTER + directionX * config.pointer.anchorRadius;
   const anchorY = RING_CENTER + directionY * config.pointer.anchorRadius;
   const inhale = breathingEnvelope(elapsed, config.hero.breathCycleMs);
+  const layerPhase = layerIndex * config.hero.layerPhaseStep;
 
-  return points.map((point) => {
+  const deformations = points.map((point) => {
     const radialX = point.x - RING_CENTER;
     const radialY = point.y - RING_CENTER;
     const radius = Math.hypot(radialX, radialY) || 1;
@@ -92,21 +94,56 @@ function morphThreadPath(
     const pointerOffset =
       profile.amplitude * config.pointer.intensity * response.strength * localInfluence;
     const perimeterAngle = Math.atan2(radialY, radialX);
-    const idleOffset =
-      (Math.sin(elapsed * config.hero.primaryWaveSpeed + profile.phase + perimeterAngle * 2.4) *
+    const localWaveScale =
+      1 + response.strength * localInfluence * config.hero.pointerWaveBoost;
+    const radialOffset =
+      ((Math.sin(
+        elapsed * config.hero.primaryWaveSpeed -
+          perimeterAngle * config.hero.primaryWaveLobes +
+          layerPhase,
+      ) *
         config.hero.primaryWaveAmplitude +
         Math.sin(
           elapsed * config.hero.secondaryWaveSpeed +
-            profile.phase * 0.45 -
-            perimeterAngle * 3.2,
+            perimeterAngle * config.hero.secondaryWaveLobes -
+            layerPhase * 0.68,
         ) *
-          config.hero.secondaryWaveAmplitude +
+          config.hero.secondaryWaveAmplitude) *
+        localWaveScale +
         inhale * config.hero.inhaleExpansion) *
       entrance;
+    const tangentialOffset =
+      Math.sin(
+        elapsed * config.hero.primaryWaveSpeed * config.hero.tangentialWaveSpeedRatio +
+          perimeterAngle * (config.hero.primaryWaveLobes - 0.45) +
+          layerPhase * 1.14,
+      ) *
+      config.hero.tangentialWaveAmplitude *
+      entrance;
+    const idleX = unitX * radialOffset - unitY * tangentialOffset;
+    const idleY = unitY * radialOffset + unitX * tangentialOffset;
 
     return {
-      x: point.x + (pullX / pullLength) * pointerOffset + unitX * idleOffset,
-      y: point.y + (pullY / pullLength) * pointerOffset + unitY * idleOffset,
+      idleX,
+      idleY,
+      pointerX: (pullX / pullLength) * pointerOffset,
+      pointerY: (pullY / pullLength) * pointerOffset,
+    };
+  });
+  const uniqueCount = Math.max(1, points.length - 1);
+  const centerCorrection = deformations.slice(0, uniqueCount).reduce(
+    (center, deformation) => ({
+      x: center.x + deformation.idleX / uniqueCount,
+      y: center.y + deformation.idleY / uniqueCount,
+    }),
+    { x: 0, y: 0 },
+  );
+
+  return points.map((point, index) => {
+    const deformation = deformations[index] ?? deformations[0]!;
+    return {
+      x: point.x + deformation.idleX - centerCorrection.x + deformation.pointerX,
+      y: point.y + deformation.idleY - centerCorrection.y + deformation.pointerY,
     };
   });
 }
@@ -507,6 +544,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
           config,
           motionElapsed,
           entrance,
+          index,
         );
         const ctaTarget = ctaTargets?.[index];
         const breathingCtaTarget = ctaTarget

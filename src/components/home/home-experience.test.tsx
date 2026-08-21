@@ -375,7 +375,7 @@ describe("HomeExperience", () => {
     expect(getComputedStyle(motionGroup!).transform).toBe("none");
   });
 
-  it("reveals the thick hero material before the automatic halo inhales", () => {
+  it("reveals the thick hero material before a visible wave travels around its fixed center", () => {
     const frames: FrameRequestCallback[] = [];
     vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
       frames.push(callback);
@@ -412,12 +412,33 @@ describe("HomeExperience", () => {
       ),
     );
 
+    act(() => frames.shift()?.(3720));
+    const traveledPoints = parseCubicLoopPath(firstPath.getAttribute("d")!);
+    const traveledDistance = Math.max(
+      ...traveledPoints.map((point, index) =>
+        Math.hypot(point.x - inhaledPoints[index]!.x, point.y - inhaledPoints[index]!.y),
+      ),
+    );
+    const centroid = (points: typeof traveledPoints) =>
+      points.slice(0, -1).reduce(
+        (center, point) => ({
+          x: center.x + point.x / (points.length - 1),
+          y: center.y + point.y / (points.length - 1),
+        }),
+        { x: 0, y: 0 },
+      );
+    const authoredCenter = centroid(authoredPoints);
+    const traveledCenter = centroid(traveledPoints);
+
     expect(entryWidth).toBeCloseTo(0.95, 2);
     expect(openingWidths[0]).toBeGreaterThan(openingWidths[3]!);
     expect(openingWidths[3]).toBeGreaterThan(5);
     expect(restingWidth).toBeCloseTo(12, 1);
     expect(inhaledWidth).toBeGreaterThan(19.5);
-    expect(largestDisplacement).toBeGreaterThan(0.3);
+    expect(largestDisplacement).toBeGreaterThan(1);
+    expect(traveledDistance).toBeGreaterThan(0.75);
+    expect(Math.hypot(traveledCenter.x - authoredCenter.x, traveledCenter.y - authoredCenter.y))
+      .toBeLessThan(0.4);
   });
 
   it("places a restrained color-matched glow behind each hero thread", () => {
