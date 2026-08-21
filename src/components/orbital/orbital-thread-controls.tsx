@@ -11,6 +11,13 @@ import {
 export function OrbitalThreadControls() {
   const values = useControls("CALORYTHM / ORBITAL", {
     "Hero material": folder({
+      heroEntryStrokeWidth: {
+        label: "Entry width",
+        max: 8,
+        min: 0.25,
+        step: 0.05,
+        value: orbitalThreadDefaults.hero.entryStrokeWidth,
+      },
       heroRestStrokeWidth: {
         label: "Rest width",
         max: 30,
@@ -31,6 +38,20 @@ export function OrbitalThreadControls() {
         min: 1200,
         step: 50,
         value: orbitalThreadDefaults.hero.breathCycleMs,
+      },
+      heroRevealDurationMs: {
+        label: "Reveal duration",
+        max: 2400,
+        min: 200,
+        step: 25,
+        value: orbitalThreadDefaults.hero.revealDurationMs,
+      },
+      heroRevealStaggerMs: {
+        label: "Reveal stagger",
+        max: 240,
+        min: 0,
+        step: 5,
+        value: orbitalThreadDefaults.hero.revealStaggerMs,
       },
       heroPrimaryWaveAmplitude: {
         label: "Primary wave",
@@ -122,9 +143,12 @@ export function OrbitalThreadControls() {
     setOrbitalThreadConfig({
       hero: {
         breathCycleMs: values.breathCycleMs,
+        entryStrokeWidth: values.heroEntryStrokeWidth,
         inhaleExpansion: values.heroInhaleExpansion,
         inhaleStrokeWidth: values.heroInhaleStrokeWidth,
         primaryWaveAmplitude: values.heroPrimaryWaveAmplitude,
+        revealDurationMs: values.heroRevealDurationMs,
+        revealStaggerMs: values.heroRevealStaggerMs,
         restStrokeWidth: values.heroRestStrokeWidth,
         secondaryWaveAmplitude: values.heroSecondaryWaveAmplitude,
       },

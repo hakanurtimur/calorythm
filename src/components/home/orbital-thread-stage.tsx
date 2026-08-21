@@ -8,7 +8,6 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import type { CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { readMotionProfile } from "@/components/motion/motion-profile";
 import {
@@ -54,6 +53,10 @@ const baseThreadPoints = orbitalPaths.map((path) => parseCubicLoopPath(path.d));
 
 function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(maximum, Math.max(minimum, value));
+}
+
+function easeOutQuart(progress: number) {
+  return 1 - (1 - progress) ** 4;
 }
 
 function breathingEnvelope(elapsed: number, cycleMs: number) {
@@ -437,8 +440,12 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       const elapsed = timestamp - firstTimestamp;
       const config = configRef.current;
       const entrance = clamp(elapsed / Math.max(1, config.hero.entranceMs), 0, 1);
-      const inhale = breathingEnvelope(elapsed, config.hero.breathCycleMs);
-      const heroThreadWidth =
+      const totalRevealDuration =
+        config.hero.revealDurationMs +
+        config.hero.revealStaggerMs * Math.max(0, paths.length - 1);
+      const motionElapsed = Math.max(0, elapsed - totalRevealDuration);
+      const inhale = breathingEnvelope(motionElapsed, config.hero.breathCycleMs);
+      const revealedHeroThreadWidth =
         config.hero.restStrokeWidth +
         inhale * (config.hero.inhaleStrokeWidth - config.hero.restStrokeWidth);
       const ctaThreadWidth =
@@ -498,13 +505,26 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
           response,
           profile,
           config,
-          elapsed,
+          motionElapsed,
           entrance,
         );
         const ctaTarget = ctaTargets?.[index];
-        const breathingCtaTarget = ctaTarget ? morphCtaHalo(ctaTarget, elapsed, config) : null;
+        const breathingCtaTarget = ctaTarget
+          ? morphCtaHalo(ctaTarget, motionElapsed, config)
+          : null;
         const pathLag = config.cta.pathLags[index] ?? 1;
         const pathProgress = laggedCtaProgress(ctaProgress, pathLag);
+        const revealProgress = easeOutQuart(
+          clamp(
+            (elapsed - index * config.hero.revealStaggerMs) /
+              Math.max(1, config.hero.revealDurationMs),
+            0,
+            1,
+          ),
+        );
+        const heroThreadWidth =
+          config.hero.entryStrokeWidth +
+          (revealedHeroThreadWidth - config.hero.entryStrokeWidth) * revealProgress;
         const threadWidth =
           heroThreadWidth + (ctaThreadWidth - heroThreadWidth) * pathProgress;
         let renderedPoints = heroPoints;
@@ -708,9 +728,6 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
               key={path.id}
               pathLength="1"
               stroke={path.color}
-              style={{
-                "--thread-width": threadConfig.hero.restStrokeWidth,
-              } as CSSProperties}
             />
           ))}
         </g>

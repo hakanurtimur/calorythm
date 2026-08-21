@@ -372,7 +372,7 @@ describe("HomeExperience", () => {
     expect(getComputedStyle(motionGroup!).transform).toBe("none");
   });
 
-  it("thickens the threads as the automatic halo inhales", () => {
+  it("reveals the thick hero material before the automatic halo inhales", () => {
     const frames: FrameRequestCallback[] = [];
     vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
       frames.push(callback);
@@ -386,9 +386,18 @@ describe("HomeExperience", () => {
 
     fireEvent.pointerDown(screen.getByTestId("home-splash"));
     act(() => frames.shift()?.(0));
+    const entryWidth = Number(firstPath.style.getPropertyValue("--thread-width"));
+
+    act(() => frames.shift()?.(450));
+    const openingWidths = Array.from(
+      document.querySelectorAll<SVGPathElement>("[data-orbital-thread-stage] [data-orbit-path]"),
+      (path) => Number(path.style.getPropertyValue("--thread-width")),
+    );
+
+    act(() => frames.shift()?.(1020));
     const restingWidth = Number(firstPath.style.getPropertyValue("--thread-width"));
 
-    act(() => [1050, 2100].forEach((timestamp) => frames.shift()?.(timestamp)));
+    act(() => frames.shift()?.(3120));
     const inhaledWidth = Number(firstPath.style.getPropertyValue("--thread-width"));
     const inhaledPoints = parseCubicLoopPath(firstPath.getAttribute("d")!);
     const largestDisplacement = Math.max(
@@ -400,7 +409,10 @@ describe("HomeExperience", () => {
       ),
     );
 
-    expect(restingWidth).toBeCloseTo(12, 2);
+    expect(entryWidth).toBeCloseTo(0.95, 2);
+    expect(openingWidths[0]).toBeGreaterThan(openingWidths[3]!);
+    expect(openingWidths[3]).toBeGreaterThan(5);
+    expect(restingWidth).toBeCloseTo(12, 1);
     expect(inhaledWidth).toBeGreaterThan(19.5);
     expect(largestDisplacement).toBeGreaterThan(0.3);
   });

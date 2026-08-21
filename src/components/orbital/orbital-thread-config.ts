@@ -19,11 +19,14 @@ export type OrbitalThreadConfig = {
   };
   hero: {
     breathCycleMs: number;
+    entryStrokeWidth: number;
     entranceMs: number;
     inhaleExpansion: number;
     inhaleStrokeWidth: number;
     primaryWaveAmplitude: number;
     primaryWaveSpeed: number;
+    revealDurationMs: number;
+    revealStaggerMs: number;
     restStrokeWidth: number;
     secondaryWaveAmplitude: number;
     secondaryWaveSpeed: number;
@@ -46,11 +49,14 @@ export type OrbitalThreadConfigPatch = {
 export const orbitalThreadDefaults: OrbitalThreadConfig = {
   hero: {
     breathCycleMs: 4200,
+    entryStrokeWidth: 0.95,
     entranceMs: 800,
     inhaleExpansion: 0.16,
     inhaleStrokeWidth: 20,
     primaryWaveAmplitude: 0.34,
     primaryWaveSpeed: 0.00105,
+    revealDurationMs: 900,
+    revealStaggerMs: 40,
     restStrokeWidth: 12,
     secondaryWaveAmplitude: 0.09,
     secondaryWaveSpeed: 0.00172,
