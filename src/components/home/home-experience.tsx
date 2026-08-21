@@ -41,13 +41,13 @@ export function HomeExperience() {
               ))}
             </nav>
             <a className={styles.headerCta} href="#journal">
-              Günlük ritim <span aria-hidden="true">↘</span>
+              Konuları keşfet <span aria-hidden="true">↘</span>
             </a>
           </header>
 
           <div className={styles.heroGrid}>
             <div className={styles.heroCopy} data-motion="hero-copy">
-              <p className={styles.heroPrelude}>Besin. Beden. Bağlam.</p>
+              <p className={styles.heroPrelude}>{orbitalHomeContent.hero.prelude}</p>
               <h1 aria-label={orbitalHomeContent.hero.title} id="home-hero-title">
                 <span>Beslenmenin</span>
                 <span>bir ritmi var.</span>
@@ -56,6 +56,7 @@ export function HomeExperience() {
               <OrbitalLink href="#section-01" variant="orbit">
                 {orbitalHomeContent.hero.cta}
               </OrbitalLink>
+              <p className={styles.heroAttribution}>{orbitalHomeContent.hero.attribution}</p>
             </div>
 
             <div
@@ -172,8 +173,8 @@ export function HomeExperience() {
               <SceneTitle section={thought} />
               <p className={styles.sceneBody}>{thought.body}</p>
               <p className={styles.thoughtEmphasis} data-motion="thought-resolution">
-                <span>Amaç yalnızca bilgi vermek değil.</span>
-                <strong>Anlaşılmasını sağlamak.</strong>
+                <span>{thought.emphasis[0]}</span>
+                <strong>{thought.emphasis[1]}</strong>
               </p>
             </div>
           </div>
@@ -187,15 +188,15 @@ export function HomeExperience() {
         id="section-05"
       >
         <div className={`${styles.sceneInner} ${styles.flagshipInner}`}>
-          <p className={styles.flagshipLabel}>İlk hikâye <span>001</span></p>
+          <p className={styles.flagshipLabel}>İlk dosya <span>001</span></p>
           <div className={`${styles.sceneCopy} ${styles.flagshipCopy}`}>
             <SceneTitle section={flagship} />
             <p className={styles.sceneBody}>{flagship.body}</p>
             <p className={styles.flagshipEmphasis}>{flagship.emphasis}</p>
-            <OrbitalLink unavailable>Hikâyeyi keşfet</OrbitalLink>
+            <OrbitalLink unavailable>İlk dosya yakında</OrbitalLink>
           </div>
           <p aria-hidden="true" className={styles.flagshipNotation}>
-            YAPI <i /> ONARIM <i /> ENZİM <i /> SİNYAL
+            SORU <i /> MEKANİZMA <i /> KANIT <i /> BAĞLAM
           </p>
         </div>
         </section>
@@ -211,7 +212,7 @@ export function HomeExperience() {
             <p aria-hidden="true" className={styles.sceneNumber}>06</p>
             <div className={`${styles.sceneCopy} ${styles.journalCopy}`}>
               <SceneTitle section={journal} />
-              <p>Bir sonraki merakını seç.</p>
+              <p>Bir sorudan başla.</p>
             </div>
           </div>
           <ol
@@ -249,13 +250,13 @@ export function HomeExperience() {
             <SceneTitle section={finale} />
             <p className={styles.sceneBody}>{finale.body}</p>
             <p className={styles.finaleEmphasis}>{finale.emphasis}</p>
-            <OrbitalLink href="#journal">Journal’ı keşfet</OrbitalLink>
+            <OrbitalLink href="#journal">Konuları keşfet</OrbitalLink>
           </div>
           <footer className={styles.finaleFooter}>
             <a aria-label="CALORYTHM ana sayfa" href="#top">
               <BrandWordmark className={styles.finaleWordmark} />
             </a>
-            <span>Beslenme bilimi için bağımsız yayın</span>
+            <span>Bağımsız beslenme yayını</span>
             <span>İstanbul · 2026</span>
           </footer>
         </div>

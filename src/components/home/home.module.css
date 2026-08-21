@@ -663,7 +663,15 @@
 .heroBody {
   color: color-mix(in srgb, var(--ink) 74%, transparent);
   margin: clamp(1.8rem, 2.8vw, 2.75rem) auto 1.5rem;
-  max-width: 40ch;
+  max-width: 48ch;
+}
+
+.heroAttribution {
+  color: color-mix(in srgb, var(--ink) 56%, transparent);
+  font-size: 0.68rem;
+  letter-spacing: 0.01em;
+  margin: 1.05rem auto 0;
+  max-width: 44ch;
 }
 
 .heroMarkFrame {

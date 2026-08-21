@@ -31,21 +31,24 @@ describe("HomeExperience", () => {
 
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
-      "Bilgiyi okumak kolaydır. Anlamak zordur.",
-      "Her konu, kendi hikâyesini anlatır.",
-      "Karmaşık olanı, anlaşılır hâle getiriyoruz.",
-      "Bir makale okumuyorsun. Bir düşüncenin içine giriyorsun.",
-      "Protein Sadece Kas İçin Değildir",
-      "Keşfetmeye devam et.",
-      "Merak iyi bir başlangıçtır.",
+      "Beslenme bilgisi çok. Bağlamı az.",
+      "Bir besin, tek bir sonuç değildir.",
+      "Ne yapacağını ezberleme. Nedenini anla.",
+      "Konuyu seç. Derinine in.",
+      "İlk dosya hazırlanıyor.",
+      "Merak ettiğin yerden başla.",
+      "Beslenme bilimi, anlaşıldığında işe yarar.",
     ]);
+    expect(
+      screen.getByText("Bir diyetisyen ve yazılımcı tarafından hazırlanır."),
+    ).toBeInTheDocument();
     expect(container.querySelectorAll("[data-scene]")).toHaveLength(8);
   });
 
   it("keeps the complete reading experience available without a graphics runtime", () => {
     const { container } = render(<HomeExperience />);
 
-    expect(screen.getByText("Beslenme bilimini ezberlerle değil, anlayarak keşfet.")).toBeInTheDocument();
+    expect(screen.getByText("Yeni dosyalar, yeni sorular ve daha sağlam bir kavrayış için.")).toBeInTheDocument();
     expect(container.querySelector("[data-motion-profile]")).toBeInTheDocument();
     expect(container.querySelector("canvas")).not.toBeInTheDocument();
     expect(container.querySelector("video")).not.toBeInTheDocument();
@@ -60,7 +63,7 @@ describe("HomeExperience", () => {
     expect(screen.getByRole("list", { name: "Journal konuları" }).children).toHaveLength(8);
     expect(container.querySelectorAll('[data-motion="journal-topic"]')).toHaveLength(8);
     expect(container.querySelector("[data-orbit-mark]")).not.toBeInTheDocument();
-    expect(screen.getByText("Hikâyeyi keşfet").closest("[aria-disabled]")).toHaveAttribute(
+    expect(screen.getByText("İlk dosya yakında").closest("[aria-disabled]")).toHaveAttribute(
       "aria-disabled",
       "true",
     );

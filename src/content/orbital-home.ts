@@ -19,7 +19,7 @@ export type OrbitalSection = {
   id: OrbitalSectionId;
   title: readonly [string, string];
   body?: string;
-  emphasis?: string;
+  emphasis?: string | readonly [string, string];
 };
 
 export const orbitalHomeContent = {
@@ -35,46 +35,48 @@ export const orbitalHomeContent = {
   ],
   hero: {
     title: "Beslenmenin bir ritmi var.",
-    body: "Beslenme bilimini; görsel hikâyeler ve deneyimlenen anlatılarla yeniden keşfet.",
-    cta: "Keşfet",
+    prelude: "Bağımsız beslenme yayını",
+    body: "Ne yiyeceğini söyleyen bir site değil. Besinlerin bedende nasıl çalıştığını gösteren bağımsız bir yayın.",
+    cta: "Konuları keşfet",
+    attribution: "Bir diyetisyen ve yazılımcı tarafından hazırlanır.",
   },
   sections: [
     {
       id: "01",
-      title: ["Bilgiyi okumak kolaydır.", "Anlamak zordur."],
-      body: "CALORYTHM bilgiyi içerik olarak bırakmaz. Her konu, bağlantıları görünür kılan ve adım adım açılan bir hikâyeye dönüşür.",
+      title: ["Beslenme bilgisi çok.", "Bağlamı az."],
+      body: "Her gün yeni bir beslenme iddiası dolaşıma giriyor. CALORYTHM iddiaları değil; mekanizmaları, kanıtı ve insan bedenini takip eder.",
     },
     {
       id: "02",
-      title: ["Her konu,", "kendi hikâyesini anlatır."],
-      body: "Her hikâye tek bir fikrin peşinden gider; onu parçalarına ayırır, bağlamına yerleştirir ve yeniden kurar.",
+      title: ["Bir besin,", "tek bir sonuç değildir."],
+      body: "Etkisi; miktara, zamana, harekete, uykuya ve bedenin o anki koşullarına göre değişir.",
     },
     {
       id: "03",
-      title: ["Karmaşık olanı,", "anlaşılır hâle getiriyoruz."],
-      body: "Beslenme biliminin en çok yanlış anlaşılan konularını; sade, görsel ve bilimsel bir anlatımla yeniden ele alıyoruz.",
+      title: ["Ne yapacağını ezberleme.", "Nedenini anla."],
+      body: "Her konu tek bir sorudan başlar; mekanizmasına iner, kanıtı tartar ve günlük yaşamla bağlantısını kurar.",
     },
     {
       id: "04",
-      title: ["Bir makale okumuyorsun.", "Bir düşüncenin içine giriyorsun."],
-      body: "Her hikâye kendi anlatım dilini kurar. Büyük fikirler açılır, veriler bağlam kazanır, parçalar birbirine bağlanır.",
-      emphasis: "Amaç yalnızca bilgi vermek değil. Anlaşılmasını sağlamak.",
+      title: ["Konuyu seç.", "Derinine in."],
+      body: "Protein, karbonhidrat, yağ, metabolizma, lif, hidrasyon ve mikro besinler. Her dosya tek bir soruyu yüzeyde bırakmadan ele alır.",
+      emphasis: ["Mekanizmayı gör.", "Kanıtı tart. Bağlamı koru."],
     },
     {
       id: "05",
-      title: ["Protein Sadece", "Kas İçin Değildir"],
-      body: "Protein denince aklına ilk kas geliyor olabilir. Oysa beden, proteini bundan çok daha fazlası için kullanır.",
-      emphasis: "Bu hikâye, proteine yeniden bakmanı sağlayacak.",
+      title: ["İlk dosya", "hazırlanıyor."],
+      body: "İlk CALORYTHM dosyası, beslenme hakkında sık sorulan tek bir soruyu mekanizmasından gündelik karşılığına kadar takip edecek.",
+      emphasis: "Yalnızca cevabı değil, cevaba nasıl ulaşıldığını da göreceksin.",
     },
     {
       id: "06",
-      title: ["Keşfetmeye", "devam et."],
+      title: ["Merak ettiğin", "yerden başla."],
     },
     {
       id: "07",
-      title: ["Merak iyi bir", "başlangıçtır."],
-      body: "Her hafta yeni hikâyeler. Yeni araştırmalar. Yeni bakış açıları.",
-      emphasis: "Beslenme bilimini ezberlerle değil, anlayarak keşfet.",
+      title: ["Beslenme bilimi,", "anlaşıldığında işe yarar."],
+      body: "Yeni dosyalar, yeni sorular ve daha sağlam bir kavrayış için.",
+      emphasis: "Ezberden önce mekanizmayı, iddiadan önce kanıtı takip et.",
     },
   ] as const satisfies readonly [
     OrbitalSection,
@@ -85,45 +87,45 @@ export const orbitalHomeContent = {
     OrbitalSection,
     OrbitalSection,
   ],
-  knowledgeFragments: ["Oku", "Bağla", "Anla"],
+  knowledgeFragments: ["İddia", "Kanıt", "Bağlam"],
   topicAtlas: [
-    { title: "Metabolizma", note: "Enerjinin yönetimi" },
-    { title: "Enerji dengesi", note: "Girdi ve çıktının ötesi" },
-    { title: "Lif", note: "Sindirimin ötesindeki görevler" },
-    { title: "Hidrasyon", note: "Suyun beden içindeki işi" },
-    { title: "Mikro besinler", note: "Küçük miktarlar, büyük etkiler" },
+    { title: "Metabolizma", note: "Enerji nasıl dönüşür ve kullanılır?" },
+    { title: "Enerji dengesi", note: "Alım, harcama ve uyum" },
+    { title: "Lif", note: "Bağırsak, tokluk ve mikrobiyota" },
+    { title: "Hidrasyon", note: "Sıvı dengesi, dolaşım ve ısı" },
+    { title: "Mikro besinler", note: "Az miktarda, kritik görevler" },
   ],
   macroRoutes: [
     {
       id: "protein",
       title: "Protein",
-      statement: "Protein yalnızca protein değildir.",
-      detail: "Yapı, onarım ve çok daha fazlası.",
+      statement: "Yapı kurar, onarır ve taşır.",
+      detail: "Kasın ötesinde: enzimler, antikorlar ve dokular.",
       tone: "coral",
     },
     {
       id: "karbonhidrat",
       title: "Karbonhidrat",
-      statement: "Karbonhidrat yalnızca enerji değildir.",
-      detail: "Hareketin ve dönüşümün yakıtı.",
+      statement: "Enerjiyi erişilebilir kılar.",
+      detail: "Glikoz, glikojen ve lif; aynı başlığın farklı işleri.",
       tone: "orange",
     },
     {
       id: "yag",
       title: "Yağ",
-      statement: "Yağ yalnızca depolanan kalori değildir.",
-      detail: "Zar, sinyal ve enerji rezervi.",
+      statement: "Depolar, zar kurar ve emilimi destekler.",
+      detail: "Hücre zarları, sinyalleşme ve yağda çözünen vitaminler.",
       tone: "olive",
     },
   ] satisfies readonly MacroRoute[],
   journalTopics: [
-    { id: "protein", title: "Protein", description: "Yapı, onarım ve çok daha fazlası.", tone: "coral" },
-    { id: "karbonhidrat", title: "Karbonhidrat", description: "Enerjinin en yanlış anlaşılan yüzü.", tone: "orange" },
-    { id: "yaglar", title: "Yağlar", description: "Depolamaktan çok daha fazlası.", tone: "olive" },
-    { id: "metabolizma", title: "Metabolizma", description: "Beden enerjiyi nasıl yönetiyor?", tone: "ochre" },
-    { id: "enerji-dengesi", title: "Enerji Dengesi", description: "Bir sayıdan daha fazlası.", tone: "orange" },
-    { id: "lif", title: "Lif", description: "Sindirimin ötesindeki görevleri.", tone: "olive" },
-    { id: "hidrasyon", title: "Hidrasyon", description: "Su gerçekten ne yapar?", tone: "coral" },
-    { id: "mikro-besinler", title: "Mikro Besinler", description: "Küçük miktarlar, büyük etkiler.", tone: "ochre" },
+    { id: "protein", title: "Protein", description: "Kasın ötesinde: yapı, enzim ve taşıma.", tone: "coral" },
+    { id: "karbonhidrat", title: "Karbonhidrat", description: "Enerji, depolama ve lifin farklı rolleri.", tone: "orange" },
+    { id: "yaglar", title: "Yağlar", description: "Hücre zarından enerji rezervine.", tone: "olive" },
+    { id: "metabolizma", title: "Metabolizma", description: "Beden enerjiyi nasıl dönüştürüyor?", tone: "ochre" },
+    { id: "enerji-dengesi", title: "Enerji Dengesi", description: "Alım, harcama ve uyum neden sabit değil?", tone: "orange" },
+    { id: "lif", title: "Lif", description: "Bağırsak, tokluk ve mikrobiyota.", tone: "olive" },
+    { id: "hidrasyon", title: "Hidrasyon", description: "Sıvı dengesi beden boyunca nasıl korunur?", tone: "coral" },
+    { id: "mikro-besinler", title: "Mikro Besinler", description: "Az miktarlar neden kritik işler yapar?", tone: "ochre" },
   ] satisfies readonly JournalTopic[],
 } as const;

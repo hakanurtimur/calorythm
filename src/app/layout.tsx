@@ -6,7 +6,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "CALORYTHM",
-  description: "Beslenmenin bir ritmi var.",
+  description:
+    "Besinlerin bedende nasıl çalıştığını gösteren bağımsız beslenme yayını.",
 };
 
 export const viewport: Viewport = {

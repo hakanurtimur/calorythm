@@ -29,6 +29,26 @@ describe("orbitalHomeContent", () => {
     const publicCopy = JSON.stringify(orbitalHomeContent).toLocaleLowerCase("tr");
 
     expect(publicCopy).not.toMatch(/interaktif makale|scroll|animasyon/);
-    expect(publicCopy).toContain("anlaşılmasını sağlamak");
+    expect(publicCopy).toContain("besinlerin bedende nasıl çalıştığını");
+  });
+
+  it("positions the brand as an independent publication with a quiet founder signature", () => {
+    expect(orbitalHomeContent.hero.body).toBe(
+      "Ne yiyeceğini söyleyen bir site değil. Besinlerin bedende nasıl çalıştığını gösteren bağımsız bir yayın.",
+    );
+    expect(orbitalHomeContent.hero.attribution).toBe(
+      "Bir diyetisyen ve yazılımcı tarafından hazırlanır.",
+    );
+    expect(orbitalHomeContent.sections[0].title).toEqual([
+      "Beslenme bilgisi çok.",
+      "Bağlamı az.",
+    ]);
+  });
+
+  it("keeps the first editorial file open until its subject is chosen", () => {
+    expect(orbitalHomeContent.sections[4].title).toEqual(["İlk dosya", "hazırlanıyor."]);
+    expect(JSON.stringify(orbitalHomeContent.sections[4])).not.toContain(
+      "Protein Sadece Kas İçin Değildir",
+    );
   });
 });
