@@ -85,20 +85,30 @@ export function HomeExperience() {
         aria-labelledby="section-01-title"
         className={`${styles.scene} ${styles.knowledgeScene}`}
         data-scene="01"
+        data-scene-role="editorial-noise"
         id="section-01"
       >
-        <div className={`${styles.sceneInner} ${styles.knowledgeInner}`}>
-          <p aria-hidden="true" className={styles.sceneNumber}>01</p>
-          <div aria-hidden="true" className={styles.knowledgeFragments}>
-            {orbitalHomeContent.knowledgeFragments.map((fragment, index) => (
-              <span data-motion="knowledge-fragment" key={fragment}>
-                <small>0{index + 1}</small>{fragment}
-              </span>
-            ))}
-          </div>
-          <div className={`${styles.sceneCopy} ${styles.knowledgeCopy}`}>
-            <SceneTitle section={knowledge} />
-            <p className={styles.sceneBody}>{knowledge.body}</p>
+        <div className={styles.knowledgeViewport} data-pin="01">
+          <div className={`${styles.sceneInner} ${styles.knowledgeInner}`}>
+            <p aria-hidden="true" className={styles.sceneNumber}>01</p>
+            <p aria-hidden="true" className={styles.knowledgeSignalIndex}>
+              <span>CALORYTHM / SIGNAL 001</span>
+              <span>GÜRÜLTÜ → BAĞLAM</span>
+            </p>
+            <div aria-hidden="true" className={styles.knowledgeFragments}>
+              {orbitalHomeContent.knowledgeFragments.map((fragment, index) => (
+                <span data-motion="knowledge-fragment" key={fragment}>
+                  <small>0{index + 1}</small>{fragment}
+                </span>
+              ))}
+            </div>
+            <div
+              className={`${styles.sceneCopy} ${styles.knowledgeCopy}`}
+              data-motion="knowledge-copy"
+            >
+              <SceneTitle section={knowledge} />
+              <p className={styles.sceneBody}>{knowledge.body}</p>
+            </div>
           </div>
         </div>
         </section>

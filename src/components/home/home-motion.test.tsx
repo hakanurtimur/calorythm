@@ -145,13 +145,13 @@ describe("HomeMotion", () => {
     }));
     expect(timelineTriggers).toEqual([
       { trigger: '[data-scene="hero"]', pin: '[data-pin="hero"]' },
-      { trigger: '[data-scene="01"]', pin: undefined },
+      { trigger: '[data-scene="01"]', pin: '[data-pin="01"]' },
       { trigger: '[data-scene="02"]', pin: '[data-pin="02"]' },
       { trigger: '[data-scene="03"]', pin: undefined },
       { trigger: '[data-scene="04"]', pin: '[data-pin="04"]' },
       { trigger: '[data-scene="05"]', pin: undefined },
     ]);
-    expect(fake.ScrollTrigger.create).toHaveBeenCalledTimes(8);
+    expect(fake.ScrollTrigger.create).toHaveBeenCalledTimes(9);
 
     unmount();
     expect(fake.media.revert).toHaveBeenCalledOnce();

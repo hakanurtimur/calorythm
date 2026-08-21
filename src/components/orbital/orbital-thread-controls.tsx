@@ -126,6 +126,78 @@ export function OrbitalThreadControls() {
         value: orbitalThreadDefaults.hero.pointerWaveBoost,
       },
     }),
+    "Scene 01 signal": folder({
+      scene01RadiusX: {
+        label: "Horizontal reach",
+        max: 86,
+        min: 44,
+        step: 1,
+        value: orbitalThreadDefaults.scene01.radiusX,
+      },
+      scene01RadiusY: {
+        label: "Band height",
+        max: 24,
+        min: 3,
+        step: 0.25,
+        value: orbitalThreadDefaults.scene01.radiusY,
+      },
+      scene01LayerSpacing: {
+        label: "Layer spacing",
+        max: 8,
+        min: 0,
+        step: 0.1,
+        value: orbitalThreadDefaults.scene01.layerSpacing,
+      },
+      scene01NoiseAmplitude: {
+        label: "Noise depth",
+        max: 16,
+        min: 0,
+        step: 0.1,
+        value: orbitalThreadDefaults.scene01.noiseAmplitude,
+      },
+      scene01SettledWaveAmplitude: {
+        label: "Settled wave",
+        max: 6,
+        min: 0,
+        step: 0.05,
+        value: orbitalThreadDefaults.scene01.settledWaveAmplitude,
+      },
+      scene01WaveLobes: {
+        label: "Wave span",
+        max: 8,
+        min: 1,
+        step: 0.05,
+        value: orbitalThreadDefaults.scene01.waveLobes,
+      },
+      scene01WaveSpeed: {
+        label: "Wave speed",
+        max: 3,
+        min: 0.1,
+        step: 0.05,
+        value: orbitalThreadDefaults.scene01.waveSpeed * 1000,
+      },
+      scene01RestStrokeWidth: {
+        label: "Rest width",
+        max: 24,
+        min: 1,
+        step: 0.1,
+        value: orbitalThreadDefaults.scene01.restStrokeWidth,
+      },
+      scene01InhaleStrokeWidth: {
+        label: "Inhale width",
+        max: 30,
+        min: 1,
+        step: 0.1,
+        value: orbitalThreadDefaults.scene01.inhaleStrokeWidth,
+      },
+      scene01PointerWaveBoost: {
+        label: "Pointer boost",
+        max: 4,
+        min: 0,
+        step: 0.05,
+        value: orbitalThreadDefaults.scene01.pointerWaveBoost,
+      },
+    }),
     Glow: folder({
       glowBlur: {
         label: "Blur",
@@ -223,6 +295,18 @@ export function OrbitalThreadControls() {
       pointer: {
         anchorRadius: values.pointerAnchorRadius,
         intensity: values.pointerIntensity,
+      },
+      scene01: {
+        inhaleStrokeWidth: values.scene01InhaleStrokeWidth,
+        layerSpacing: values.scene01LayerSpacing,
+        noiseAmplitude: values.scene01NoiseAmplitude,
+        pointerWaveBoost: values.scene01PointerWaveBoost,
+        radiusX: values.scene01RadiusX,
+        radiusY: values.scene01RadiusY,
+        restStrokeWidth: values.scene01RestStrokeWidth,
+        settledWaveAmplitude: values.scene01SettledWaveAmplitude,
+        waveLobes: values.scene01WaveLobes,
+        waveSpeed: values.scene01WaveSpeed / 1000,
       },
     });
   }, [values]);

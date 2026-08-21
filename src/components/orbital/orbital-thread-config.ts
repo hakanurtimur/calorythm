@@ -37,6 +37,18 @@ export type OrbitalThreadConfig = {
     tangentialWaveAmplitude: number;
     tangentialWaveSpeedRatio: number;
   };
+  scene01: {
+    inhaleStrokeWidth: number;
+    layerSpacing: number;
+    noiseAmplitude: number;
+    pointerWaveBoost: number;
+    radiusX: number;
+    radiusY: number;
+    restStrokeWidth: number;
+    settledWaveAmplitude: number;
+    waveLobes: number;
+    waveSpeed: number;
+  };
   pointer: {
     anchorRadius: number;
     intensity: number;
@@ -85,6 +97,18 @@ export const orbitalThreadDefaults: OrbitalThreadConfig = {
     secondaryWaveAmplitude: 0.08,
     secondaryWaveSpeedRatio: 0.72,
   },
+  scene01: {
+    inhaleStrokeWidth: 12,
+    layerSpacing: 2.4,
+    noiseAmplitude: 7,
+    pointerWaveBoost: 1.35,
+    radiusX: 70,
+    radiusY: 9,
+    restStrokeWidth: 6.5,
+    settledWaveAmplitude: 1.2,
+    waveLobes: 3.2,
+    waveSpeed: 0.001,
+  },
   glow: {
     blur: 0.8,
     opacity: 0.46,
@@ -120,6 +144,7 @@ export function setOrbitalThreadConfig(patch: OrbitalThreadConfigPatch) {
     cta: { ...currentConfig.cta, ...patch.cta },
     glow: { ...currentConfig.glow, ...patch.glow },
     pointer: { ...currentConfig.pointer, ...patch.pointer },
+    scene01: { ...currentConfig.scene01, ...patch.scene01 },
   };
   listeners.forEach((listener) => listener());
 }

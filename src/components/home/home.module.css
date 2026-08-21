@@ -164,6 +164,14 @@
   stroke-width: var(--thread-width, 0.95);
 }
 
+.orbitalThreadStage[data-orbital-layout="scene-01"] {
+  z-index: 2;
+}
+
+.orbitalThreadStage[data-orbital-layout="scene-01"] .orbitalThreadPath {
+  mix-blend-mode: screen;
+}
+
 .splashCal,
 .splashRythm {
   animation-duration: var(--splash-duration);
@@ -849,77 +857,114 @@
 }
 
 .knowledgeScene {
-  min-height: 110svh;
+  background: var(--ink);
+  color: var(--ivory);
+  min-height: 100svh;
+}
+
+.knowledgeViewport {
+  background:
+    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--ivory) 4%, transparent), transparent 48%),
+    var(--ink);
+  min-height: 100svh;
+  overflow: hidden;
+  position: relative;
 }
 
 .knowledgeInner {
+  align-items: center;
   overflow: hidden;
   position: relative;
 }
 
 .knowledgeInner::after {
-  background: var(--ink);
+  background: color-mix(in srgb, var(--ivory) 22%, transparent);
   content: "";
   height: 1px;
   left: var(--home-gutter);
-  opacity: 0.18;
   position: absolute;
   right: var(--home-gutter);
   top: 50%;
 }
 
-.knowledgeMarkFrame {
-  grid-column: 8 / -1;
-  height: min(64svh, 42rem);
-  opacity: 0.2;
-  position: relative;
-  transform: translate(12%, -12%);
-}
-
-.knowledgeMark {
-  height: 100%;
+.knowledgeSignalIndex {
+  display: flex;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(0.52rem, 0.54vw, 0.64rem);
+  justify-content: space-between;
+  left: var(--home-gutter);
+  letter-spacing: 0.12em;
+  margin: 0;
+  opacity: 0.5;
+  position: absolute;
+  top: clamp(2rem, 4.5vw, 4.75rem);
+  right: var(--home-gutter);
+  z-index: 3;
 }
 
 .knowledgeFragments {
-  align-self: end;
-  display: flex;
-  gap: clamp(1.4rem, 3vw, 3.8rem);
-  grid-column: 1 / span 5;
-  padding-bottom: clamp(2rem, 4vw, 4rem);
-  position: relative;
-  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 4;
 }
 
 .knowledgeFragments span {
   align-items: baseline;
   display: flex;
-  font-family: "Bodoni Moda Variable", serif;
-  font-size: clamp(1.8rem, 3.4vw, 3.8rem);
-  gap: 0.55rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(0.58rem, 0.7vw, 0.72rem);
+  gap: 0.7rem;
+  letter-spacing: 0.1em;
+  position: absolute;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.knowledgeFragments span:nth-child(1) {
+  right: 8%;
+  top: 22%;
 }
 
 .knowledgeFragments span:nth-child(2) {
-  transform: translateY(-5.5rem);
+  bottom: 20%;
+  left: 7%;
 }
 
 .knowledgeFragments span:nth-child(3) {
-  transform: translateY(-1.5rem);
+  left: 10%;
+  top: 27%;
 }
 
 .knowledgeFragments small {
-  font-family: "Manrope Variable", sans-serif;
-  font-size: 0.58rem;
+  color: var(--orange);
+  font-family: inherit;
+  font-size: 0.52rem;
 }
 
 .knowledgeCopy {
-  grid-column: 4 / span 8;
+  grid-column: 2 / -2;
   grid-row: 1;
+  justify-self: center;
   position: relative;
+  text-align: center;
+  width: 100%;
   z-index: 3;
 }
 
+.knowledgeCopy h2 {
+  font-size: clamp(4rem, 7.4vw, 8rem);
+  line-height: 0.86;
+  margin-inline: auto;
+  max-width: 12ch;
+  text-shadow: 0 0 2.5rem color-mix(in srgb, var(--ink) 76%, transparent);
+}
+
 .knowledgeCopy .sceneBody {
-  margin-right: 7%;
+  color: color-mix(in srgb, var(--ivory) 74%, transparent);
+  margin: clamp(3rem, 5vw, 5.5rem) 4% 0 auto;
+  max-width: 43ch;
+  text-align: left;
 }
 
 .macroScene {
@@ -1509,16 +1554,55 @@
   }
 
   .knowledgeFragments {
-    display: grid;
-    gap: 0.8rem;
-    margin-top: 5rem;
-    padding: 0;
+    display: block;
+    inset: 0;
+    margin: 0;
   }
 
   .knowledgeFragments span,
   .knowledgeFragments span:nth-child(2),
   .knowledgeFragments span:nth-child(3) {
     transform: none;
+  }
+
+  .knowledgeFragments span:nth-child(1) {
+    right: 1.25rem;
+    top: 19%;
+  }
+
+  .knowledgeFragments span:nth-child(2) {
+    bottom: 14%;
+    left: 1.25rem;
+  }
+
+  .knowledgeFragments span:nth-child(3) {
+    left: 1.25rem;
+    top: 30%;
+  }
+
+  .knowledgeSignalIndex {
+    left: 1.25rem;
+    right: 1.25rem;
+  }
+
+  .knowledgeSignalIndex span:last-child {
+    display: none;
+  }
+
+  .knowledgeInner {
+    align-items: center;
+    min-height: 100svh;
+    padding-block: 6rem;
+  }
+
+  .knowledgeCopy h2 {
+    font-size: clamp(3.4rem, 14vw, 5.2rem);
+    max-width: 10ch;
+  }
+
+  .knowledgeCopy .sceneBody {
+    margin: 3.5rem 0 0;
+    max-width: 34ch;
   }
 
   .macroViewport,

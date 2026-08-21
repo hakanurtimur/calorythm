@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { readMotionProfile } from "@/components/motion/motion-profile";
+import { setOrbitalBaseState } from "@/components/orbital/orbital-thread-store";
 import styles from "./home.module.css";
 
 export type HomeMotionRuntime = {
@@ -132,29 +133,89 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
               0.75,
             );
 
+            const scene01HandoffShare = 0.22;
+            if (canPin) {
+              ScrollTrigger.create({
+                end: "top top",
+                id: "scene-01-handoff",
+                onLeaveBack: () => setOrbitalBaseState({ kind: "hero" }),
+                onUpdate: ({ progress }) =>
+                  setOrbitalBaseState({
+                    id: "01",
+                    kind: "scene",
+                    progress: progress * scene01HandoffShare,
+                  }),
+                start: "top bottom",
+                trigger: '[data-scene="01"]',
+              });
+            }
+
             const knowledge = gsap.timeline({
               defaults: { ease: "none" },
               scrollTrigger: {
-                end: "bottom 30%",
-                pin: undefined,
+                end: canPin ? "+=200%" : "bottom 30%",
+                onLeave: () => setOrbitalBaseState({ kind: "hero" }),
+                onLeaveBack: () => setOrbitalBaseState({ kind: "hero" }),
+                onUpdate: ({ progress }) => {
+                  if (!canPin) return;
+                  setOrbitalBaseState({
+                    id: "01",
+                    kind: "scene",
+                    progress:
+                      scene01HandoffShare + progress * (1 - scene01HandoffShare),
+                  });
+                },
+                pin: canPin ? '[data-pin="01"]' : undefined,
                 scrub: 0.55,
-                start: "top 82%",
+                start: canPin ? "top top" : "top 82%",
                 trigger: '[data-scene="01"]',
+                ...(canPin ? { anticipatePin: 1 } : {}),
               },
             });
-            knowledge
-              .fromTo(
-                '[data-motion="knowledge-fragment"]',
-                { autoAlpha: 0.35, y: 24 },
-                { autoAlpha: 1, duration: 0.72, stagger: 0.1, y: 0 },
-                0,
-              )
-              .fromTo(
-                '[data-scene="01"] h2',
-                { y: 20 },
-                { duration: 0.65, y: 0 },
-                0.22,
+            const knowledgeSignalIndex = scope.querySelector(
+              `[data-scene="01"] .${styles.knowledgeSignalIndex}`,
+            );
+            const knowledgeFragments = Array.from(
+              scope.querySelectorAll('[data-motion="knowledge-fragment"]'),
+            );
+            const knowledgeTitleLines = Array.from(
+              scope.querySelectorAll('[data-scene="01"] h2 span'),
+            );
+            const knowledgeBody = scope.querySelector(
+              `[data-motion="knowledge-copy"] .${styles.sceneBody}`,
+            );
+            if (knowledgeSignalIndex) {
+              knowledge.fromTo(
+                knowledgeSignalIndex,
+                { autoAlpha: 0 },
+                { autoAlpha: 0.5, duration: 0.2 },
+                0.05,
               );
+            }
+            if (knowledgeFragments.length > 0) {
+              knowledge.fromTo(
+                knowledgeFragments,
+                { autoAlpha: 0, x: 18, y: 12 },
+                { autoAlpha: 0.72, duration: 0.5, stagger: 0.08, x: 0, y: 0 },
+                0.16,
+              );
+            }
+            if (knowledgeTitleLines.length > 0) {
+              knowledge.fromTo(
+                knowledgeTitleLines,
+                { autoAlpha: 0, yPercent: 42 },
+                { autoAlpha: 1, duration: 0.46, stagger: 0.08, yPercent: 0 },
+                0.28,
+              );
+            }
+            if (knowledgeBody) {
+              knowledge.fromTo(
+                knowledgeBody,
+                { autoAlpha: 0, y: 28 },
+                { autoAlpha: 1, duration: 0.34, y: 0 },
+                0.54,
+              );
+            }
 
             const macros = gsap.timeline({
               defaults: { ease: "none" },

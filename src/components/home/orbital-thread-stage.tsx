@@ -18,6 +18,7 @@ import {
 import {
   computeThreadDash,
   createCtaThreadGeometry,
+  createEditorialSignalGeometry,
   interpolateProgressiveGeometry,
   parseCubicLoopPath,
   serializeCubicLoopPath,
@@ -369,7 +370,26 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       const target = targetRef.current;
       if (!stage || !target) return;
 
+      const baseState = snapshotRef.current.base;
       const targetSquare = centeredSquare(target.getBoundingClientRect());
+      if (baseState.kind === "scene" && baseState.id === "01") {
+        const rawLayoutProgress = clamp(baseState.progress / 0.22, 0, 1);
+        const layoutProgress =
+          rawLayoutProgress * rawLayoutProgress * (3 - rawLayoutProgress * 2);
+        stage.dataset.orbitalLayout = "scene-01";
+        stage.style.left = `${targetSquare.left * (1 - layoutProgress)}px`;
+        stage.style.top = `${targetSquare.top * (1 - layoutProgress)}px`;
+        stage.style.width = `${
+          targetSquare.size + (window.innerWidth - targetSquare.size) * layoutProgress
+        }px`;
+        stage.style.height = `${
+          targetSquare.size + (window.innerHeight - targetSquare.size) * layoutProgress
+        }px`;
+        return;
+      }
+
+      stage.dataset.orbitalLayout = "hero";
+      stage.style.removeProperty("opacity");
       stage.style.left = `${targetSquare.left}px`;
       stage.style.top = `${targetSquare.top}px`;
       stage.style.width = `${targetSquare.size}px`;
@@ -490,6 +510,10 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         inhale * (config.cta.inhaleStrokeWidth - config.cta.restStrokeWidth);
       const snapshot = snapshotRef.current;
       const pointer = snapshot.pointer;
+      const scene01Progress =
+        snapshot.base.kind === "scene" && snapshot.base.id === "01"
+          ? snapshot.base.progress
+          : 0;
       const ctaActive = snapshot.cta.active && snapshot.cta.anchorId === "hero-cta";
       const ctaTargetProgress = ctaActive ? 1 : 0;
       const ctaEasing = 1 - Math.exp(-config.cta.response * delta);
@@ -563,9 +587,30 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         const heroThreadWidth =
           config.hero.entryStrokeWidth +
           (revealedHeroThreadWidth - config.hero.entryStrokeWidth) * revealProgress;
+        const sceneThreadWidth =
+          config.scene01.restStrokeWidth +
+          inhale * (config.scene01.inhaleStrokeWidth - config.scene01.restStrokeWidth);
+        const sceneWidthProgress = easeOutQuart(clamp(scene01Progress / 0.42, 0, 1));
+        const baseThreadWidth =
+          heroThreadWidth + (sceneThreadWidth - heroThreadWidth) * sceneWidthProgress;
         const threadWidth =
-          heroThreadWidth + (ctaThreadWidth - heroThreadWidth) * pathProgress;
-        let renderedPoints = heroPoints;
+          baseThreadWidth + (ctaThreadWidth - baseThreadWidth) * pathProgress;
+        let renderedPoints = createEditorialSignalGeometry(heroPoints, {
+          elapsedMs: motionElapsed,
+          layerIndex: index,
+          layerSpacing: config.scene01.layerSpacing,
+          noiseAmplitude: config.scene01.noiseAmplitude,
+          pointerBoost: config.scene01.pointerWaveBoost,
+          pointerStrength: pointer.strength,
+          pointerX: pointer.x,
+          pointerY: pointer.y,
+          progress: scene01Progress,
+          radiusX: config.scene01.radiusX,
+          radiusY: config.scene01.radiusY,
+          settledWaveAmplitude: config.scene01.settledWaveAmplitude,
+          waveLobes: config.scene01.waveLobes,
+          waveSpeed: config.scene01.waveSpeed,
+        });
 
         if (ctaTarget && breathingCtaTarget) {
           leadingPoints[index] ??= leadingPointForTarget(heroPoints, ctaTarget);
@@ -594,12 +639,22 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         "--orbital-fill-progress",
         `${fillProgress}`,
       );
+      if (scene01Progress > 0) {
+        const exitFade = clamp((scene01Progress - 0.92) / 0.08, 0, 1);
+        stage.style.opacity = `${1 - exitFade * 0.82}`;
+      } else {
+        stage.style.removeProperty("opacity");
+      }
 
       requestRender();
     };
     const handlePointerMove = (event: PointerEvent) => {
       if (!hasFinePointer || event.pointerType === "touch") return;
-      const rect = target.getBoundingClientRect();
+      const baseState = snapshotRef.current.base;
+      const rect =
+        baseState.kind === "scene" && baseState.id === "01"
+          ? stage.getBoundingClientRect()
+          : target.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
 
       const relativeX = (event.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
@@ -717,9 +772,11 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       data-cta-layer="idle"
       data-orbit-mark="frame"
       data-orbital-thread-stage=""
+      data-orbital-layout="hero"
       data-phase={phase}
       fill="none"
       focusable="false"
+      preserveAspectRatio="none"
       ref={stageRef}
       viewBox="0 0 128 128"
     >

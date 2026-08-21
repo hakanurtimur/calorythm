@@ -87,7 +87,7 @@ export const orbitalHomeContent = {
     OrbitalSection,
     OrbitalSection,
   ],
-  knowledgeFragments: ["İddia", "Kanıt", "Bağlam"],
+  knowledgeFragments: ["Tek çalışma", "Bağlam dışı", "Kaynak belirsiz"],
   topicAtlas: [
     { title: "Metabolizma", note: "Enerji nasıl dönüşür ve kullanılır?" },
     { title: "Enerji dengesi", note: "Alım, harcama ve uyum" },

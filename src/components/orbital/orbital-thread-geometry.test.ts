@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { orbitalPaths } from "./orbital-paths";
+import * as orbitalGeometry from "./orbital-thread-geometry";
 import {
   computeThreadDash,
   createCtaThreadGeometry,
@@ -113,5 +114,65 @@ describe("orbital thread geometry", () => {
     expect(morphed[9]!.x).toBeLessThan(morphed[3]!.x);
     expect(interpolateProgressiveGeometry(from, to, 0, { leadingPointIndex: 3 })).toEqual(from);
     expect(interpolateProgressiveGeometry(from, to, 1, { leadingPointIndex: 3 })).toEqual(to);
+  });
+
+  it("morphs the authored loop into a layered editorial signal without breaking its seam", () => {
+    type SignalGeometry = (
+      source: ReturnType<typeof parseCubicLoopPath>,
+      input: {
+        elapsedMs: number;
+        layerIndex: number;
+        layerSpacing: number;
+        noiseAmplitude: number;
+        progress: number;
+        radiusX: number;
+        radiusY: number;
+        settledWaveAmplitude: number;
+        waveLobes: number;
+        waveSpeed: number;
+      },
+    ) => ReturnType<typeof parseCubicLoopPath>;
+    const createEditorialSignalGeometry = (
+      orbitalGeometry as unknown as { createEditorialSignalGeometry?: SignalGeometry }
+    ).createEditorialSignalGeometry;
+
+    expect(createEditorialSignalGeometry).toBeTypeOf("function");
+    if (!createEditorialSignalGeometry) return;
+
+    const source = parseCubicLoopPath(orbitalPaths[0].d);
+    const input = {
+      elapsedMs: 1200,
+      layerIndex: 0,
+      layerSpacing: 2.4,
+      noiseAmplitude: 7,
+      progress: 1,
+      radiusX: 70,
+      radiusY: 9,
+      settledWaveAmplitude: 1.2,
+      waveLobes: 3.2,
+      waveSpeed: 0.001,
+    };
+    const signal = createEditorialSignalGeometry(source, input);
+    const xValues = signal.map(({ x }) => x);
+    const yValues = signal.map(({ y }) => y);
+    const lowerLayer = createEditorialSignalGeometry(source, { ...input, layerIndex: 3 });
+    const animatedMidpoint = createEditorialSignalGeometry(source, {
+      ...input,
+      elapsedMs: 1650,
+      progress: 0.55,
+    });
+    const initialMidpoint = createEditorialSignalGeometry(source, {
+      ...input,
+      elapsedMs: 0,
+      progress: 0.55,
+    });
+
+    expect(createEditorialSignalGeometry(source, { ...input, progress: 0 })).toEqual(source);
+    expect(Math.max(...xValues) - Math.min(...xValues)).toBeGreaterThan(130);
+    expect(Math.max(...yValues) - Math.min(...yValues)).toBeLessThan(28);
+    expect(signal.at(-1)).toEqual(signal[0]);
+    expect(lowerLayer[0]!.y).toBeGreaterThan(signal[0]!.y + 5);
+    expect(animatedMidpoint).not.toEqual(initialMidpoint);
+    expect(signal.flatMap(({ x, y }) => [x, y]).every(Number.isFinite)).toBe(true);
   });
 });
