@@ -23,6 +23,22 @@ describe("orbital brand primitives", () => {
     );
   });
 
+  it("gives an orbital CTA four independently animated brand threads", () => {
+    render(
+      <OrbitalLink href="#konular" variant="orbit">
+        Keşfet
+      </OrbitalLink>,
+    );
+
+    const link = screen.getByRole("link", { name: "Keşfet" });
+    expect(link).toHaveAttribute("data-variant", "orbit");
+    expect(
+      Array.from(link.querySelectorAll("[data-link-orbit-path]"), (path) =>
+        path.getAttribute("data-link-orbit-path"),
+      ),
+    ).toEqual(["orange", "coral", "ochre", "olive"]);
+  });
+
   it("never exposes an unavailable destination as a dead link", () => {
     render(<OrbitalLink unavailable>Hikâyeyi keşfet</OrbitalLink>);
 

@@ -35,6 +35,75 @@
   width: fit-content;
 }
 
+.orbitalLink[data-variant="orbit"] {
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: 999px;
+  gap: 0.7rem;
+  isolation: isolate;
+  min-height: 3.25rem;
+  overflow: hidden;
+  padding: 0.24rem 0.24rem 0.24rem 1.35rem;
+  position: relative;
+  transition:
+    border-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.orbitalLink[data-variant="orbit"]::before {
+  background: linear-gradient(
+    105deg,
+    var(--olive, #a7be89) 0%,
+    var(--ochre, #c79a45) 30%,
+    var(--orange, #f3a65a) 64%,
+    var(--coral, #ea735d) 100%
+  );
+  clip-path: circle(0 at calc(100% - 1.6rem) 50%);
+  content: "";
+  inset: 0;
+  position: absolute;
+  transition: clip-path 460ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: -2;
+}
+
+.linkOrbit {
+  height: 100%;
+  inset: 0;
+  opacity: 0;
+  overflow: visible;
+  pointer-events: none;
+  position: absolute;
+  transform: rotate(-145deg) scale(0.18);
+  transform-origin: calc(100% - 1.6rem) 50%;
+  transition:
+    opacity 90ms linear,
+    transform 480ms cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+  z-index: -1;
+}
+
+.linkOrbit path {
+  mix-blend-mode: multiply;
+  opacity: 0.94;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.35;
+  transition: stroke-dashoffset 390ms cubic-bezier(0.22, 1, 0.36, 1);
+  vector-effect: non-scaling-stroke;
+}
+
+.orbitalLink[data-variant="orbit"] .linkLabel,
+.orbitalLink[data-variant="orbit"] .linkTerminal {
+  position: relative;
+  z-index: 1;
+}
+
+.orbitalLink[data-variant="orbit"] .linkLabel::after {
+  display: none;
+}
+
 .linkLabel {
   position: relative;
 }
@@ -87,6 +156,67 @@
   transform: rotate(-18deg);
 }
 
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover,
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible {
+  border-color: transparent;
+  color: var(--ink, #20211e);
+  transform: translateY(-1px);
+}
+
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover::before,
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible::before {
+  clip-path: circle(145% at calc(100% - 1.6rem) 50%);
+}
+
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover .linkOrbit,
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible .linkOrbit {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
+
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover .linkOrbit path,
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible .linkOrbit path {
+  stroke-dashoffset: 0;
+}
+
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover
+  .linkOrbit
+  path:nth-child(2),
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible
+  .linkOrbit
+  path:nth-child(2) {
+  transition-delay: 25ms;
+}
+
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover
+  .linkOrbit
+  path:nth-child(3),
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible
+  .linkOrbit
+  path:nth-child(3) {
+  transition-delay: 50ms;
+}
+
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover
+  .linkOrbit
+  path:nth-child(4),
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible
+  .linkOrbit
+  path:nth-child(4) {
+  transition-delay: 75ms;
+}
+
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover .linkTerminal,
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible .linkTerminal {
+  background: color-mix(in srgb, var(--ivory, #f6f1e8) 32%, transparent);
+  border-color: color-mix(in srgb, var(--ink, #20211e) 36%, transparent);
+  color: var(--ink, #20211e);
+}
+
+.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):active {
+  transform: translateY(0) scale(0.98);
+}
+
 .orbitalLink[data-unavailable="true"] {
   cursor: not-allowed;
   opacity: 0.58;
@@ -94,7 +224,16 @@
 
 @media (prefers-reduced-motion: reduce) {
   .linkLabel::after,
-  .linkTerminal {
+  .linkTerminal,
+  .linkOrbit,
+  .linkOrbit path,
+  .orbitalLink[data-variant="orbit"],
+  .orbitalLink[data-variant="orbit"]::before {
     transition: none;
+  }
+
+  .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover .linkOrbit,
+  .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible .linkOrbit {
+    transform: none;
   }
 }

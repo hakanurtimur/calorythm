@@ -8,7 +8,7 @@ export type MotionEnvironment = {
 export type MotionProfile = {
   animate: boolean;
   pin: boolean;
-  splashDuration: 0 | 900 | 1750;
+  splashDuration: 0 | 1600 | 2400;
 };
 
 type NavigatorWithConnection = Navigator & {
@@ -40,6 +40,6 @@ export function readMotionProfile(
   return {
     animate,
     pin: animate && environment.width >= 768 && environment.height >= 700,
-    splashDuration: animate ? (environment.width < 768 ? 900 : 1750) : 0,
+    splashDuration: animate ? (environment.width < 768 ? 1600 : 2400) : 0,
   };
 }

@@ -3,8 +3,12 @@ import {
   getOrbitalThreadSnapshot,
   resetOrbitalThreadState,
 } from "@/components/orbital/orbital-thread-store";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HomeExperience } from "./home-experience";
+
+beforeEach(() => {
+  vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
+});
 
 afterEach(() => {
   cleanup();
@@ -114,7 +118,7 @@ describe("HomeExperience", () => {
     expect(ring?.style.getPropertyValue("--handoff-scale")).toBe("");
   });
 
-  it("keeps the handoff square unchanged when the splash settles into hero", () => {
+  it("settles a positive-duration manual dismissal into the unchanged hero square", () => {
     const { container } = render(<HomeExperience />);
     const ring = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]");
     const target = container.querySelector<HTMLElement>("[data-splash-handoff-target]");
@@ -131,6 +135,24 @@ describe("HomeExperience", () => {
     expect(ring?.style.top).toBe("200px");
     expect(ring?.style.width).toBe("400px");
     expect(ring?.style.height).toBe("400px");
+  });
+
+  it("settles a positive-duration automatic dismissal into hero", () => {
+    vi.useFakeTimers();
+    render(<HomeExperience />);
+    const stage = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]");
+
+    expect(stage).toHaveAttribute("data-phase", "intro");
+    expect(getOrbitalThreadSnapshot().base).toEqual({ kind: "intro" });
+
+    act(() => vi.advanceTimersByTime(2399));
+    expect(screen.getByTestId("home-splash")).toBeInTheDocument();
+    expect(getOrbitalThreadSnapshot().base).toEqual({ kind: "intro" });
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.queryByTestId("home-splash")).not.toBeInTheDocument();
+    expect(stage).toHaveAttribute("data-phase", "hero");
+    expect(getOrbitalThreadSnapshot().base).toEqual({ kind: "hero" });
   });
 
   it("resynchronizes the persistent stage when the hero target resizes", () => {

@@ -21,7 +21,7 @@ describe("readMotionProfile", () => {
         width: 1440,
         height: 900,
       })),
-    ).toEqual({ animate: true, pin: true, splashDuration: 1750 });
+    ).toEqual({ animate: true, pin: true, splashDuration: 2400 });
   });
 
   it("keeps animation without pinning on mobile", () => {
@@ -32,7 +32,7 @@ describe("readMotionProfile", () => {
         width: 640,
         height: 844,
       })),
-    ).toEqual({ animate: true, pin: false, splashDuration: 900 });
+    ).toEqual({ animate: true, pin: false, splashDuration: 1600 });
   });
 
   it.each([
@@ -42,6 +42,6 @@ describe("readMotionProfile", () => {
   ])("pins only when the viewport can hold a complete scene", ({ height, pin, width }) => {
     expect(
       readMotionProfile(() => ({ reducedMotion: false, saveData: false, width, height })),
-    ).toEqual({ animate: true, pin, splashDuration: width < 768 ? 900 : 1750 });
+    ).toEqual({ animate: true, pin, splashDuration: width < 768 ? 1600 : 2400 });
   });
 });

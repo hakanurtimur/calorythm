@@ -2,24 +2,45 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { readMotionProfile } from "@/components/motion/motion-profile";
-import { OrbitalMark } from "@/components/orbital/orbital-mark";
-import { orbitalHomeContent } from "@/content/orbital-home";
+import { orbitalPaths } from "@/components/orbital/orbital-paths";
+import { HOME_SPLASH_DISMISS_EVENT } from "./home-intro-events";
 import styles from "./home.module.css";
+import { SplashLockup } from "./splash-lockup";
 
 type HomeSplashProps = {
-  durationOverride?: 0 | 900 | 1750;
+  durationOverride?: 0 | 1600 | 2400;
 };
 
 export function HomeSplash({ durationOverride }: HomeSplashProps) {
   const [visible, setVisible] = useState(durationOverride !== 0);
-  const dismiss = useCallback(() => setVisible(false), []);
+  const dismiss = useCallback(() => {
+    window.dispatchEvent(new Event(HOME_SPLASH_DISMISS_EVENT));
+    setVisible(false);
+  }, []);
 
   useEffect(() => {
+    if (!visible) return;
+    const root = document.documentElement;
+    const body = document.body;
+    const previousRootOverflow = root.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    const restorePageScroll = () => {
+      root.style.overflow = previousRootOverflow;
+      body.style.overflow = previousBodyOverflow;
+    };
+
+    window.scrollTo({ behavior: "instant", left: 0, top: 0 });
+    root.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+
     const duration = durationOverride ?? readMotionProfile().splashDuration;
 
     if (duration === 0) {
       const immediateTimeout = window.setTimeout(dismiss, 0);
-      return () => window.clearTimeout(immediateTimeout);
+      return () => {
+        window.clearTimeout(immediateTimeout);
+        restorePageScroll();
+      };
     }
 
     const timeout = window.setTimeout(dismiss, duration);
@@ -34,8 +55,9 @@ export function HomeSplash({ durationOverride }: HomeSplashProps) {
     return () => {
       window.clearTimeout(timeout);
       window.removeEventListener("keydown", handleKeyDown);
+      restorePageScroll();
     };
-  }, [dismiss, durationOverride]);
+  }, [dismiss, durationOverride, visible]);
 
   if (!visible) {
     return null;
@@ -50,22 +72,15 @@ export function HomeSplash({ durationOverride }: HomeSplashProps) {
       onPointerDown={dismiss}
       role="dialog"
     >
-      <OrbitalMark className={styles.splashMark} tone="ivory" variant="signature" />
-      <div className={styles.splashCopy}>
-        <p className={styles.splashWordmark}>{orbitalHomeContent.splash.label}</p>
-        <p className={styles.splashStatement}>{orbitalHomeContent.splash.statement}</p>
+      <div aria-hidden="true" className={styles.splashChromaticField}>
+        {orbitalPaths.map((path) => (
+          <span data-splash-color={path.id} key={path.id} />
+        ))}
       </div>
-      <button className={styles.splashSkip} onClick={dismiss} type="button">
-        <span>İntroyu geç</span>
-        <span aria-hidden="true">↗</span>
-      </button>
-      <p aria-hidden="true" className={styles.splashTempo}>
-        <span>AL</span>
-        <i />
-        <span>DÖNÜŞTÜR</span>
-        <i />
-        <span>ANLA</span>
-      </p>
+
+      <div className={styles.splashIdentity}>
+        <SplashLockup />
+      </div>
     </div>
   );
 }
