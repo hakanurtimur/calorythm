@@ -35,6 +35,46 @@ describe("HomeSplash", () => {
     expect(screen.queryByText("Beslenme bilimi · Bağımsız yayın")).not.toBeInTheDocument();
   });
 
+  it("focuses the labelled splash surface and contains focus while the background is inert", () => {
+    render(
+      <>
+        <button autoFocus data-testid="background-action" type="button">Arka plan eylemi</button>
+        <HomeSplash durationOverride={2400} />
+      </>,
+    );
+    const backgroundAction = screen.getByTestId("background-action");
+    const splash = screen.getByRole("dialog", { name: "CALORYTHM açılış" });
+
+    expect(splash).toHaveAttribute("tabindex", "0");
+    expect(splash).toHaveFocus();
+    expect(backgroundAction).toHaveAttribute("inert");
+    expect(backgroundAction).toHaveAttribute("aria-hidden", "true");
+
+    expect(fireEvent.keyDown(window, { key: "Tab" })).toBe(false);
+    expect(splash).toHaveFocus();
+
+    backgroundAction.focus();
+    expect(splash).toHaveFocus();
+  });
+
+  it("restores focus and background semantics after keyboard dismissal", () => {
+    render(
+      <>
+        <button aria-hidden="false" autoFocus data-testid="previous-focus" type="button">Önceki odak</button>
+        <HomeSplash durationOverride={2400} />
+      </>,
+    );
+    const previousFocus = screen.getByTestId("previous-focus");
+
+    expect(screen.getByRole("dialog", { name: "CALORYTHM açılış" })).toHaveFocus();
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(screen.queryByRole("dialog", { name: "CALORYTHM açılış" })).not.toBeInTheDocument();
+    expect(previousFocus).toHaveFocus();
+    expect(previousFocus).not.toHaveAttribute("inert");
+    expect(previousFocus).toHaveAttribute("aria-hidden", "false");
+  });
+
   it("treats the full intro surface as a dismiss action", () => {
     render(<HomeSplash durationOverride={2400} />);
 

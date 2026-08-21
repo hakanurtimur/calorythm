@@ -126,14 +126,11 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
                 ...(canPin ? { anticipatePin: 1 } : {}),
               },
             });
-            hero
-              .fromTo(
-                '[data-motion="hero-mark"]',
-                { rotation: 0, scale: 1 },
-                { duration: 1, rotation: 8, scale: 1.55 },
-                0,
-              )
-              .to('[data-motion="hero-copy"]', { autoAlpha: 0.28, duration: 0.25, y: -24 }, 0.75);
+            hero.to(
+              '[data-motion="hero-copy"]',
+              { autoAlpha: 0.28, duration: 0.25, y: -24 },
+              0.75,
+            );
 
             const knowledge = gsap.timeline({
               defaults: { ease: "none" },
@@ -170,19 +167,12 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
                 ...(canPin ? { anticipatePin: 1 } : {}),
               },
             });
-            macros
-              .fromTo(
-                '[data-scene="02"] [data-orbit-mark]',
-                { rotation: -10, scale: 0.9 },
-                { duration: 1, rotation: 24, scale: 1.08 },
-                0,
-              )
-              .fromTo(
-                '[data-motion="macro-route"]',
-                { autoAlpha: 0.28, scale: 0.96, y: 34 },
-                { autoAlpha: 1, duration: 0.62, scale: 1, stagger: 0.2, y: 0 },
-                0.12,
-              );
+            macros.fromTo(
+              '[data-motion="macro-route"]',
+              { autoAlpha: 0.28, scale: 0.96, y: 34 },
+              { autoAlpha: 1, duration: 0.62, scale: 1, stagger: 0.2, y: 0 },
+              0.12,
+            );
 
             const atlas = gsap.timeline({
               defaults: { ease: "none" },
@@ -211,19 +201,12 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
                 ...(canPin ? { anticipatePin: 1 } : {}),
               },
             });
-            thought
-              .fromTo(
-                '[data-scene="04"] [data-orbit-mark]',
-                { rotation: -18, scale: 0.62 },
-                { duration: 1, rotation: 6, scale: 1.28 },
-                0,
-              )
-              .fromTo(
-                '[data-motion="thought-resolution"]',
-                { autoAlpha: 0.3, y: 28 },
-                { autoAlpha: 1, duration: 0.42, y: 0 },
-                0.56,
-              );
+            thought.fromTo(
+              '[data-motion="thought-resolution"]',
+              { autoAlpha: 0.3, y: 28 },
+              { autoAlpha: 1, duration: 0.42, y: 0 },
+              0.56,
+            );
 
             const flagship = gsap.timeline({
               defaults: { ease: "none" },
@@ -235,19 +218,12 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
                 trigger: '[data-scene="05"]',
               },
             });
-            flagship
-              .fromTo(
-                '[data-scene="05"] h2',
-                { y: 36 },
-                { duration: 0.7, y: 0 },
-                0,
-              )
-              .fromTo(
-                '[data-motion="flagship-mark"]',
-                { autoAlpha: 0.12, rotation: -12, scale: 0.74 },
-                { autoAlpha: 1, duration: 0.85, rotation: 4, scale: 1 },
-                0.12,
-              );
+            flagship.fromTo(
+              '[data-scene="05"] h2',
+              { y: 36 },
+              { duration: 0.7, y: 0 },
+              0,
+            );
 
             const topics = Array.from(
               scope.querySelectorAll<HTMLElement>('[data-motion="journal-topic"]'),
@@ -266,22 +242,6 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
                 trigger: topic,
               });
             });
-
-            const finale = gsap.timeline({
-              defaults: { ease: "none" },
-              scrollTrigger: {
-                end: "bottom 20%",
-                pin: undefined,
-                scrub: 0.64,
-                start: "top 78%",
-                trigger: '[data-scene="07"]',
-              },
-            });
-            finale.fromTo(
-              '[data-scene="07"] [data-orbit-path]',
-              { strokeDasharray: 1, strokeDashoffset: 1 },
-              { duration: 0.8, stagger: 0.08, strokeDashoffset: 0 },
-            );
 
             const fontsReady = document.fonts?.ready;
             fontsReady?.then(() => {

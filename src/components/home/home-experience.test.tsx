@@ -4,6 +4,10 @@ import {
   resetOrbitalThreadState,
   resolveOrbitalMode,
 } from "@/components/orbital/orbital-thread-store";
+import {
+  createCtaThreadGeometry,
+  parseCubicLoopPath,
+} from "@/components/orbital/orbital-thread-geometry";
 import { orbitalPaths } from "@/components/orbital/orbital-paths";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HomeExperience } from "./home-experience";
@@ -23,6 +27,7 @@ afterEach(() => {
 describe("HomeExperience", () => {
   it("presents one page title followed by the seven-part editorial narrative", () => {
     const { container } = render(<HomeExperience />);
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
 
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
@@ -48,12 +53,13 @@ describe("HomeExperience", () => {
 
   it("uses authored editorial structures instead of a repeated card grid", () => {
     const { container } = render(<HomeExperience />);
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
 
     expect(screen.getByRole("list", { name: "Makro besin rotaları" }).children).toHaveLength(3);
     expect(screen.getByRole("list", { name: "Beslenme konuları" }).children).toHaveLength(5);
     expect(screen.getByRole("list", { name: "Journal konuları" }).children).toHaveLength(8);
     expect(container.querySelectorAll('[data-motion="journal-topic"]')).toHaveLength(8);
-    expect(container.querySelectorAll("[data-orbit-mark]")).toHaveLength(5);
+    expect(container.querySelector("[data-orbit-mark]")).not.toBeInTheDocument();
     expect(screen.getByText("Hikâyeyi keşfet").closest("[aria-disabled]")).toHaveAttribute(
       "aria-disabled",
       "true",
@@ -62,6 +68,7 @@ describe("HomeExperience", () => {
 
   it("keeps every available action valid and exposes only one unavailable destination", () => {
     const { container } = render(<HomeExperience />);
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
 
     expect(screen.getAllByRole("link").every((link) => Boolean(link.getAttribute("href")))).toBe(true);
     expect(container.querySelectorAll('[aria-disabled="true"]')).toHaveLength(1);
@@ -73,6 +80,7 @@ describe("HomeExperience", () => {
     const { container } = render(<HomeExperience />);
 
     expect(container.querySelectorAll('[data-brand-wordmark="primary"]')).toHaveLength(3);
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
     expect(screen.getAllByRole("link", { name: "CALORYTHM ana sayfa" })).toHaveLength(2);
   });
 
@@ -98,6 +106,18 @@ describe("HomeExperience", () => {
     expect(stage?.querySelectorAll("[data-orbit-path]")).toHaveLength(4);
     expect(document.querySelectorAll("[data-orbital-thread-stage]")).toHaveLength(1);
     expect(document.querySelector("[data-splash-handoff-ring]")).not.toBeInTheDocument();
+  });
+
+  it("keeps every official orbital path inside the one persistent stage", () => {
+    render(<HomeExperience />);
+    const stage = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]")!;
+    const officialPathData = new Set<string>(orbitalPaths.map(({ d }) => d));
+    const officialPaths = Array.from(document.querySelectorAll<SVGPathElement>("path")).filter(
+      (path) => officialPathData.has(path.getAttribute("d") ?? ""),
+    );
+
+    expect(officialPaths).toHaveLength(4);
+    expect(officialPaths.every((path) => stage.contains(path))).toBe(true);
   });
 
   it("moves the persistent SVG itself without scaling its rendered strokes", () => {
@@ -139,6 +159,26 @@ describe("HomeExperience", () => {
     expect(ring?.style.top).toBe("200px");
     expect(ring?.style.width).toBe("400px");
     expect(ring?.style.height).toBe("400px");
+  });
+
+  it("keeps an early manual dismissal settled after the full splash duration", () => {
+    vi.useFakeTimers();
+    const { container } = render(<HomeExperience />);
+    const stage = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]")!;
+    const target = container.querySelector<HTMLElement>("[data-splash-handoff-target]")!;
+
+    stage.getBoundingClientRect = () =>
+      ({ bottom: 380, height: 80, left: 400, right: 480, top: 300, width: 80, x: 400, y: 300, toJSON: () => ({}) }) as DOMRect;
+    target.getBoundingClientRect = () =>
+      ({ bottom: 700, height: 600, left: 900, right: 1300, top: 100, width: 400, x: 900, y: 100, toJSON: () => ({}) }) as DOMRect;
+
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+    expect(stage).toHaveAttribute("data-phase", "hero");
+
+    act(() => vi.advanceTimersByTime(3000));
+
+    expect(stage).toHaveAttribute("data-phase", "hero");
+    expect(getOrbitalThreadSnapshot().base).toEqual({ kind: "hero" });
   });
 
   it("settles a positive-duration automatic dismissal into hero", () => {
@@ -213,6 +253,60 @@ describe("HomeExperience", () => {
     expect(stage?.style.top).toBe("80px");
     expect(stage?.style.width).toBe("300px");
     expect(stage?.style.height).toBe("300px");
+  });
+
+  it("recomputes active CTA geometry after the stage synchronizes on resize", () => {
+    const frames = new Map<number, FrameRequestCallback>();
+    let nextFrame = 0;
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      nextFrame += 1;
+      frames.set(nextFrame, callback);
+      return nextFrame;
+    });
+    vi.spyOn(window, "cancelAnimationFrame").mockImplementation((frame) => {
+      frames.delete(frame);
+    });
+    const runNextFrame = (timestamp: number) => {
+      const pending = frames.entries().next().value as [number, FrameRequestCallback] | undefined;
+      expect(pending).toBeDefined();
+      frames.delete(pending![0]);
+      pending![1](timestamp);
+    };
+    const { container } = render(<HomeExperience />);
+    const stage = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]")!;
+    const cta = container.querySelector<HTMLElement>('[data-orbital-anchor="hero-cta"]')!;
+    const target = container.querySelector<HTMLElement>("[data-splash-handoff-target]")!;
+    let ctaRect = {
+      left: 640, top: 650, width: 160, height: 52, right: 800, bottom: 702, x: 640, y: 650, toJSON: () => ({}),
+    } as DOMRect;
+
+    target.getBoundingClientRect = () =>
+      ({ bottom: 882, height: 864, left: 288, right: 1152, top: 18, width: 864, x: 288, y: 18, toJSON: () => ({}) }) as DOMRect;
+    stage.getBoundingClientRect = () =>
+      ({ bottom: 882, height: 864, left: 288, right: 1152, top: 18, width: 864, x: 288, y: 18, toJSON: () => ({}) }) as DOMRect;
+    cta.getBoundingClientRect = () => ctaRect;
+
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+    fireEvent.pointerEnter(cta);
+    [
+      0, 120, 240, 360, 480, 600, 720, 840, 960, 1080, 1200, 1320, 1440, 1560,
+      1680, 1800,
+    ].forEach(runNextFrame);
+    const contractedBeforeResize = stage
+      .querySelector<SVGPathElement>("[data-orbit-path]")!
+      .getAttribute("d");
+
+    ctaRect = {
+      left: 520, top: 570, width: 240, height: 64, right: 760, bottom: 634, x: 520, y: 570, toJSON: () => ({}),
+    } as DOMRect;
+    fireEvent.resize(window);
+    runNextFrame(1860);
+    runNextFrame(1920);
+    runNextFrame(1980);
+
+    expect(stage.querySelector("[data-orbit-path]")?.getAttribute("d")).not.toBe(
+      contractedBeforeResize,
+    );
   });
 
   it("publishes the hero base state when the splash settles", () => {
@@ -325,6 +419,139 @@ describe("HomeExperience", () => {
     act(() => [1380, 1440, 1500, 1560].forEach((time) => frames.shift()?.(time)));
     expect(firstPath.getAttribute("d")).not.toBe(contractedPath);
     expect(Number(cta.style.getPropertyValue("--orbital-fill-progress"))).toBeLessThan(0.1);
+  });
+
+  it("pulls each CTA-facing segment first and applies ordered per-path lag", () => {
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    const { container } = render(<HomeExperience />);
+    const stage = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]")!;
+    const cta = container.querySelector<HTMLElement>('[data-orbital-anchor="hero-cta"]')!;
+    const stageRect = {
+      left: 288, top: 18, width: 864, height: 864, right: 1152, bottom: 882, x: 288, y: 18, toJSON: () => ({}),
+    } as DOMRect;
+    const ctaRect = {
+      left: 640, top: 650, width: 160, height: 52, right: 800, bottom: 702, x: 640, y: 650, toJSON: () => ({}),
+    } as DOMRect;
+    stage.getBoundingClientRect = () => stageRect;
+    cta.getBoundingClientRect = () => ctaRect;
+
+    const sources = orbitalPaths.map(({ d }) => parseCubicLoopPath(d));
+    const targets = orbitalPaths.map((_, pathIndex) =>
+      createCtaThreadGeometry({ ctaRect, pathIndex, stageRect }),
+    );
+    const leadingIndex = (target: Array<{ x: number; y: number }>, source: Array<{ x: number; y: number }>) => {
+      const targetCenter = target.slice(0, -1).reduce(
+        (center, point) => ({ x: center.x + point.x / 12, y: center.y + point.y / 12 }),
+        { x: 0, y: 0 },
+      );
+      return source.slice(0, -1).reduce(
+        (nearest, point, index) => {
+          const distance = Math.hypot(point.x - targetCenter.x, point.y - targetCenter.y);
+          return distance < nearest.distance ? { distance, index } : nearest;
+        },
+        { distance: Number.POSITIVE_INFINITY, index: 0 },
+      ).index;
+    };
+    const movementFraction = (
+      rendered: Array<{ x: number; y: number }>,
+      source: Array<{ x: number; y: number }>,
+      target: Array<{ x: number; y: number }>,
+      index: number,
+    ) =>
+      Math.hypot(rendered[index]!.x - source[index]!.x, rendered[index]!.y - source[index]!.y) /
+      Math.hypot(target[index]!.x - source[index]!.x, target[index]!.y - source[index]!.y);
+
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+    fireEvent.pointerEnter(cta);
+    act(() => frames.shift()?.(0));
+
+    const firstFrame = Array.from(stage.querySelectorAll<SVGPathElement>("[data-orbit-path]"), (path) =>
+      parseCubicLoopPath(path.getAttribute("d")!),
+    );
+    const firstLeader = leadingIndex(targets[0]!, sources[0]!);
+    const oppositePoint = (firstLeader + 6) % 12;
+    expect(movementFraction(firstFrame[0]!, sources[0]!, targets[0]!, firstLeader)).toBeGreaterThan(0);
+    expect(movementFraction(firstFrame[0]!, sources[0]!, targets[0]!, oppositePoint)).toBe(0);
+
+    act(() => frames.shift()?.(16.667));
+    const secondFrame = Array.from(stage.querySelectorAll<SVGPathElement>("[data-orbit-path]"), (path) =>
+      parseCubicLoopPath(path.getAttribute("d")!),
+    );
+    const pathProgress = secondFrame.map((rendered, index) => {
+      const leader = leadingIndex(targets[index]!, sources[index]!);
+      return movementFraction(rendered, sources[index]!, targets[index]!, leader);
+    });
+
+    expect(pathProgress[0]).toBeGreaterThan(pathProgress[1]!);
+    expect(pathProgress[1]).toBeGreaterThan(pathProgress[2]!);
+    expect(pathProgress[2]).toBeGreaterThan(pathProgress[3]!);
+  });
+
+  it("returns to the exact live hero geometry with a closed dash endpoint", () => {
+    const frames = new Map<number, FrameRequestCallback>();
+    let nextFrame = 0;
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      nextFrame += 1;
+      frames.set(nextFrame, callback);
+      return nextFrame;
+    });
+    vi.spyOn(window, "cancelAnimationFrame").mockImplementation((frame) => {
+      frames.delete(frame);
+    });
+    const runNextFrame = (timestamp: number) => {
+      const pending = frames.entries().next().value as [number, FrameRequestCallback] | undefined;
+      expect(pending).toBeDefined();
+      frames.delete(pending![0]);
+      pending![1](timestamp);
+    };
+    const stageRect = {
+      left: 288, top: 18, width: 864, height: 864, right: 1152, bottom: 882, x: 288, y: 18, toJSON: () => ({}),
+    } as DOMRect;
+    const ctaRect = {
+      left: 640, top: 650, width: 160, height: 52, right: 800, bottom: 702, x: 640, y: 650, toJSON: () => ({}),
+    } as DOMRect;
+    const firstRender = render(<HomeExperience />);
+    const firstStage = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]")!;
+    const firstCta = firstRender.container.querySelector<HTMLElement>(
+      '[data-orbital-anchor="hero-cta"]',
+    )!;
+    firstStage.getBoundingClientRect = () => stageRect;
+    firstCta.getBoundingClientRect = () => ctaRect;
+
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+    fireEvent.pointerEnter(firstCta);
+    Array.from({ length: 16 }, (_, index) => index * 120).forEach(runNextFrame);
+    fireEvent.pointerLeave(firstCta);
+    const reverseFrames = Array.from({ length: 14 }, (_, index) => 1920 + index * 120);
+    reverseFrames.forEach(runNextFrame);
+    const terminalTimestamp = reverseFrames.at(-1)!;
+    const returnedPath = firstStage.querySelector<SVGPathElement>("[data-orbit-path]")!;
+
+    expect(returnedPath).toHaveAttribute("stroke-dasharray", "1 0");
+    expect(returnedPath).toHaveAttribute("stroke-dashoffset", "0");
+    expect(firstCta.style.getPropertyValue("--orbital-fill-progress")).toBe("0");
+    const returnedGeometry = returnedPath.getAttribute("d");
+
+    firstRender.unmount();
+    expect(frames.size).toBe(0);
+
+    const controlRender = render(<HomeExperience />);
+    const controlStage = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]")!;
+    const controlTarget = controlRender.container.querySelector<HTMLElement>(
+      "[data-splash-handoff-target]",
+    )!;
+    controlTarget.getBoundingClientRect = () => stageRect;
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+    runNextFrame(0);
+    runNextFrame(terminalTimestamp);
+
+    expect(controlStage.querySelector("[data-orbit-path]")?.getAttribute("d")).toBe(
+      returnedGeometry,
+    );
   });
 
   it("paints CTA threads above the gradient only while the morph is away from idle", () => {
@@ -575,6 +802,53 @@ describe("HomeExperience", () => {
 
     fireEvent.focus(cta);
     expect(resolveOrbitalMode(getOrbitalThreadSnapshot()).kind).not.toBe("cta");
+  });
+
+  it("resets ephemeral pointer state before the persistent stage remounts", () => {
+    const frames = new Map<number, FrameRequestCallback>();
+    let nextFrame = 0;
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      nextFrame += 1;
+      frames.set(nextFrame, callback);
+      return nextFrame;
+    });
+    vi.spyOn(window, "cancelAnimationFrame").mockImplementation((frame) => {
+      frames.delete(frame);
+    });
+    const firstRender = render(<HomeExperience />);
+    const firstTarget = firstRender.container.querySelector<HTMLElement>(
+      "[data-splash-handoff-target]",
+    )!;
+    firstTarget.getBoundingClientRect = () =>
+      ({ bottom: 700, height: 600, left: 900, right: 1300, top: 100, width: 400, x: 900, y: 100, toJSON: () => ({}) }) as DOMRect;
+
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+    const pointerMove = new Event("pointermove");
+    Object.defineProperties(pointerMove, {
+      clientX: { value: 1300 },
+      clientY: { value: 700 },
+      pointerType: { value: "mouse" },
+    });
+    window.dispatchEvent(pointerMove);
+    expect(getOrbitalThreadSnapshot().pointer.strength).toBe(1);
+
+    firstRender.unmount();
+    expect(getOrbitalThreadSnapshot().pointer).toEqual({ x: 0, y: 0, strength: 0 });
+
+    const secondRender = render(<HomeExperience />);
+    const secondTarget = secondRender.container.querySelector<HTMLElement>(
+      "[data-splash-handoff-target]",
+    )!;
+    secondTarget.getBoundingClientRect = firstTarget.getBoundingClientRect;
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+    const pending = frames.entries().next().value as [number, FrameRequestCallback] | undefined;
+    expect(pending).toBeDefined();
+    frames.delete(pending![0]);
+    act(() => pending![1](0));
+
+    expect(
+      document.querySelector("[data-orbital-thread-stage] [data-orbit-path]")?.getAttribute("d"),
+    ).toBe(orbitalPaths[0].d);
   });
 
   it("returns an active stage to static hero geometry when reduced motion changes at runtime", () => {

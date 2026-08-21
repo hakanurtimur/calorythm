@@ -2,6 +2,12 @@ const KAPPA = 0.5522847498;
 const STAGE_VIEWBOX_SIZE = 128;
 const AUTHORED_GROUP_OFFSET = 8;
 const AUTHORED_GROUP_SCALE = 1.12;
+const SVG_NUMBER = "[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?";
+const SVG_POINT = `(${SVG_NUMBER})[\\s,]+(${SVG_NUMBER})`;
+const SVG_CUBIC_SEGMENT = `\\s*C\\s*${SVG_POINT}[\\s,]+${SVG_POINT}[\\s,]+${SVG_POINT}`;
+const CUBIC_LOOP_PATH = new RegExp(
+  `^\\s*M\\s*${SVG_POINT}${SVG_CUBIC_SEGMENT.repeat(4)}\\s*Z\\s*$`,
+);
 
 export type RingPoint = {
   x: number;
@@ -36,7 +42,7 @@ function clampUnit(value: number) {
 }
 
 function formatCoordinate(value: number) {
-  return `${Number(value.toFixed(6))}`;
+  return `${Number(value.toFixed(2))}`;
 }
 
 function pointAt(points: RingPoint[], index: number) {
@@ -72,7 +78,8 @@ function circularPointDistance(index: number, leadingPointIndex: number, pointCo
 }
 
 export function parseCubicLoopPath(d: string): RingPoint[] {
-  const values = d.match(/[-+]?\d*\.?\d+/g)?.map(Number) ?? [];
+  const match = CUBIC_LOOP_PATH.exec(d);
+  const values = match?.slice(1).map(Number) ?? [];
   if (values.length !== 26 || values.some((value) => !Number.isFinite(value))) {
     throw new Error("Expected an SVG loop with one move and four cubic segments.");
   }

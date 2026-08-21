@@ -150,10 +150,19 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
   const targetRef = useRef<HTMLElement | null>(null);
   const ctaAnchorRef = useRef<HTMLElement | null>(null);
   const ctaRectRef = useRef<DOMRect | null>(null);
+  const ctaLayoutRevisionRef = useRef(0);
+  const handoffTimeoutRef = useRef<number | null>(null);
+  const settledRef = useRef(false);
 
   useLayoutEffect(() => {
     snapshotRef.current = orbitalSnapshot;
   }, [orbitalSnapshot]);
+
+  useEffect(() => {
+    return () => {
+      setOrbitalPointer({ x: 0, y: 0, strength: 0 });
+    };
+  }, []);
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -243,10 +252,16 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
   }, [isHydrated]);
 
   const settleIntoHero = useCallback(() => {
+    if (settledRef.current) return;
     const target =
       targetRef.current ?? document.querySelector<HTMLElement>("[data-splash-handoff-target]");
     if (!target) return;
 
+    settledRef.current = true;
+    if (handoffTimeoutRef.current !== null) {
+      window.clearTimeout(handoffTimeoutRef.current);
+      handoffTimeoutRef.current = null;
+    }
     targetRef.current = target;
     setOrbitalBaseState({ kind: "hero" });
     setPhase("hero");
@@ -267,6 +282,13 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       stage.style.top = `${targetSquare.top}px`;
       stage.style.width = `${targetSquare.size}px`;
       stage.style.height = `${targetSquare.size}px`;
+
+      const ctaAnchor = ctaAnchorRef.current;
+      const ctaState = snapshotRef.current.cta;
+      if (ctaAnchor && ctaState.active && ctaState.anchorId === "hero-cta") {
+        ctaRectRef.current = ctaAnchor.getBoundingClientRect();
+        ctaLayoutRevisionRef.current += 1;
+      }
     };
     const requestSync = () => {
       if (animationFrame !== 0) return;
@@ -309,6 +331,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
     let animationFrame = 0;
     let ctaProgress = 0;
     let ctaTargets: RingPoint[][] | null = null;
+    let ctaLayoutRevision = -1;
     let leadingPoints: Array<number | null> = orbitalPaths.map(() => null);
     let wasCtaActive = false;
     let firstTimestamp: number | null = null;
@@ -329,6 +352,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
     const restoreStaticStage = () => {
       ctaProgress = 0;
       ctaTargets = null;
+      ctaLayoutRevision = -1;
       leadingPoints = orbitalPaths.map(() => null);
       wasCtaActive = false;
       stage.setAttribute("data-cta-layer", "idle");
@@ -371,7 +395,11 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         stage.style.removeProperty("z-index");
       }
 
-      if (ctaActive && (!wasCtaActive || !ctaTargets)) {
+      const currentCtaLayoutRevision = ctaLayoutRevisionRef.current;
+      if (
+        ctaActive &&
+        (!wasCtaActive || !ctaTargets || ctaLayoutRevision !== currentCtaLayoutRevision)
+      ) {
         const stageRect = stage.getBoundingClientRect();
         const ctaRect = ctaRectRef.current;
         if (ctaRect && stageRect.width > 0 && stageRect.height > 0) {
@@ -379,6 +407,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
             createCtaThreadGeometry({ ctaRect, pathIndex, stageRect }),
           );
           leadingPoints = orbitalPaths.map(() => null);
+          ctaLayoutRevision = currentCtaLayoutRevision;
         }
       }
       wasCtaActive = ctaActive;
@@ -501,6 +530,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
     }
 
     const handoffTimeout = window.setTimeout(() => {
+      if (settledRef.current) return;
       const stage = stageRef.current;
       const currentTarget = targetRef.current;
       if (!stage || !currentTarget) return;
@@ -522,9 +552,11 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       stage.style.setProperty("--handoff-target-size", `${targetSquare.size}px`);
       setPhase("handoff");
     }, duration - handoffDurationFor(duration));
+    handoffTimeoutRef.current = handoffTimeout;
 
     return () => {
       window.clearTimeout(handoffTimeout);
+      if (handoffTimeoutRef.current === handoffTimeout) handoffTimeoutRef.current = null;
       window.removeEventListener(HOME_SPLASH_DISMISS_EVENT, handleDismiss);
     };
   }, [durationOverride, settleIntoHero]);

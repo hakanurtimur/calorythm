@@ -32,12 +32,19 @@ function createRuntime() {
   type TimelineConfig = {
     scrollTrigger: { pin?: string; trigger: string };
   };
+  const missingTargets: string[] = [];
   const timeline = {
     fromTo: vi.fn(),
     to: vi.fn(),
   };
-  timeline.fromTo.mockReturnValue(timeline);
-  timeline.to.mockReturnValue(timeline);
+  const recordTarget = (target: unknown) => {
+    if (typeof target === "string" && document.querySelector(target) === null) {
+      missingTargets.push(target);
+    }
+    return timeline;
+  };
+  timeline.fromTo.mockImplementation(recordTarget);
+  timeline.to.mockImplementation(recordTarget);
 
   const media = {
     add: vi.fn(
@@ -69,6 +76,7 @@ function createRuntime() {
   return {
     context,
     media,
+    missingTargets,
     runtime: { gsap, ScrollTrigger } as unknown as HomeMotionRuntime,
     ScrollTrigger,
     gsap,
@@ -78,18 +86,18 @@ function createRuntime() {
 function MotionFixture({ children }: { children?: ReactNode }) {
   return (
     <>
-      <section data-scene="hero"><div data-pin="hero"><i data-motion="hero-mark" /><i data-motion="hero-copy" /></div></section>
-      <section data-scene="01"><i data-motion="knowledge-fragment" /></section>
+      <section data-scene="hero"><div data-pin="hero"><i data-motion="hero-copy" /></div></section>
+      <section data-scene="01"><h2 /><i data-motion="knowledge-fragment" /></section>
       <section data-scene="02"><div data-pin="02"><i data-motion="macro-route" /></div></section>
       <section data-scene="03"><i data-motion="topic-atlas-item" /></section>
       <section data-scene="04"><div data-pin="04"><i data-motion="thought-resolution" /></div></section>
-      <section data-scene="05"><i data-motion="flagship-mark" /></section>
+      <section data-scene="05"><h2 /></section>
       <section data-scene="06">
         <ol>
           {Array.from({ length: 8 }, (_, index) => <li data-motion="journal-topic" key={index} />)}
         </ol>
       </section>
-      <section data-scene="07"><svg><path data-orbit-path="orange" /></svg></section>
+      <section data-scene="07"><h2 /></section>
       {children}
     </>
   );
@@ -142,7 +150,6 @@ describe("HomeMotion", () => {
       { trigger: '[data-scene="03"]', pin: undefined },
       { trigger: '[data-scene="04"]', pin: '[data-pin="04"]' },
       { trigger: '[data-scene="05"]', pin: undefined },
-      { trigger: '[data-scene="07"]', pin: undefined },
     ]);
     expect(fake.ScrollTrigger.create).toHaveBeenCalledTimes(8);
 
@@ -150,4 +157,18 @@ describe("HomeMotion", () => {
     expect(fake.media.revert).toHaveBeenCalledOnce();
     expect(fake.context.revert).toHaveBeenCalledOnce();
   });
+
+  it("only sends rendered home elements to the animation runtime", async () => {
+    installEnvironment();
+    const fake = createRuntime();
+    const loadRuntime = vi.fn().mockResolvedValue(fake.runtime);
+    const { container } = render(
+      <HomeMotion loadRuntime={loadRuntime}><MotionFixture /></HomeMotion>,
+    );
+
+    await waitFor(() => expect(container.firstChild).toHaveAttribute("data-motion-profile", "full"));
+
+    expect(fake.missingTargets).toEqual([]);
+  });
+
 });

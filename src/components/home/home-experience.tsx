@@ -1,6 +1,5 @@
 import { BrandWordmark } from "@/components/brand/brand-wordmark";
 import { OrbitalLink } from "@/components/orbital/orbital-link";
-import { OrbitalMark } from "@/components/orbital/orbital-mark";
 import { orbitalHomeContent } from "@/content/orbital-home";
 import { HomeMotion } from "./home-motion";
 import { HomeSplash } from "./home-splash";
@@ -87,9 +86,6 @@ export function HomeExperience() {
       >
         <div className={`${styles.sceneInner} ${styles.knowledgeInner}`}>
           <p aria-hidden="true" className={styles.sceneNumber}>01</p>
-          <div aria-hidden="true" className={styles.knowledgeMarkFrame}>
-            <OrbitalMark className={styles.knowledgeMark} tone="brand" variant="atlas" />
-          </div>
           <div aria-hidden="true" className={styles.knowledgeFragments}>
             {orbitalHomeContent.knowledgeFragments.map((fragment, index) => (
               <span data-motion="knowledge-fragment" key={fragment}>
@@ -117,7 +113,6 @@ export function HomeExperience() {
               <SceneTitle section={stories} />
               <p className={styles.sceneBody}>{stories.body}</p>
             </div>
-            <OrbitalMark className={styles.macroMark} tone="brand" variant="atlas" />
             <ol aria-label="Makro besin rotaları" className={styles.macroRoutes}>
               {orbitalHomeContent.macroRoutes.map((route, index) => (
                 <li
@@ -169,7 +164,6 @@ export function HomeExperience() {
         id="section-04"
       >
         <div className={styles.thoughtViewport} data-pin="04">
-          <OrbitalMark className={styles.thoughtMark} tone="ivory" variant="portal" />
           <div className={`${styles.sceneInner} ${styles.thoughtInner}`}>
             <p aria-hidden="true" className={styles.sceneNumber}>04</p>
             <div className={`${styles.sceneCopy} ${styles.thoughtCopy}`}>
@@ -192,9 +186,6 @@ export function HomeExperience() {
       >
         <div className={`${styles.sceneInner} ${styles.flagshipInner}`}>
           <p className={styles.flagshipLabel}>İlk hikâye <span>001</span></p>
-          <div aria-hidden="true" className={styles.flagshipMarkFrame} data-motion="flagship-mark">
-            <OrbitalMark className={styles.flagshipMark} tone="ivory" variant="portal" />
-          </div>
           <div className={`${styles.sceneCopy} ${styles.flagshipCopy}`}>
             <SceneTitle section={flagship} />
             <p className={styles.sceneBody}>{flagship.body}</p>
@@ -251,7 +242,6 @@ export function HomeExperience() {
         id="hakkinda"
       >
         <div className={`${styles.sceneInner} ${styles.finaleInner}`}>
-          <OrbitalMark className={styles.finaleMark} tone="brand" variant="finale" />
           <p aria-hidden="true" className={styles.sceneNumber}>07</p>
           <div className={`${styles.sceneCopy} ${styles.finaleCopy}`}>
             <SceneTitle section={finale} />

@@ -17,6 +17,24 @@ describe("orbital thread geometry", () => {
     expect(serializeCubicLoopPath(points)).toBe(orbitalPaths[0].d);
   });
 
+  it.each([
+    orbitalPaths[0].d.replace("C", "L"),
+    orbitalPaths[0].d.slice(0, -1),
+    `${orbitalPaths[0].d} L`,
+  ])("rejects authored data outside the M plus four C plus Z grammar", (path) => {
+    expect(() => parseCubicLoopPath(path)).toThrow(
+      "Expected an SVG loop with one move and four cubic segments.",
+    );
+  });
+
+  it("serializes runtime coordinates with no more than two decimal places", () => {
+    const points = parseCubicLoopPath(orbitalPaths[0].d);
+    points[1] = { x: 76.126, y: 5.129 };
+
+    expect(serializeCubicLoopPath(points)).toContain("C76.13 5.13");
+    expect(serializeCubicLoopPath(points)).not.toMatch(/\.\d{3}/);
+  });
+
   it("keeps interpolation endpoints exact", () => {
     const from = parseCubicLoopPath(orbitalPaths[0].d);
     const to = createCtaThreadGeometry({
@@ -27,6 +45,23 @@ describe("orbital thread geometry", () => {
 
     expect(interpolateGeometry(from, to, 0)).toEqual(from);
     expect(interpolateGeometry(from, to, 1)).toEqual(to);
+  });
+
+  it("keeps standard and progressive interpolation midpoints finite", () => {
+    const from = parseCubicLoopPath(orbitalPaths[0].d);
+    const to = createCtaThreadGeometry({
+      ctaRect: { left: 620, top: 650, width: 160, height: 52 },
+      pathIndex: 0,
+      stageRect: { left: 288, top: 18, width: 864, height: 864 },
+    });
+    const midpoints = [
+      interpolateGeometry(from, to, 0.5),
+      interpolateProgressiveGeometry(from, to, 0.5, { leadingPointIndex: 3 }),
+    ];
+
+    expect(
+      midpoints.flat().every(({ x, y }) => Number.isFinite(x) && Number.isFinite(y)),
+    ).toBe(true);
   });
 
   it("creates four finite, nested CTA loops", () => {
