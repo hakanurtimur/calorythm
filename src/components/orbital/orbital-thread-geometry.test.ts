@@ -64,7 +64,7 @@ describe("orbital thread geometry", () => {
     ).toBe(true);
   });
 
-  it("creates one shared finite CTA capsule for all four paths", () => {
+  it("creates four finite CTA rounded rectangles in one-pixel outer layers", () => {
     const loops = [0, 1, 2, 3].map((pathIndex) =>
       createCtaThreadGeometry({
         ctaRect: { left: 620, top: 650, width: 160, height: 52 },
@@ -75,17 +75,28 @@ describe("orbital thread geometry", () => {
 
     expect(loops.every((loop) => loop.length === 13)).toBe(true);
     expect(loops.flat().every(({ x, y }) => Number.isFinite(x) && Number.isFinite(y))).toBe(true);
-    expect(new Set(loops.map(serializeCubicLoopPath))).toHaveProperty("size", 1);
+    expect(new Set(loops.map(serializeCubicLoopPath))).toHaveProperty("size", 4);
+    loops.forEach((loop) => {
+      expect(new Set(loop.slice(0, 4).map(({ y }) => y))).toHaveProperty("size", 1);
+      expect(new Set(loop.slice(6, 10).map(({ y }) => y))).toHaveProperty("size", 1);
+      expect(loop[0]!.x).toBeLessThan(loop[3]!.x);
+    });
+    expect(loops.map((loop) => loop[0]!.y)).toEqual(
+      [...loops.map((loop) => loop[0]!.y)].sort((a, b) => b - a),
+    );
+    expect(loops[0]![0]!.y - loops[1]![0]!.y).toBeCloseTo(0.132275, 6);
+    expect(loops[1]![0]!.y - loops[2]![0]!.y).toBeCloseTo(0.132275, 6);
+    expect(loops[2]![0]!.y - loops[3]![0]!.y).toBeCloseTo(0.132275, 6);
   });
 
-  it("opens a travelling gap before settling into four non-overlapping CTA border segments", () => {
+  it("opens a travelling gap before closing each layered CTA outline", () => {
     expect(computeThreadDash(0, 0)).toEqual({ dasharray: "1 0", dashoffset: 0 });
     expect(computeThreadDash(0.5, 0).dasharray).not.toBe("1 0");
     expect([0, 1, 2, 3].map((pathIndex) => computeThreadDash(1, pathIndex))).toEqual([
-      { dasharray: "0.21 0.79", dashoffset: 0 },
-      { dasharray: "0.21 0.79", dashoffset: -0.25 },
-      { dasharray: "0.21 0.79", dashoffset: -0.5 },
-      { dasharray: "0.21 0.79", dashoffset: -0.75 },
+      { dasharray: "1 0", dashoffset: 0 },
+      { dasharray: "1 0", dashoffset: 0 },
+      { dasharray: "1 0", dashoffset: 0 },
+      { dasharray: "1 0", dashoffset: 0 },
     ]);
   });
 

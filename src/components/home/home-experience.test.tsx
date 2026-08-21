@@ -419,18 +419,18 @@ describe("HomeExperience", () => {
       }),
     );
     expect(Number(cta.style.getPropertyValue("--orbital-fill-progress"))).toBe(1);
-    expect(new Set(contractedPaths)).toHaveProperty("size", 1);
+    expect(new Set(contractedPaths)).toHaveProperty("size", 4);
     expect(contractedDashes.map(({ dasharray }) => dasharray)).toEqual([
-      "0.21 0.79",
-      "0.21 0.79",
-      "0.21 0.79",
-      "0.21 0.79",
+      "1 0",
+      "1 0",
+      "1 0",
+      "1 0",
     ]);
     expect(contractedDashes.map(({ dashoffset }) => dashoffset)).toEqual([
       "0",
-      "-0.25",
-      "-0.5",
-      "-0.75",
+      "0",
+      "0",
+      "0",
     ]);
 
     fireEvent.pointerLeave(cta);

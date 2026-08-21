@@ -1,10 +1,8 @@
-const KAPPA = 0.5522847498;
 const STAGE_VIEWBOX_SIZE = 128;
 const AUTHORED_GROUP_OFFSET = 8;
 const AUTHORED_GROUP_SCALE = 1.12;
-const CTA_SEGMENT_LENGTH = 0.21;
-const CTA_SEGMENT_SLOT = 0.25;
-const CTA_SEGMENT_SETTLE_START = 0.62;
+const CTA_LAYER_SPACING_PX = 1;
+const SEMICIRCLE_CONTROL = 4 / 3;
 const SVG_NUMBER = "[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?";
 const SVG_POINT = `(${SVG_NUMBER})[\\s,]+(${SVG_NUMBER})`;
 const SVG_CUBIC_SEGMENT = `\\s*C\\s*${SVG_POINT}[\\s,]+${SVG_POINT}[\\s,]+${SVG_POINT}`;
@@ -42,11 +40,6 @@ export type ProgressiveGeometryInput = {
 function clampUnit(value: number) {
   if (!Number.isFinite(value)) return 0;
   return Math.min(1, Math.max(0, value));
-}
-
-function smoothstep(value: number) {
-  const amount = clampUnit(value);
-  return amount * amount * (3 - 2 * amount);
 }
 
 function formatCoordinate(value: number) {
@@ -145,61 +138,72 @@ export function interpolateProgressiveGeometry(
 
 export function createCtaThreadGeometry({
   ctaRect,
+  pathIndex,
   stageRect,
 }: CtaThreadGeometryInput): RingPoint[] {
-  const left = toAuthoredLocal(mapToStage(ctaRect.left, stageRect.left, stageRect.width));
-  const right = toAuthoredLocal(
-    mapToStage(ctaRect.left + ctaRect.width, stageRect.left, stageRect.width),
+  const safePathIndex = Number.isFinite(pathIndex) ? Math.max(0, pathIndex) : 0;
+  const layerOffset = safePathIndex * CTA_LAYER_SPACING_PX;
+  const left = toAuthoredLocal(
+    mapToStage(ctaRect.left - layerOffset, stageRect.left, stageRect.width),
   );
-  const top = toAuthoredLocal(mapToStage(ctaRect.top, stageRect.top, stageRect.height));
+  const right = toAuthoredLocal(
+    mapToStage(
+      ctaRect.left + ctaRect.width + layerOffset,
+      stageRect.left,
+      stageRect.width,
+    ),
+  );
+  const top = toAuthoredLocal(
+    mapToStage(ctaRect.top - layerOffset, stageRect.top, stageRect.height),
+  );
   const bottom = toAuthoredLocal(
-    mapToStage(ctaRect.top + ctaRect.height, stageRect.top, stageRect.height),
+    mapToStage(
+      ctaRect.top + ctaRect.height + layerOffset,
+      stageRect.top,
+      stageRect.height,
+    ),
   );
   const centerX = (left + right) / 2;
-  const centerY = (top + bottom) / 2;
   const radiusX = Math.max(0, Math.abs(right - left) / 2);
   const radiusY = Math.max(0, Math.abs(bottom - top) / 2);
-  const controlX = radiusX * KAPPA;
-  const controlY = radiusY * KAPPA;
+  const cornerRadius = Math.min(radiusX, radiusY);
+  const straightHalf = Math.max(0, radiusX - cornerRadius);
+  const topLeft = centerX - straightHalf;
+  const topRight = centerX + straightHalf;
+  const straightThird = (topRight - topLeft) / 3;
+  const capControl = cornerRadius * SEMICIRCLE_CONTROL;
 
   return [
-    { x: centerX, y: centerY - radiusY },
-    { x: centerX + controlX, y: centerY - radiusY },
-    { x: centerX + radiusX, y: centerY - controlY },
-    { x: centerX + radiusX, y: centerY },
-    { x: centerX + radiusX, y: centerY + controlY },
-    { x: centerX + controlX, y: centerY + radiusY },
-    { x: centerX, y: centerY + radiusY },
-    { x: centerX - controlX, y: centerY + radiusY },
-    { x: centerX - radiusX, y: centerY + controlY },
-    { x: centerX - radiusX, y: centerY },
-    { x: centerX - radiusX, y: centerY - controlY },
-    { x: centerX - controlX, y: centerY - radiusY },
-    { x: centerX, y: centerY - radiusY },
+    { x: topLeft, y: top },
+    { x: topLeft + straightThird, y: top },
+    { x: topRight - straightThird, y: top },
+    { x: topRight, y: top },
+    { x: topRight + capControl, y: top },
+    { x: topRight + capControl, y: bottom },
+    { x: topRight, y: bottom },
+    { x: topRight - straightThird, y: bottom },
+    { x: topLeft + straightThird, y: bottom },
+    { x: topLeft, y: bottom },
+    { x: topLeft - capControl, y: bottom },
+    { x: topLeft - capControl, y: top },
+    { x: topLeft, y: top },
   ];
 }
 
 export function computeThreadDash(progress: number, pathIndex: number) {
   const amount = clampUnit(progress);
-  if (amount === 0) {
+  if (amount === 0 || amount === 1) {
     return { dasharray: "1 0", dashoffset: 0 };
   }
 
   const safePathIndex = Number.isFinite(pathIndex) ? Math.max(0, pathIndex) : 0;
-  const travellingGap = Math.sin(amount * Math.PI) * (0.2 + safePathIndex * 0.025);
-  const travellingLength = 1 - travellingGap;
-  const travellingOffset = amount * (0.18 + safePathIndex * 0.035);
-  const settleProgress = smoothstep(
-    (amount - CTA_SEGMENT_SETTLE_START) / (1 - CTA_SEGMENT_SETTLE_START),
-  );
-  const segmentLength =
-    travellingLength + (CTA_SEGMENT_LENGTH - travellingLength) * settleProgress;
-  const segmentGap = 1 - segmentLength;
-  const terminalOffset = -safePathIndex * CTA_SEGMENT_SLOT;
-  const dashoffset = travellingOffset + (terminalOffset - travellingOffset) * settleProgress;
+  const gap = Math.sin(amount * Math.PI) * (0.2 + safePathIndex * 0.025);
 
   return {
-    dasharray: `${Number(segmentLength.toFixed(3))} ${Number(segmentGap.toFixed(3))}`,
-    dashoffset: Number(dashoffset.toFixed(3)),
+    dasharray:
+      gap <= 0.0001
+        ? "1 0"
+        : `${Number((1 - gap).toFixed(3))} ${Number(gap.toFixed(3))}`,
+    dashoffset: Number((amount * (0.18 + safePathIndex * 0.035)).toFixed(3)),
   };
 }
