@@ -28,6 +28,20 @@ describe("orbital thread store", () => {
     });
   });
 
+  it("keeps future scene progress stackable while CTA temporarily overrides it", () => {
+    setOrbitalBaseState({ kind: "scene", id: "scene-02", progress: 0.35 });
+    setOrbitalCtaState({ active: true, anchorId: "hero-cta" });
+    expect(resolveOrbitalMode(getOrbitalThreadSnapshot()).kind).toBe("cta");
+
+    setOrbitalCtaState({ active: false, anchorId: null });
+
+    expect(resolveOrbitalMode(getOrbitalThreadSnapshot())).toEqual({
+      kind: "scene",
+      id: "scene-02",
+      progress: 0.35,
+    });
+  });
+
   it("clamps scene progress and pointer strength", () => {
     setOrbitalBaseState({ kind: "scene", id: "energy", progress: 3 });
     setOrbitalPointer({ x: 1, y: 1, strength: -2 });

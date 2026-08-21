@@ -117,31 +117,52 @@
   transform: translateX(-0.04rem);
 }
 
-.orbitalLink:not([data-unavailable="true"]):hover .linkLabel::after,
 .orbitalLink:not([data-unavailable="true"]):focus-visible .linkLabel::after {
   transform: scaleX(1);
   transform-origin: left;
 }
 
-.orbitalLink:not([data-unavailable="true"]):hover .linkTerminal,
 .orbitalLink:not([data-unavailable="true"]):focus-visible .linkTerminal {
   background: var(--ink, #20211e);
   color: var(--ivory, #f6f1e8);
   transform: rotate(-18deg);
 }
 
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover,
 .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible {
   border-color: transparent;
   color: var(--ink, #20211e);
   transform: translateY(-1px);
 }
 
-.orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover .linkTerminal,
 .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible .linkTerminal {
   background: color-mix(in srgb, var(--ivory, #f6f1e8) 32%, transparent);
   border-color: color-mix(in srgb, var(--ink, #20211e) 36%, transparent);
   color: var(--ink, #20211e);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .orbitalLink:not([data-unavailable="true"]):hover .linkLabel::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .orbitalLink:not([data-unavailable="true"]):hover .linkTerminal {
+    background: var(--ink, #20211e);
+    color: var(--ivory, #f6f1e8);
+    transform: rotate(-18deg);
+  }
+
+  .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover {
+    border-color: transparent;
+    color: var(--ink, #20211e);
+    transform: translateY(-1px);
+  }
+
+  .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):hover .linkTerminal {
+    background: color-mix(in srgb, var(--ivory, #f6f1e8) 32%, transparent);
+    border-color: color-mix(in srgb, var(--ink, #20211e) 36%, transparent);
+    color: var(--ink, #20211e);
+  }
 }
 
 .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):active {
@@ -158,5 +179,14 @@
   .linkTerminal,
   .orbitalLink[data-variant="orbit"] {
     transition: none;
+  }
+
+  .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible,
+  .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):active {
+    transform: none;
+  }
+
+  .orbitalLink[data-variant="orbit"]:not([data-unavailable="true"]):focus-visible .linkTerminal {
+    transform: none;
   }
 }

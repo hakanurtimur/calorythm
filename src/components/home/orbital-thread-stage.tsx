@@ -164,6 +164,8 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
     if (!ctaAnchor) return;
 
     ctaAnchorRef.current = ctaAnchor;
+    const hasFinePointer =
+      typeof window.matchMedia !== "function" || window.matchMedia("(pointer: fine)").matches;
     let hasPointer = false;
     let hasFocus = false;
     let wasActive = false;
@@ -193,14 +195,18 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       syncCtaState();
     };
 
-    ctaAnchor.addEventListener("pointerenter", handlePointerEnter);
-    ctaAnchor.addEventListener("pointerleave", handlePointerLeave);
+    if (hasFinePointer) {
+      ctaAnchor.addEventListener("pointerenter", handlePointerEnter);
+      ctaAnchor.addEventListener("pointerleave", handlePointerLeave);
+    }
     ctaAnchor.addEventListener("focus", handleFocus);
     ctaAnchor.addEventListener("blur", handleBlur);
 
     return () => {
-      ctaAnchor.removeEventListener("pointerenter", handlePointerEnter);
-      ctaAnchor.removeEventListener("pointerleave", handlePointerLeave);
+      if (hasFinePointer) {
+        ctaAnchor.removeEventListener("pointerenter", handlePointerEnter);
+        ctaAnchor.removeEventListener("pointerleave", handlePointerLeave);
+      }
       ctaAnchor.removeEventListener("focus", handleFocus);
       ctaAnchor.removeEventListener("blur", handleBlur);
       ctaAnchor.style.removeProperty("--orbital-fill-progress");
@@ -266,9 +272,14 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const hasFinePointer =
       typeof window.matchMedia !== "function" || window.matchMedia("(pointer: fine)").matches;
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || !hasFinePointer) return;
 
     const paths = Array.from(stage.querySelectorAll<SVGPathElement>("[data-orbit-path]"));
+    const authoredPathAttributes = paths.map((path) => ({
+      d: path.getAttribute("d"),
+      dasharray: path.getAttribute("stroke-dasharray"),
+      dashoffset: path.getAttribute("stroke-dashoffset"),
+    }));
     const responses = threadResponses.map((response) => ({ ...response }));
     let animationFrame = 0;
     let ctaProgress = 0;
@@ -278,7 +289,13 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
     let firstTimestamp: number | null = null;
     let lastTimestamp: number | null = null;
 
+    const requestRender = () => {
+      if (document.hidden || animationFrame !== 0) return;
+      animationFrame = window.requestAnimationFrame(renderMorph);
+    };
     const renderMorph = (timestamp: number) => {
+      animationFrame = 0;
+      if (document.hidden) return;
       firstTimestamp ??= timestamp;
       const delta =
         lastTimestamp === null ? 1 / 60 : Math.min((timestamp - lastTimestamp) / 1000, 0.05);
@@ -351,7 +368,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         `${fillProgress}`,
       );
 
-      animationFrame = window.requestAnimationFrame(renderMorph);
+      requestRender();
     };
     const handlePointerMove = (event: PointerEvent) => {
       if (!hasFinePointer) return;
@@ -373,25 +390,42 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
     const releasePointer = () => {
       setOrbitalPointer({ ...snapshotRef.current.pointer, strength: 0 });
     };
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (animationFrame !== 0) window.cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+        return;
+      }
+      requestRender();
+    };
 
     window.addEventListener("pointermove", handlePointerMove, { passive: true });
     window.addEventListener("blur", releasePointer);
     document.documentElement.addEventListener("pointerleave", releasePointer);
-    animationFrame = window.requestAnimationFrame(renderMorph);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    requestRender();
 
     return () => {
-      window.cancelAnimationFrame(animationFrame);
+      if (animationFrame !== 0) window.cancelAnimationFrame(animationFrame);
       stage.setAttribute("data-cta-layer", "idle");
       stage.style.removeProperty("z-index");
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("blur", releasePointer);
       document.documentElement.removeEventListener("pointerleave", releasePointer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       paths.forEach((path, index) => {
-        const basePath = orbitalPaths[index];
-        if (basePath) path.setAttribute("d", basePath.d);
-        path.removeAttribute("stroke-dasharray");
-        path.removeAttribute("stroke-dashoffset");
+        const authored = authoredPathAttributes[index];
+        if (!authored) return;
+        if (authored.d === null) path.removeAttribute("d");
+        else path.setAttribute("d", authored.d);
+        if (authored.dasharray === null) path.removeAttribute("stroke-dasharray");
+        else path.setAttribute("stroke-dasharray", authored.dasharray);
+        if (authored.dashoffset === null) path.removeAttribute("stroke-dashoffset");
+        else path.setAttribute("stroke-dashoffset", authored.dashoffset);
       });
+      if (getOrbitalThreadSnapshot().cta.anchorId === "hero-cta") {
+        setOrbitalCtaState({ active: false, anchorId: null });
+      }
     };
   }, [phase]);
 
