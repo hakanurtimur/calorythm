@@ -26,7 +26,7 @@ const initialSnapshot: OrbitalThreadSnapshot = {
 
 let snapshot = initialSnapshot;
 const listeners = new Set<() => void>();
-const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+const clamp01 = (value: number) => (Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0);
 
 export function getOrbitalThreadSnapshot() {
   return snapshot;
@@ -68,5 +68,5 @@ export function resolveOrbitalMode(value: OrbitalThreadSnapshot): ResolvedOrbita
 }
 
 export function resetOrbitalThreadState() {
-  snapshot = initialSnapshot;
+  publish(initialSnapshot);
 }

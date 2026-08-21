@@ -44,4 +44,28 @@ describe("orbital thread store", () => {
     expect(listener).not.toHaveBeenCalled();
     unsubscribe();
   });
+
+  it("notifies subscribers when reset changes state and suppresses stable resets", () => {
+    setOrbitalBaseState({ kind: "hero" });
+    const listener = vi.fn();
+    const unsubscribe = subscribeOrbitalThreadState(listener);
+
+    resetOrbitalThreadState();
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(getOrbitalThreadSnapshot().base).toEqual({ kind: "intro" });
+
+    resetOrbitalThreadState();
+    expect(listener).toHaveBeenCalledTimes(1);
+    unsubscribe();
+  });
+
+  it("normalizes non-finite scene progress and pointer strength", () => {
+    setOrbitalBaseState({ kind: "scene", id: "energy", progress: Number.NaN });
+    setOrbitalPointer({ x: 0, y: 0, strength: Number.POSITIVE_INFINITY });
+
+    expect(getOrbitalThreadSnapshot()).toMatchObject({
+      base: { kind: "scene", id: "energy", progress: 0 },
+      pointer: { strength: 0 },
+    });
+  });
 });
