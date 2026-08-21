@@ -326,6 +326,48 @@ describe("HomeExperience", () => {
     expect(Number(cta.style.getPropertyValue("--orbital-fill-progress"))).toBeLessThan(0.1);
   });
 
+  it("paints CTA threads above the gradient only while the morph is away from idle", () => {
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    const { container } = render(<HomeExperience />);
+    const stage = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]")!;
+    const heroCopy = container.querySelector<HTMLElement>('[data-motion="hero-copy"]')!;
+    const header = container.querySelector<HTMLElement>("header")!;
+    const cta = heroCopy.querySelector<HTMLElement>('[data-orbital-anchor="hero-cta"]')!;
+
+    stage.getBoundingClientRect = () =>
+      ({ left: 288, top: 18, width: 864, height: 864, right: 1152, bottom: 882, x: 288, y: 18, toJSON: () => ({}) }) as DOMRect;
+    cta.getBoundingClientRect = () =>
+      ({ left: 640, top: 650, width: 160, height: 52, right: 800, bottom: 702, x: 640, y: 650, toJSON: () => ({}) }) as DOMRect;
+
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+    expect(stage).toHaveAttribute("data-cta-layer", "idle");
+    expect(stage.style.zIndex).toBe("");
+
+    fireEvent.pointerEnter(cta);
+    act(() => frames.shift()?.(0));
+
+    const foregroundZIndex = Number(stage.style.zIndex);
+    expect(stage).toHaveAttribute("data-cta-layer", "foreground");
+    expect(foregroundZIndex).toBeGreaterThan(3);
+    expect(foregroundZIndex).toBeLessThan(5);
+    expect(heroCopy).toContainElement(cta);
+    expect(header).not.toContainElement(stage);
+
+    fireEvent.pointerLeave(cta);
+    act(() =>
+      [60, 120, 180, 240, 300, 360, 420, 480, 540, 600, 660, 720].forEach((time) =>
+        frames.shift()?.(time),
+      ),
+    );
+
+    expect(stage).toHaveAttribute("data-cta-layer", "idle");
+    expect(stage.style.zIndex).toBe("");
+  });
+
   it("uses the same CTA state for keyboard focus", () => {
     const { container } = render(<HomeExperience />);
     const cta = container.querySelector<HTMLElement>(

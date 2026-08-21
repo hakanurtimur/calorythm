@@ -294,6 +294,13 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         ctaProgress = ctaTargetProgress;
       }
       lastTimestamp = timestamp;
+      const ctaLayer = ctaActive || ctaProgress > 0 ? "foreground" : "idle";
+      stage.setAttribute("data-cta-layer", ctaLayer);
+      if (ctaLayer === "foreground") {
+        stage.style.zIndex = "4";
+      } else {
+        stage.style.removeProperty("z-index");
+      }
 
       if (ctaActive && (!wasCtaActive || !ctaTargets)) {
         const stageRect = stage.getBoundingClientRect();
@@ -374,6 +381,8 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
+      stage.setAttribute("data-cta-layer", "idle");
+      stage.style.removeProperty("z-index");
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("blur", releasePointer);
       document.documentElement.removeEventListener("pointerleave", releasePointer);
@@ -438,6 +447,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
     <svg
       aria-hidden="true"
       className={styles.orbitalThreadStage}
+      data-cta-layer="idle"
       data-orbit-mark="frame"
       data-orbital-thread-stage=""
       data-phase={phase}
