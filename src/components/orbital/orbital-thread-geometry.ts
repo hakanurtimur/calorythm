@@ -24,6 +24,7 @@ export type RectLike = {
 
 export type CtaThreadGeometryInput = {
   ctaRect: RectLike;
+  layerSpacingPx?: number;
   pathIndex: number;
   stageRect: RectLike;
 };
@@ -138,11 +139,13 @@ export function interpolateProgressiveGeometry(
 
 export function createCtaThreadGeometry({
   ctaRect,
+  layerSpacingPx = CTA_LAYER_SPACING_PX,
   pathIndex,
   stageRect,
 }: CtaThreadGeometryInput): RingPoint[] {
   const safePathIndex = Number.isFinite(pathIndex) ? Math.max(0, pathIndex) : 0;
-  const layerOffset = safePathIndex * CTA_LAYER_SPACING_PX;
+  const safeLayerSpacing = Number.isFinite(layerSpacingPx) ? Math.max(0, layerSpacingPx) : 0;
+  const layerOffset = safePathIndex * safeLayerSpacing;
   const left = toAuthoredLocal(
     mapToStage(ctaRect.left - layerOffset, stageRect.left, stageRect.width),
   );

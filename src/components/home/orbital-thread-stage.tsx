@@ -8,8 +8,14 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import type { CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { readMotionProfile } from "@/components/motion/motion-profile";
+import {
+  getOrbitalThreadConfig,
+  subscribeOrbitalThreadConfig,
+  type OrbitalThreadConfig,
+} from "@/components/orbital/orbital-thread-config";
 import {
   computeThreadDash,
   createCtaThreadGeometry,
@@ -36,26 +42,13 @@ type OrbitalThreadStageProps = {
 };
 
 type ThreadResponse = {
-  amplitude: number;
   directionX: number;
   directionY: number;
-  phase: number;
-  response: number;
   strength: number;
 };
 
 const subscribeToHydration = () => () => undefined;
 const RING_CENTER = 50;
-const POINTER_ANCHOR_RADIUS = 61;
-const CTA_RESPONSE = 10;
-const CTA_PATH_LAGS = [1, 0.92, 0.84, 0.76] as const;
-
-const threadResponses: ThreadResponse[] = [
-  { amplitude: 5.2, directionX: 1, directionY: 0, phase: 0.2, response: 8.2, strength: 0 },
-  { amplitude: 4.6, directionX: 1, directionY: 0, phase: 1.6, response: 6.8, strength: 0 },
-  { amplitude: 4, directionX: 1, directionY: 0, phase: 3.1, response: 5.6, strength: 0 },
-  { amplitude: 3.5, directionX: 1, directionY: 0, phase: 4.7, response: 4.7, strength: 0 },
-];
 
 const baseThreadPoints = orbitalPaths.map((path) => parseCubicLoopPath(path.d));
 
@@ -63,17 +56,24 @@ function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(maximum, Math.max(minimum, value));
 }
 
+function breathingEnvelope(elapsed: number, cycleMs: number) {
+  return (1 - Math.cos((elapsed / Math.max(1, cycleMs)) * Math.PI * 2)) / 2;
+}
+
 function morphThreadPath(
   points: RingPoint[],
   response: ThreadResponse,
+  profile: OrbitalThreadConfig["pointer"]["threads"][number],
+  config: OrbitalThreadConfig,
   elapsed: number,
   entrance: number,
 ) {
   const directionLength = Math.hypot(response.directionX, response.directionY) || 1;
   const directionX = response.directionX / directionLength;
   const directionY = response.directionY / directionLength;
-  const anchorX = RING_CENTER + directionX * POINTER_ANCHOR_RADIUS;
-  const anchorY = RING_CENTER + directionY * POINTER_ANCHOR_RADIUS;
+  const anchorX = RING_CENTER + directionX * config.pointer.anchorRadius;
+  const anchorY = RING_CENTER + directionY * config.pointer.anchorRadius;
+  const inhale = breathingEnvelope(elapsed, config.hero.breathCycleMs);
 
   return points.map((point) => {
     const radialX = point.x - RING_CENTER;
@@ -86,10 +86,19 @@ function morphThreadPath(
     const pullX = anchorX - point.x;
     const pullY = anchorY - point.y;
     const pullLength = Math.hypot(pullX, pullY) || 1;
-    const pointerOffset = response.amplitude * response.strength * localInfluence;
+    const pointerOffset =
+      profile.amplitude * config.pointer.intensity * response.strength * localInfluence;
+    const perimeterAngle = Math.atan2(radialY, radialX);
     const idleOffset =
-      Math.sin(elapsed * 0.00072 + response.phase + Math.atan2(radialY, radialX) * 2.4) *
-      0.24 *
+      (Math.sin(elapsed * config.hero.primaryWaveSpeed + profile.phase + perimeterAngle * 2.4) *
+        config.hero.primaryWaveAmplitude +
+        Math.sin(
+          elapsed * config.hero.secondaryWaveSpeed +
+            profile.phase * 0.45 -
+            perimeterAngle * 3.2,
+        ) *
+          config.hero.secondaryWaveAmplitude +
+        inhale * config.hero.inhaleExpansion) *
       entrance;
 
     return {
@@ -99,7 +108,7 @@ function morphThreadPath(
   });
 }
 
-function morphCtaHalo(points: RingPoint[], elapsed: number) {
+function morphCtaHalo(points: RingPoint[], elapsed: number, config: OrbitalThreadConfig) {
   const uniquePoints = points.slice(0, -1);
   const center = uniquePoints.reduce(
     (current, point) => ({
@@ -109,7 +118,8 @@ function morphCtaHalo(points: RingPoint[], elapsed: number) {
     { x: 0, y: 0 },
   );
   const uniqueCount = Math.max(1, uniquePoints.length);
-  const time = elapsed * 0.00078;
+  const time = elapsed * config.cta.primaryWaveSpeed;
+  const inhale = breathingEnvelope(elapsed, config.hero.breathCycleMs);
 
   return points.map((point, index) => {
     const seamIndex = index === uniqueCount ? 0 : index;
@@ -118,8 +128,10 @@ function morphCtaHalo(points: RingPoint[], elapsed: number) {
     const radialY = point.y - center.y;
     const radius = Math.hypot(radialX, radialY) || 1;
     const haloOffset =
-      Math.sin(time + perimeterPhase * 2) * 0.16 +
-      Math.sin(time * 0.63 - perimeterPhase * 3) * 0.04;
+      Math.sin(time + perimeterPhase * 2) * config.cta.primaryWaveAmplitude +
+      Math.sin(time * config.cta.secondaryWaveSpeedRatio - perimeterPhase * 3) *
+        config.cta.secondaryWaveAmplitude +
+      inhale * config.cta.inhaleExpansion;
 
     return {
       x: point.x + (radialX / radius) * haloOffset,
@@ -169,11 +181,17 @@ function leadingPointForTarget(source: RingPoint[], target: RingPoint[]) {
 export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps) {
   const [phase, setPhase] = useState<OrbitalThreadPhase>("intro");
   const isHydrated = useSyncExternalStore(subscribeToHydration, () => true, () => false);
+  const threadConfig = useSyncExternalStore(
+    subscribeOrbitalThreadConfig,
+    getOrbitalThreadConfig,
+    getOrbitalThreadConfig,
+  );
   const orbitalSnapshot = useSyncExternalStore(
     subscribeOrbitalThreadState,
     getOrbitalThreadSnapshot,
     getOrbitalThreadSnapshot,
   );
+  const configRef = useRef(threadConfig);
   const snapshotRef = useRef(orbitalSnapshot);
   const stageRef = useRef<SVGSVGElement>(null);
   const targetRef = useRef<HTMLElement | null>(null);
@@ -186,6 +204,11 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
   useLayoutEffect(() => {
     snapshotRef.current = orbitalSnapshot;
   }, [orbitalSnapshot]);
+
+  useLayoutEffect(() => {
+    configRef.current = threadConfig;
+    ctaLayoutRevisionRef.current += 1;
+  }, [threadConfig]);
 
   useEffect(() => {
     return () => {
@@ -355,8 +378,13 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       d: path.getAttribute("d"),
       dasharray: path.getAttribute("stroke-dasharray"),
       dashoffset: path.getAttribute("stroke-dashoffset"),
+      threadWidth: path.style.getPropertyValue("--thread-width"),
     }));
-    const responses = threadResponses.map((response) => ({ ...response }));
+    const responses: ThreadResponse[] = orbitalPaths.map(() => ({
+      directionX: 1,
+      directionY: 0,
+      strength: 0,
+    }));
     let animationFrame = 0;
     let ctaProgress = 0;
     let ctaTargets: RingPoint[][] | null = null;
@@ -376,6 +404,8 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         else path.setAttribute("stroke-dasharray", authored.dasharray);
         if (authored.dashoffset === null) path.removeAttribute("stroke-dashoffset");
         else path.setAttribute("stroke-dashoffset", authored.dashoffset);
+        if (authored.threadWidth) path.style.setProperty("--thread-width", authored.threadWidth);
+        else path.style.removeProperty("--thread-width");
       });
     };
     const restoreStaticStage = () => {
@@ -405,12 +435,20 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       const delta =
         lastTimestamp === null ? 1 / 60 : Math.min((timestamp - lastTimestamp) / 1000, 0.05);
       const elapsed = timestamp - firstTimestamp;
-      const entrance = clamp(elapsed / 800, 0, 1);
+      const config = configRef.current;
+      const entrance = clamp(elapsed / Math.max(1, config.hero.entranceMs), 0, 1);
+      const inhale = breathingEnvelope(elapsed, config.hero.breathCycleMs);
+      const heroThreadWidth =
+        config.hero.restStrokeWidth +
+        inhale * (config.hero.inhaleStrokeWidth - config.hero.restStrokeWidth);
+      const ctaThreadWidth =
+        config.cta.restStrokeWidth +
+        inhale * (config.cta.inhaleStrokeWidth - config.cta.restStrokeWidth);
       const snapshot = snapshotRef.current;
       const pointer = snapshot.pointer;
       const ctaActive = snapshot.cta.active && snapshot.cta.anchorId === "hero-cta";
       const ctaTargetProgress = ctaActive ? 1 : 0;
-      const ctaEasing = 1 - Math.exp(-CTA_RESPONSE * delta);
+      const ctaEasing = 1 - Math.exp(-config.cta.response * delta);
       ctaProgress += (ctaTargetProgress - ctaProgress) * ctaEasing;
       if (Math.abs(ctaTargetProgress - ctaProgress) < 0.001) {
         ctaProgress = ctaTargetProgress;
@@ -433,7 +471,12 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         const ctaRect = ctaRectRef.current;
         if (ctaRect && stageRect.width > 0 && stageRect.height > 0) {
           ctaTargets = orbitalPaths.map((_, pathIndex) =>
-            createCtaThreadGeometry({ ctaRect, pathIndex, stageRect }),
+            createCtaThreadGeometry({
+              ctaRect,
+              layerSpacingPx: config.cta.layerSpacingPx,
+              pathIndex,
+              stageRect,
+            }),
           );
           leadingPoints = orbitalPaths.map(() => null);
           ctaLayoutRevision = currentCtaLayoutRevision;
@@ -443,17 +486,27 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
 
       responses.forEach((response, index) => {
         const basePoints = baseThreadPoints[index];
-        if (!basePoints) return;
-        const easing = 1 - Math.exp(-response.response * delta);
+        const profile = config.pointer.threads[index];
+        if (!basePoints || !profile) return;
+        const easing = 1 - Math.exp(-profile.response * delta);
         response.directionX += (pointer.x - response.directionX) * easing;
         response.directionY += (pointer.y - response.directionY) * easing;
         response.strength += (pointer.strength - response.strength) * easing;
 
-        const heroPoints = morphThreadPath(basePoints, response, elapsed, entrance);
+        const heroPoints = morphThreadPath(
+          basePoints,
+          response,
+          profile,
+          config,
+          elapsed,
+          entrance,
+        );
         const ctaTarget = ctaTargets?.[index];
-        const breathingCtaTarget = ctaTarget ? morphCtaHalo(ctaTarget, elapsed) : null;
-        const pathLag = CTA_PATH_LAGS[index] ?? 1;
+        const breathingCtaTarget = ctaTarget ? morphCtaHalo(ctaTarget, elapsed, config) : null;
+        const pathLag = config.cta.pathLags[index] ?? 1;
         const pathProgress = laggedCtaProgress(ctaProgress, pathLag);
+        const threadWidth =
+          heroThreadWidth + (ctaThreadWidth - heroThreadWidth) * pathProgress;
         let renderedPoints = heroPoints;
 
         if (ctaTarget && breathingCtaTarget) {
@@ -471,9 +524,14 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         path?.setAttribute("d", serializeCubicLoopPath(renderedPoints));
         path?.setAttribute("stroke-dasharray", dash.dasharray);
         path?.setAttribute("stroke-dashoffset", `${dash.dashoffset}`);
+        path?.style.setProperty("--thread-width", threadWidth.toFixed(3));
       });
 
-      const fillProgress = clamp((ctaProgress - 0.45) / 0.55, 0, 1);
+      const fillProgress = clamp(
+        (ctaProgress - config.cta.fillStart) / Math.max(0.01, 1 - config.cta.fillStart),
+        0,
+        1,
+      );
       ctaAnchorRef.current?.style.setProperty(
         "--orbital-fill-progress",
         `${fillProgress}`,
@@ -607,6 +665,36 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
       ref={stageRef}
       viewBox="0 0 128 128"
     >
+      <defs>
+        {orbitalPaths.map((path) => (
+          <filter
+            colorInterpolationFilters="sRGB"
+            filterUnits="userSpaceOnUse"
+            height={128 + threadConfig.glow.regionPadding * 2}
+            id={`calorythm-orbital-glow-${path.id}`}
+            key={path.id}
+            width={128 + threadConfig.glow.regionPadding * 2}
+            x={-threadConfig.glow.regionPadding}
+            y={-threadConfig.glow.regionPadding}
+          >
+            <feGaussianBlur
+              in="SourceGraphic"
+              result="softGlow"
+              stdDeviation={threadConfig.glow.blur}
+            />
+            <feFlood
+              floodColor={path.color}
+              floodOpacity={threadConfig.glow.opacity}
+              result="glowColor"
+            />
+            <feComposite in="glowColor" in2="softGlow" operator="in" result="coloredGlow" />
+            <feMerge>
+              <feMergeNode in="coloredGlow" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        ))}
+      </defs>
       <g data-orbital-thread-motion="" style={{ transform: "none" }}>
         <g transform="translate(8 8) scale(1.12)">
           {orbitalPaths.map((path) => (
@@ -616,9 +704,13 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
               data-orbit-path={path.id}
               data-splash-thread={path.id}
               data-tone={path.id}
+              filter={phase === "hero" ? `url(#calorythm-orbital-glow-${path.id})` : undefined}
               key={path.id}
               pathLength="1"
               stroke={path.color}
+              style={{
+                "--thread-width": threadConfig.hero.restStrokeWidth,
+              } as CSSProperties}
             />
           ))}
         </g>

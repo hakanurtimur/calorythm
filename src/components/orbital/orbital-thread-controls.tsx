@@ -1,0 +1,178 @@
+"use client";
+
+import { useEffect } from "react";
+import { folder, Leva, useControls } from "leva";
+import {
+  orbitalThreadDefaults,
+  resetOrbitalThreadConfig,
+  setOrbitalThreadConfig,
+} from "./orbital-thread-config";
+
+export function OrbitalThreadControls() {
+  const values = useControls("CALORYTHM / ORBITAL", {
+    "Hero material": folder({
+      heroRestStrokeWidth: {
+        label: "Rest width",
+        max: 30,
+        min: 1,
+        step: 0.1,
+        value: orbitalThreadDefaults.hero.restStrokeWidth,
+      },
+      heroInhaleStrokeWidth: {
+        label: "Inhale width",
+        max: 40,
+        min: 1,
+        step: 0.1,
+        value: orbitalThreadDefaults.hero.inhaleStrokeWidth,
+      },
+      breathCycleMs: {
+        label: "Breath cycle",
+        max: 9000,
+        min: 1200,
+        step: 50,
+        value: orbitalThreadDefaults.hero.breathCycleMs,
+      },
+      heroPrimaryWaveAmplitude: {
+        label: "Primary wave",
+        max: 1.2,
+        min: 0,
+        step: 0.01,
+        value: orbitalThreadDefaults.hero.primaryWaveAmplitude,
+      },
+      heroSecondaryWaveAmplitude: {
+        label: "Secondary wave",
+        max: 0.6,
+        min: 0,
+        step: 0.01,
+        value: orbitalThreadDefaults.hero.secondaryWaveAmplitude,
+      },
+      heroInhaleExpansion: {
+        label: "Inhale expansion",
+        max: 1,
+        min: 0,
+        step: 0.01,
+        value: orbitalThreadDefaults.hero.inhaleExpansion,
+      },
+    }),
+    Glow: folder({
+      glowBlur: {
+        label: "Blur",
+        max: 3,
+        min: 0,
+        step: 0.01,
+        value: orbitalThreadDefaults.glow.blur,
+      },
+      glowOpacity: {
+        label: "Opacity",
+        max: 1,
+        min: 0,
+        step: 0.01,
+        value: orbitalThreadDefaults.glow.opacity,
+      },
+    }),
+    "CTA form": folder({
+      ctaRestStrokeWidth: {
+        label: "Rest width",
+        max: 6,
+        min: 0.5,
+        step: 0.05,
+        value: orbitalThreadDefaults.cta.restStrokeWidth,
+      },
+      ctaInhaleStrokeWidth: {
+        label: "Inhale width",
+        max: 8,
+        min: 0.5,
+        step: 0.05,
+        value: orbitalThreadDefaults.cta.inhaleStrokeWidth,
+      },
+      ctaLayerSpacing: {
+        label: "Layer spacing",
+        max: 8,
+        min: 0,
+        step: 0.25,
+        value: orbitalThreadDefaults.cta.layerSpacingPx,
+      },
+      ctaWaveAmplitude: {
+        label: "Wave",
+        max: 0.8,
+        min: 0,
+        step: 0.01,
+        value: orbitalThreadDefaults.cta.primaryWaveAmplitude,
+      },
+    }),
+    Pointer: folder({
+      pointerIntensity: {
+        label: "Intensity",
+        max: 2,
+        min: 0,
+        step: 0.05,
+        value: orbitalThreadDefaults.pointer.intensity,
+      },
+      pointerAnchorRadius: {
+        label: "Reach",
+        max: 90,
+        min: 10,
+        step: 1,
+        value: orbitalThreadDefaults.pointer.anchorRadius,
+      },
+    }),
+  });
+
+  useEffect(() => {
+    setOrbitalThreadConfig({
+      hero: {
+        breathCycleMs: values.breathCycleMs,
+        inhaleExpansion: values.heroInhaleExpansion,
+        inhaleStrokeWidth: values.heroInhaleStrokeWidth,
+        primaryWaveAmplitude: values.heroPrimaryWaveAmplitude,
+        restStrokeWidth: values.heroRestStrokeWidth,
+        secondaryWaveAmplitude: values.heroSecondaryWaveAmplitude,
+      },
+      cta: {
+        inhaleStrokeWidth: values.ctaInhaleStrokeWidth,
+        layerSpacingPx: values.ctaLayerSpacing,
+        primaryWaveAmplitude: values.ctaWaveAmplitude,
+        restStrokeWidth: values.ctaRestStrokeWidth,
+      },
+      glow: {
+        blur: values.glowBlur,
+        opacity: values.glowOpacity,
+      },
+      pointer: {
+        anchorRadius: values.pointerAnchorRadius,
+        intensity: values.pointerIntensity,
+      },
+    });
+  }, [values]);
+
+  useEffect(() => resetOrbitalThreadConfig, []);
+
+  return (
+    <div data-control-runtime="leva" data-orbital-controls="">
+      <Leva
+        collapsed
+        hideCopyButton
+        theme={{
+          colors: {
+            accent1: "#ea735d",
+            accent2: "#f3a65a",
+            accent3: "#c79a45",
+            elevation1: "#20211e",
+            elevation2: "#2b2c28",
+            elevation3: "#353630",
+            highlight1: "#f6f1e8",
+            highlight2: "#dcd6cc",
+            highlight3: "#a7be89",
+          },
+          fonts: {
+            mono: '"IBM Plex Mono", monospace',
+            sans: '"Manrope Variable", sans-serif',
+          },
+          radii: { lg: "10px", sm: "6px", xs: "3px" },
+          sizes: { rootWidth: "320px" },
+        }}
+        titleBar={{ drag: true, filter: false, title: "CALORYTHM / ORBITAL" }}
+      />
+    </div>
+  );
+}

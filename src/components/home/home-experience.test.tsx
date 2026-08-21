@@ -372,6 +372,71 @@ describe("HomeExperience", () => {
     expect(getComputedStyle(motionGroup!).transform).toBe("none");
   });
 
+  it("thickens the threads as the automatic halo inhales", () => {
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    render(<HomeExperience />);
+    const firstPath = document.querySelector<SVGPathElement>(
+      '[data-orbital-thread-stage] [data-orbit-path="orange"]',
+    )!;
+    const authoredPoints = parseCubicLoopPath(orbitalPaths[0].d);
+
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+    act(() => frames.shift()?.(0));
+    const restingWidth = Number(firstPath.style.getPropertyValue("--thread-width"));
+
+    act(() => [1050, 2100].forEach((timestamp) => frames.shift()?.(timestamp)));
+    const inhaledWidth = Number(firstPath.style.getPropertyValue("--thread-width"));
+    const inhaledPoints = parseCubicLoopPath(firstPath.getAttribute("d")!);
+    const largestDisplacement = Math.max(
+      ...inhaledPoints.map((point, index) =>
+        Math.hypot(
+          point.x - authoredPoints[index]!.x,
+          point.y - authoredPoints[index]!.y,
+        ),
+      ),
+    );
+
+    expect(restingWidth).toBeCloseTo(12, 2);
+    expect(inhaledWidth).toBeGreaterThan(19.5);
+    expect(largestDisplacement).toBeGreaterThan(0.3);
+  });
+
+  it("places a restrained color-matched glow behind each hero thread", () => {
+    render(<HomeExperience />);
+    fireEvent.pointerDown(screen.getByTestId("home-splash"));
+
+    const stage = document.querySelector<SVGSVGElement>("[data-orbital-thread-stage]")!;
+    const paths = Array.from(stage.querySelectorAll<SVGPathElement>("[data-orbit-path]"));
+    const filters = Array.from(
+      stage.querySelectorAll<SVGFilterElement>('filter[id^="calorythm-orbital-glow-"]'),
+    );
+
+    expect(filters).toHaveLength(4);
+    expect(paths.map((path) => path.getAttribute("filter"))).toEqual([
+      "url(#calorythm-orbital-glow-orange)",
+      "url(#calorythm-orbital-glow-coral)",
+      "url(#calorythm-orbital-glow-ochre)",
+      "url(#calorythm-orbital-glow-olive)",
+    ]);
+    expect(
+      filters.every((filter) => {
+        const blur = filter.querySelector('feGaussianBlur[in="SourceGraphic"]');
+        const flood = filter.querySelector("feFlood");
+        const mergeNodes = filter.querySelectorAll("feMergeNode");
+        return (
+          blur?.getAttribute("stdDeviation") === "0.8" &&
+          flood?.getAttribute("flood-opacity") === "0.46" &&
+          mergeNodes.length === 2 &&
+          mergeNodes[1]?.getAttribute("in") === "SourceGraphic"
+        );
+      }),
+    ).toBe(true);
+  });
+
   it("morphs the same persistent paths into breathing CTA layers and returns them", () => {
     const frames: FrameRequestCallback[] = [];
     vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
@@ -432,6 +497,7 @@ describe("HomeExperience", () => {
       "0",
       "0",
     ]);
+    expect(Number(firstPath.style.getPropertyValue("--thread-width"))).toBeLessThanOrEqual(2.4);
 
     act(() => [1380, 1440, 1500, 1560].forEach((time) => frames.shift()?.(time)));
     const breathingPaths = Array.from(

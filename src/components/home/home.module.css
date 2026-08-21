@@ -161,7 +161,7 @@
 
 .orbitalThreadStage[data-phase="hero"] .orbitalThreadPath {
   animation: none;
-  stroke-width: 0.95;
+  stroke-width: var(--thread-width, 0.95);
 }
 
 .splashCal,

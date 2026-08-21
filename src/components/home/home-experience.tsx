@@ -1,5 +1,6 @@
 import { BrandWordmark } from "@/components/brand/brand-wordmark";
 import { OrbitalLink } from "@/components/orbital/orbital-link";
+import { OrbitalThreadControlsLoader } from "@/components/orbital/orbital-thread-controls-loader";
 import { orbitalHomeContent } from "@/content/orbital-home";
 import { HomeMotion } from "./home-motion";
 import { HomeSplash } from "./home-splash";
@@ -23,6 +24,7 @@ export function HomeExperience() {
 
   return (
     <div className={styles.home} data-home-experience="" id="top">
+      <OrbitalThreadControlsLoader />
       <HomeSplash />
       <HomeMotion>
         <section aria-labelledby="home-hero-title" className={styles.hero} data-scene="hero">
