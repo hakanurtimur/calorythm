@@ -99,6 +99,35 @@ function morphThreadPath(
   });
 }
 
+function morphCtaHalo(points: RingPoint[], elapsed: number) {
+  const uniquePoints = points.slice(0, -1);
+  const center = uniquePoints.reduce(
+    (current, point) => ({
+      x: current.x + point.x / (uniquePoints.length || 1),
+      y: current.y + point.y / (uniquePoints.length || 1),
+    }),
+    { x: 0, y: 0 },
+  );
+  const uniqueCount = Math.max(1, uniquePoints.length);
+  const time = elapsed * 0.00078;
+
+  return points.map((point, index) => {
+    const seamIndex = index === uniqueCount ? 0 : index;
+    const perimeterPhase = (seamIndex / uniqueCount) * Math.PI * 2;
+    const radialX = point.x - center.x;
+    const radialY = point.y - center.y;
+    const radius = Math.hypot(radialX, radialY) || 1;
+    const haloOffset =
+      Math.sin(time + perimeterPhase * 2) * 0.16 +
+      Math.sin(time * 0.63 - perimeterPhase * 3) * 0.04;
+
+    return {
+      x: point.x + (radialX / radius) * haloOffset,
+      y: point.y + (radialY / radius) * haloOffset,
+    };
+  });
+}
+
 function handoffDurationFor(duration: number) {
   return duration >= 2400 ? 620 : 460;
 }
@@ -422,15 +451,16 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
 
         const heroPoints = morphThreadPath(basePoints, response, elapsed, entrance);
         const ctaTarget = ctaTargets?.[index];
+        const breathingCtaTarget = ctaTarget ? morphCtaHalo(ctaTarget, elapsed) : null;
         const pathLag = CTA_PATH_LAGS[index] ?? 1;
         const pathProgress = laggedCtaProgress(ctaProgress, pathLag);
         let renderedPoints = heroPoints;
 
-        if (ctaTarget) {
+        if (ctaTarget && breathingCtaTarget) {
           leadingPoints[index] ??= leadingPointForTarget(heroPoints, ctaTarget);
           renderedPoints = interpolateProgressiveGeometry(
             heroPoints,
-            ctaTarget,
+            breathingCtaTarget,
             pathProgress,
             { leadingPointIndex: leadingPoints[index] ?? 0 },
           );

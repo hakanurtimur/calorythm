@@ -1,7 +1,7 @@
 const STAGE_VIEWBOX_SIZE = 128;
 const AUTHORED_GROUP_OFFSET = 8;
 const AUTHORED_GROUP_SCALE = 1.12;
-const CTA_LAYER_SPACING_PX = 1;
+const CTA_LAYER_SPACING_PX = 2;
 const SEMICIRCLE_CONTROL = 4 / 3;
 const SVG_NUMBER = "[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?";
 const SVG_POINT = `(${SVG_NUMBER})[\\s,]+(${SVG_NUMBER})`;

@@ -64,7 +64,7 @@ describe("orbital thread geometry", () => {
     ).toBe(true);
   });
 
-  it("creates four finite CTA rounded rectangles in one-pixel outer layers", () => {
+  it("creates four finite CTA rounded rectangles in two-pixel outer layers", () => {
     const loops = [0, 1, 2, 3].map((pathIndex) =>
       createCtaThreadGeometry({
         ctaRect: { left: 620, top: 650, width: 160, height: 52 },
@@ -84,9 +84,9 @@ describe("orbital thread geometry", () => {
     expect(loops.map((loop) => loop[0]!.y)).toEqual(
       [...loops.map((loop) => loop[0]!.y)].sort((a, b) => b - a),
     );
-    expect(loops[0]![0]!.y - loops[1]![0]!.y).toBeCloseTo(0.132275, 6);
-    expect(loops[1]![0]!.y - loops[2]![0]!.y).toBeCloseTo(0.132275, 6);
-    expect(loops[2]![0]!.y - loops[3]![0]!.y).toBeCloseTo(0.132275, 6);
+    expect(loops[0]![0]!.y - loops[1]![0]!.y).toBeCloseTo(0.26455, 5);
+    expect(loops[1]![0]!.y - loops[2]![0]!.y).toBeCloseTo(0.26455, 5);
+    expect(loops[2]![0]!.y - loops[3]![0]!.y).toBeCloseTo(0.26455, 5);
   });
 
   it("opens a travelling gap before closing each layered CTA outline", () => {

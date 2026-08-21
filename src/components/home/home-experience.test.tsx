@@ -372,7 +372,7 @@ describe("HomeExperience", () => {
     expect(getComputedStyle(motionGroup!).transform).toBe("none");
   });
 
-  it("morphs the same persistent paths into the CTA and returns them", () => {
+  it("morphs the same persistent paths into breathing CTA layers and returns them", () => {
     const frames: FrameRequestCallback[] = [];
     vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
       frames.push(callback);
@@ -433,8 +433,16 @@ describe("HomeExperience", () => {
       "0",
     ]);
 
-    fireEvent.pointerLeave(cta);
     act(() => [1380, 1440, 1500, 1560].forEach((time) => frames.shift()?.(time)));
+    const breathingPaths = Array.from(
+      stage.querySelectorAll<SVGPathElement>("[data-orbit-path]"),
+      (path) => path.getAttribute("d"),
+    );
+    expect(breathingPaths).not.toEqual(contractedPaths);
+    expect(new Set(breathingPaths)).toHaveProperty("size", 4);
+
+    fireEvent.pointerLeave(cta);
+    act(() => [1620, 1680, 1740, 1800].forEach((time) => frames.shift()?.(time)));
     expect(firstPath.getAttribute("d")).not.toBe(contractedPath);
     expect(Number(cta.style.getPropertyValue("--orbital-fill-progress"))).toBeLessThan(0.1);
   });
