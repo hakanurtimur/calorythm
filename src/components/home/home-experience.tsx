@@ -117,19 +117,27 @@ export function HomeExperience() {
         aria-labelledby="section-02-title"
         className={`${styles.scene} ${styles.macroScene}`}
         data-scene="02"
+        data-scene-role="editorial-proof-route"
         id="section-02"
       >
         <div className={styles.macroViewport} data-pin="02">
           <div className={`${styles.sceneInner} ${styles.macroInner}`}>
             <p aria-hidden="true" className={styles.sceneNumber}>02</p>
-            <div className={`${styles.sceneCopy} ${styles.macroCopy}`}>
+            <p aria-hidden="true" className={styles.proofIndex} data-proof-index="">
+              <span>CALORYTHM / EDITORIAL 002</span>
+              <span>İDDİA → KANIT → YAYIN</span>
+            </p>
+            <div
+              className={`${styles.sceneCopy} ${styles.macroCopy}`}
+              data-motion="proof-copy"
+            >
               <SceneTitle section={stories} />
               <p className={styles.sceneBody}>{stories.body}</p>
             </div>
             <ol aria-label="Editoryal yaklaşım" className={styles.macroRoutes}>
               {orbitalHomeContent.editorialPrinciples.map((route, index) => (
                 <li
-                  data-motion="macro-route"
+                  data-motion="proof-stop"
                   data-tone={route.tone}
                   key={route.id}
                 >

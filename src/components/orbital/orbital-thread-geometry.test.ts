@@ -36,6 +36,26 @@ describe("orbital thread geometry", () => {
     expect(serializeCubicLoopPath(points)).not.toMatch(/\.\d{3}/);
   });
 
+  it("serializes the Scene 02 proof route as an open four-cubic path", () => {
+    type SerializeCubicPath = (
+      points: ReturnType<typeof parseCubicLoopPath>,
+      options: { closed: boolean },
+    ) => string;
+    const serializeCubicPath = (
+      orbitalGeometry as unknown as { serializeCubicPath?: SerializeCubicPath }
+    ).serializeCubicPath;
+
+    expect(serializeCubicPath).toBeTypeOf("function");
+    if (!serializeCubicPath) return;
+
+    const path = serializeCubicPath(parseCubicLoopPath(orbitalPaths[0].d), {
+      closed: false,
+    });
+
+    expect(path.match(/C/g)).toHaveLength(4);
+    expect(path).not.toMatch(/Z$/);
+  });
+
   it("keeps interpolation endpoints exact", () => {
     const from = parseCubicLoopPath(orbitalPaths[0].d);
     const to = createCtaThreadGeometry({
@@ -205,5 +225,64 @@ describe("orbital thread geometry", () => {
       Math.max(...signal.map(({ x }) => x)) - Math.min(...signal.map(({ x }) => x)),
     ).toBeGreaterThan(130);
     expect(laterSignal).toEqual(signal);
+  });
+
+  it("morphs the flat signal into a layered three-stop editorial proof route", () => {
+    type ProofGeometry = (
+      source: ReturnType<typeof parseCubicLoopPath>,
+      input: {
+        layerIndex: number;
+        layerSpacing: number;
+        progress: number;
+        routeDepth: number;
+      },
+    ) => ReturnType<typeof parseCubicLoopPath>;
+    const createEditorialProofGeometry = (
+      orbitalGeometry as unknown as { createEditorialProofGeometry?: ProofGeometry }
+    ).createEditorialProofGeometry;
+
+    expect(createEditorialProofGeometry).toBeTypeOf("function");
+    if (!createEditorialProofGeometry) return;
+
+    const source = orbitalGeometry.createEditorialSignalGeometry(
+      parseCubicLoopPath(orbitalPaths[0].d),
+      {
+        elapsedMs: 0,
+        layerIndex: 0,
+        layerSpacing: 2.4,
+        noiseAmplitude: 7,
+        progress: 1,
+        radiusX: 70,
+        radiusY: 9,
+        settledWaveAmplitude: 1.2,
+        waveLobes: 3.2,
+        waveSpeed: 0.001,
+      },
+    );
+    const route = createEditorialProofGeometry(source, {
+      layerIndex: 0,
+      layerSpacing: 2.8,
+      progress: 1,
+      routeDepth: 20,
+    });
+    const lowerRoute = createEditorialProofGeometry(source, {
+      layerIndex: 3,
+      layerSpacing: 2.8,
+      progress: 1,
+      routeDepth: 20,
+    });
+    const anchors = [route[0], route[3], route[6], route[9], route[12]];
+
+    expect(createEditorialProofGeometry(source, {
+      layerIndex: 0,
+      layerSpacing: 2.8,
+      progress: 0,
+      routeDepth: 20,
+    })).toEqual(source);
+    expect(anchors.every((point, index) => index === 0 || point!.x > anchors[index - 1]!.x)).toBe(true);
+    expect(Math.max(...route.map(({ y }) => y)) - Math.min(...route.map(({ y }) => y))).toBeGreaterThan(30);
+    expect(lowerRoute[6]!.y).toBeGreaterThan(route[6]!.y + 7);
+    expect(route[0]).not.toEqual(route[12]);
+    expect(route.flatMap(({ x, y }) => [x, y]).every(Number.isFinite)).toBe(true);
   });
 });

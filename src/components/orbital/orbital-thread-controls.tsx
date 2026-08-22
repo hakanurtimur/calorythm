@@ -198,6 +198,36 @@ export function OrbitalThreadControls() {
         value: orbitalThreadDefaults.scene01.pointerWaveBoost,
       },
     }),
+    "Scene 02 proof route": folder({
+      scene02RouteDepth: {
+        label: "Route depth",
+        max: 32,
+        min: 8,
+        step: 0.5,
+        value: orbitalThreadDefaults.scene02.routeDepth,
+      },
+      scene02LayerSpacing: {
+        label: "Layer spacing",
+        max: 8,
+        min: 0,
+        step: 0.1,
+        value: orbitalThreadDefaults.scene02.layerSpacing,
+      },
+      scene02RestStrokeWidth: {
+        label: "Rest width",
+        max: 14,
+        min: 0.5,
+        step: 0.1,
+        value: orbitalThreadDefaults.scene02.restStrokeWidth,
+      },
+      scene02InhaleStrokeWidth: {
+        label: "Inhale width",
+        max: 18,
+        min: 0.5,
+        step: 0.1,
+        value: orbitalThreadDefaults.scene02.inhaleStrokeWidth,
+      },
+    }),
     Glow: folder({
       glowBlur: {
         label: "Blur",
@@ -307,6 +337,12 @@ export function OrbitalThreadControls() {
         settledWaveAmplitude: values.scene01SettledWaveAmplitude,
         waveLobes: values.scene01WaveLobes,
         waveSpeed: values.scene01WaveSpeed / 1000,
+      },
+      scene02: {
+        inhaleStrokeWidth: values.scene02InhaleStrokeWidth,
+        layerSpacing: values.scene02LayerSpacing,
+        restStrokeWidth: values.scene02RestStrokeWidth,
+        routeDepth: values.scene02RouteDepth,
       },
     });
   }, [values]);

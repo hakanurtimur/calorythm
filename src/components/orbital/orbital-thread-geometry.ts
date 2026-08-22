@@ -46,6 +46,13 @@ export type EditorialSignalGeometryInput = {
   pointerY?: number;
 };
 
+export type EditorialProofGeometryInput = {
+  layerIndex: number;
+  layerSpacing: number;
+  progress: number;
+  routeDepth: number;
+};
+
 /**
  * Selects the point nearest the CTA-facing portion of a loop. Points farther
  * around the closed path receive progressively more delay during a morph.
@@ -114,8 +121,13 @@ export function parseCubicLoopPath(d: string): RingPoint[] {
   }));
 }
 
+export function serializeCubicPath(points: RingPoint[], { closed }: { closed: boolean }) {
+  const path = `M${pointAt(points, 0)}C${pointAt(points, 1)} ${pointAt(points, 2)} ${pointAt(points, 3)}C${pointAt(points, 4)} ${pointAt(points, 5)} ${pointAt(points, 6)}C${pointAt(points, 7)} ${pointAt(points, 8)} ${pointAt(points, 9)}C${pointAt(points, 10)} ${pointAt(points, 11)} ${pointAt(points, 12)}`;
+  return closed ? `${path}Z` : path;
+}
+
 export function serializeCubicLoopPath(points: RingPoint[]) {
-  return `M${pointAt(points, 0)}C${pointAt(points, 1)} ${pointAt(points, 2)} ${pointAt(points, 3)}C${pointAt(points, 4)} ${pointAt(points, 5)} ${pointAt(points, 6)}C${pointAt(points, 7)} ${pointAt(points, 8)} ${pointAt(points, 9)}C${pointAt(points, 10)} ${pointAt(points, 11)} ${pointAt(points, 12)}Z`;
+  return serializeCubicPath(points, { closed: true });
 }
 
 export function interpolateGeometry(from: RingPoint[], to: RingPoint[], progress: number) {
@@ -219,6 +231,46 @@ export function createEditorialSignalGeometry(
   breathingTarget[uniqueCount] = { ...breathingTarget[0]! };
 
   return interpolateGeometry(source, breathingTarget, morphProgress);
+}
+
+/**
+ * Opens the flat Scene 01 signal into one continuous editorial proof route.
+ * Its four cubic stops align with Source, Context and Narrative without
+ * introducing another SVG or crossfading the persistent brand threads.
+ */
+export function createEditorialProofGeometry(
+  source: RingPoint[],
+  {
+    layerIndex,
+    layerSpacing,
+    progress,
+    routeDepth,
+  }: EditorialProofGeometryInput,
+) {
+  const amount = smoothstep(0.06, 0.86, progress);
+  if (amount === 0) return source;
+
+  const safeLayerIndex = Number.isFinite(layerIndex) ? Math.max(0, layerIndex) : 0;
+  const safeLayerSpacing = Number.isFinite(layerSpacing) ? Math.max(0, layerSpacing) : 0;
+  const safeRouteDepth = Number.isFinite(routeDepth) ? Math.max(0, routeDepth) : 20;
+  const centerY = 50 + safeLayerIndex * safeLayerSpacing;
+  const target: RingPoint[] = [
+    { x: -12, y: centerY },
+    { x: 0, y: centerY },
+    { x: 14, y: centerY },
+    { x: 27, y: centerY },
+    { x: 35, y: centerY },
+    { x: 42, y: centerY - safeRouteDepth },
+    { x: 50, y: centerY - safeRouteDepth },
+    { x: 59, y: centerY - safeRouteDepth },
+    { x: 66, y: centerY + safeRouteDepth },
+    { x: 74, y: centerY + safeRouteDepth },
+    { x: 86, y: centerY + safeRouteDepth },
+    { x: 100, y: centerY },
+    { x: 112, y: centerY },
+  ];
+
+  return interpolateGeometry(source, target, amount);
 }
 
 /**

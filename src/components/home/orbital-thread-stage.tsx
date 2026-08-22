@@ -18,9 +18,11 @@ import {
 import {
   computeThreadDash,
   createCtaThreadGeometry,
+  createEditorialProofGeometry,
   createEditorialSignalGeometry,
   interpolateProgressiveGeometry,
   parseCubicLoopPath,
+  serializeCubicPath,
   serializeCubicLoopPath,
   type RingPoint,
 } from "@/components/orbital/orbital-thread-geometry";
@@ -372,6 +374,14 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
 
       const baseState = snapshotRef.current.base;
       const targetSquare = centeredSquare(target.getBoundingClientRect());
+      if (baseState.kind === "scene" && baseState.id === "02") {
+        stage.dataset.orbitalLayout = "scene-02";
+        stage.style.left = "0px";
+        stage.style.top = "0px";
+        stage.style.width = `${window.innerWidth}px`;
+        stage.style.height = `${window.innerHeight}px`;
+        return;
+      }
       if (baseState.kind === "scene" && baseState.id === "01") {
         const rawLayoutProgress = clamp(baseState.progress / 0.22, 0, 1);
         const layoutProgress =
@@ -514,6 +524,10 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         snapshot.base.kind === "scene" && snapshot.base.id === "01"
           ? snapshot.base.progress
           : 0;
+      const scene02Progress =
+        snapshot.base.kind === "scene" && snapshot.base.id === "02"
+          ? snapshot.base.progress
+          : 0;
       const ctaActive = snapshot.cta.active && snapshot.cta.anchorId === "hero-cta";
       const ctaTargetProgress = ctaActive ? 1 : 0;
       const ctaEasing = 1 - Math.exp(-config.cta.response * delta);
@@ -590,9 +604,16 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         const sceneThreadWidth =
           config.scene01.restStrokeWidth +
           inhale * (config.scene01.inhaleStrokeWidth - config.scene01.restStrokeWidth);
-        const sceneWidthProgress = easeOutQuart(clamp(scene01Progress / 0.42, 0, 1));
-        const baseThreadWidth =
+        const proofThreadWidth =
+          config.scene02.restStrokeWidth +
+          inhale * (config.scene02.inhaleStrokeWidth - config.scene02.restStrokeWidth);
+        const sceneWidthProgress =
+          scene02Progress > 0 ? 1 : easeOutQuart(clamp(scene01Progress / 0.42, 0, 1));
+        const signalThreadWidth =
           heroThreadWidth + (sceneThreadWidth - heroThreadWidth) * sceneWidthProgress;
+        const baseThreadWidth =
+          signalThreadWidth +
+          (proofThreadWidth - signalThreadWidth) * easeOutQuart(scene02Progress);
         const threadWidth =
           baseThreadWidth + (ctaThreadWidth - baseThreadWidth) * pathProgress;
         let renderedPoints = createEditorialSignalGeometry(heroPoints, {
@@ -611,6 +632,27 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
           waveLobes: config.scene01.waveLobes,
           waveSpeed: config.scene01.waveSpeed,
         });
+        const isProofRoute = snapshot.base.kind === "scene" && snapshot.base.id === "02";
+        if (isProofRoute) {
+          const flatSignal = createEditorialSignalGeometry(basePoints, {
+            elapsedMs: 0,
+            layerIndex: index,
+            layerSpacing: config.scene01.layerSpacing,
+            noiseAmplitude: config.scene01.noiseAmplitude,
+            progress: 1,
+            radiusX: config.scene01.radiusX,
+            radiusY: config.scene01.radiusY,
+            settledWaveAmplitude: config.scene01.settledWaveAmplitude,
+            waveLobes: config.scene01.waveLobes,
+            waveSpeed: config.scene01.waveSpeed,
+          });
+          renderedPoints = createEditorialProofGeometry(flatSignal, {
+            layerIndex: index,
+            layerSpacing: config.scene02.layerSpacing,
+            progress: scene02Progress,
+            routeDepth: config.scene02.routeDepth,
+          });
+        }
 
         if (ctaTarget && breathingCtaTarget) {
           leadingPoints[index] ??= leadingPointForTarget(heroPoints, ctaTarget);
@@ -624,7 +666,12 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
 
         const path = paths[index];
         const dash = computeThreadDash(pathProgress, index);
-        path?.setAttribute("d", serializeCubicLoopPath(renderedPoints));
+        path?.setAttribute(
+          "d",
+          isProofRoute
+            ? serializeCubicPath(renderedPoints, { closed: false })
+            : serializeCubicLoopPath(renderedPoints),
+        );
         path?.setAttribute("stroke-dasharray", dash.dasharray);
         path?.setAttribute("stroke-dashoffset", `${dash.dashoffset}`);
         path?.style.setProperty("--thread-width", threadWidth.toFixed(3));
@@ -639,8 +686,8 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         "--orbital-fill-progress",
         `${fillProgress}`,
       );
-      if (scene01Progress > 0) {
-        const exitFade = clamp((scene01Progress - 0.92) / 0.08, 0, 1);
+      if (scene02Progress > 0) {
+        const exitFade = clamp((scene02Progress - 0.94) / 0.06, 0, 1);
         stage.style.opacity = `${1 - exitFade * 0.82}`;
       } else {
         stage.style.removeProperty("opacity");

@@ -154,7 +154,8 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
               defaults: { ease: "none" },
               scrollTrigger: {
                 end: canPin ? "+=200%" : "bottom 30%",
-                onLeave: () => setOrbitalBaseState({ kind: "hero" }),
+                onLeave: () =>
+                  setOrbitalBaseState({ id: "02", kind: "scene", progress: 0 }),
                 onLeaveBack: () => setOrbitalBaseState({ kind: "hero" }),
                 onUpdate: ({ progress }) => {
                   if (!canPin) return;
@@ -220,7 +221,14 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
             const macros = gsap.timeline({
               defaults: { ease: "none" },
               scrollTrigger: {
-                end: canPin ? "+=160%" : "bottom 28%",
+                end: canPin ? "+=220%" : "bottom 28%",
+                onLeave: () => setOrbitalBaseState({ kind: "hero" }),
+                onLeaveBack: () =>
+                  setOrbitalBaseState({ id: "01", kind: "scene", progress: 1 }),
+                onUpdate: ({ progress }) => {
+                  if (!canPin) return;
+                  setOrbitalBaseState({ id: "02", kind: "scene", progress });
+                },
                 pin: canPin ? '[data-pin="02"]' : undefined,
                 scrub: 0.8,
                 start: canPin ? "top top" : "top 80%",
@@ -228,12 +236,48 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
                 ...(canPin ? { anticipatePin: 1 } : {}),
               },
             });
-            macros.fromTo(
-              '[data-motion="macro-route"]',
-              { autoAlpha: 0.28, scale: 0.96, y: 34 },
-              { autoAlpha: 1, duration: 0.62, scale: 1, stagger: 0.2, y: 0 },
-              0.12,
+            const proofIndex = scope.querySelector('[data-proof-index]');
+            const proofTitleLines = Array.from(
+              scope.querySelectorAll('[data-scene="02"] h2 span'),
             );
+            const proofBody = scope.querySelector(
+              `[data-motion="proof-copy"] .${styles.sceneBody}`,
+            );
+            const proofStops = Array.from(
+              scope.querySelectorAll('[data-motion="proof-stop"]'),
+            );
+            if (proofIndex) {
+              macros.fromTo(
+                proofIndex,
+                { autoAlpha: 0 },
+                { autoAlpha: 0.5, duration: 0.18 },
+                0.03,
+              );
+            }
+            if (proofTitleLines.length > 0) {
+              macros.fromTo(
+                proofTitleLines,
+                { autoAlpha: 0, yPercent: 40 },
+                { autoAlpha: 1, duration: 0.42, stagger: 0.08, yPercent: 0 },
+                0.06,
+              );
+            }
+            if (proofBody) {
+              macros.fromTo(
+                proofBody,
+                { autoAlpha: 0, y: 24 },
+                { autoAlpha: 1, duration: 0.32, y: 0 },
+                0.18,
+              );
+            }
+            if (proofStops.length > 0) {
+              macros.fromTo(
+                proofStops,
+                { autoAlpha: 0.12, scale: 0.96, y: 34 },
+                { autoAlpha: 1, duration: 0.54, scale: 1, stagger: 0.18, y: 0 },
+                0.2,
+              );
+            }
 
             const atlas = gsap.timeline({
               defaults: { ease: "none" },

@@ -172,6 +172,14 @@
   mix-blend-mode: screen;
 }
 
+.orbitalThreadStage[data-orbital-layout="scene-02"] {
+  z-index: 2;
+}
+
+.orbitalThreadStage[data-orbital-layout="scene-02"] .orbitalThreadPath {
+  mix-blend-mode: multiply;
+}
+
 .splashCal,
 .splashRythm {
   animation-duration: var(--splash-duration);
@@ -968,109 +976,154 @@
 }
 
 .macroScene {
-  min-height: 160svh;
+  background: var(--ivory);
+  color: var(--ink);
+  min-height: 100svh;
 }
 
 .macroViewport {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--ink) 8%, var(--ivory)) 0%, var(--ivory) 19%),
+    var(--ivory);
   min-height: 100svh;
   overflow: hidden;
   position: relative;
 }
 
 .macroInner {
-  align-items: start;
+  align-items: stretch;
   isolation: isolate;
+  min-height: 100svh;
   overflow: hidden;
   position: relative;
 }
 
+.proofIndex {
+  display: flex;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(0.52rem, 0.54vw, 0.64rem);
+  justify-content: space-between;
+  left: var(--home-gutter);
+  letter-spacing: 0.12em;
+  margin: 0;
+  opacity: 0.5;
+  position: absolute;
+  right: var(--home-gutter);
+  top: clamp(2rem, 4vw, 4rem);
+  z-index: 4;
+}
+
 .macroCopy {
   align-self: start;
-  grid-column: 2 / span 7;
-  padding-top: clamp(2rem, 4vw, 4rem);
+  grid-column: 2 / span 6;
+  padding-top: clamp(5rem, 8.5vw, 9rem);
   position: relative;
-  z-index: 3;
+  z-index: 4;
 }
 
 .macroCopy h2 {
-  font-size: clamp(3rem, 5.4vw, 5.8rem);
+  font-size: clamp(4rem, 6.7vw, 7.6rem);
+  line-height: 0.88;
+  max-width: 9.4ch;
 }
 
 .macroCopy .sceneBody {
-  margin-left: 0;
-  max-width: 42ch;
-}
-
-.macroMark {
-  height: min(72svh, 47rem);
-  left: 50%;
-  opacity: 0.3;
+  left: calc(100% + clamp(2rem, 5vw, 7rem));
+  margin: 0;
+  max-width: 36ch;
   position: absolute;
-  top: 51%;
-  transform: translate(-50%, -50%) rotate(10deg);
-  width: min(50vw, 48rem);
-  z-index: -1;
+  top: clamp(6.5rem, 10vw, 10rem);
 }
 
 .macroRoutes {
-  align-self: end;
-  display: grid;
-  gap: clamp(1rem, 2vw, 2rem);
-  grid-column: 1 / -1;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  inset: 0;
   list-style: none;
-  margin: clamp(4rem, 7vw, 8rem) 0 0;
+  margin: 0;
   padding: 0;
-  position: relative;
-  z-index: 3;
+  pointer-events: none;
+  position: absolute;
+  z-index: 4;
 }
 
 .macroRoutes li {
   --route-color: var(--coral);
-  border-top: 1px solid var(--route-color);
-  display: grid;
-  gap: 1.2rem;
-  grid-template-columns: auto 1fr;
-  min-height: 14rem;
-  padding: 1rem 0 0;
+  display: block;
+  max-width: min(24vw, 24rem);
+  position: absolute;
+  text-shadow: 0 0 1.25rem var(--ivory), 0 0 2.5rem var(--ivory);
+  transform-origin: left center;
+  will-change: opacity, transform;
+}
+
+.macroRoutes li::before {
+  background: var(--route-color);
+  border: 3px solid var(--ivory);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--route-color), 0 0 1.2rem color-mix(in srgb, var(--route-color) 55%, transparent);
+  content: "";
+  height: 0.65rem;
+  left: -0.1rem;
+  position: absolute;
+  top: -1.2rem;
+  width: 0.65rem;
+}
+
+.macroRoutes li:nth-child(1) {
+  left: 7%;
+  top: 55%;
+}
+
+.macroRoutes li:nth-child(2) {
+  left: 43%;
+  top: 25%;
+}
+
+.macroRoutes li:nth-child(3) {
+  right: 6%;
+  top: 67%;
 }
 
 .macroRoutes li[data-tone="orange"] {
   --route-color: var(--orange);
-  transform: translateY(2.75rem);
 }
 
 .macroRoutes li[data-tone="olive"] {
   --route-color: var(--olive);
-  transform: translateY(5.5rem);
 }
 
 .routeIndex {
   color: var(--route-color);
-  font-size: 0.64rem;
+  display: block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.7rem;
 }
 
 .macroRoutes h3 {
   font-family: "Bodoni Moda Variable", serif;
-  font-size: clamp(2rem, 3.2vw, 3.6rem);
+  font-size: clamp(3.2rem, 5.2vw, 6.6rem);
   font-weight: 480;
-  letter-spacing: -0.03em;
-  line-height: 0.95;
+  letter-spacing: -0.055em;
+  line-height: 0.82;
   margin: 0;
 }
 
 .macroRoutes p {
-  font-size: 0.9rem;
+  font-size: clamp(0.72rem, 0.82vw, 0.88rem);
   line-height: 1.5;
-  margin: 0.85rem 0 0;
-  max-width: 25ch;
+  margin: 1rem 0 0;
+  max-width: 28ch;
 }
 
 .macroRoutes small {
-  align-self: end;
-  color: color-mix(in srgb, var(--ink) 62%, transparent);
-  font-size: 0.68rem;
-  grid-column: 2;
+  color: color-mix(in srgb, var(--ink) 58%, transparent);
+  display: block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.58rem;
+  line-height: 1.55;
+  margin-top: 0.8rem;
+  max-width: 31ch;
 }
 
 .atlasScene {
@@ -1589,6 +1642,15 @@
     display: none;
   }
 
+  .proofIndex {
+    left: 1.25rem;
+    right: 1.25rem;
+  }
+
+  .proofIndex span:last-child {
+    display: none;
+  }
+
   .knowledgeInner {
     align-items: center;
     min-height: 100svh;
@@ -1610,6 +1672,28 @@
     min-height: auto;
   }
 
+  .macroInner {
+    display: block;
+    min-height: auto;
+    padding: 7rem 1.25rem 5rem;
+  }
+
+  .macroCopy {
+    padding: 0;
+  }
+
+  .macroCopy h2 {
+    font-size: clamp(3.6rem, 15vw, 5.4rem);
+    max-width: 9ch;
+  }
+
+  .macroCopy .sceneBody {
+    left: auto;
+    margin-top: 2rem;
+    max-width: 34ch;
+    position: static;
+  }
+
   .macroMark {
     height: 28rem;
     left: 72%;
@@ -1620,11 +1704,25 @@
   .macroRoutes {
     display: block;
     margin-top: 4rem;
+    position: relative;
+    inset: auto;
   }
 
-  .macroRoutes li {
+  .macroRoutes li,
+  .macroRoutes li:nth-child(1),
+  .macroRoutes li:nth-child(2),
+  .macroRoutes li:nth-child(3) {
+    left: auto;
     margin-bottom: 2.5rem;
+    max-width: 30rem;
     padding-bottom: 1rem;
+    position: relative;
+    right: auto;
+    top: auto;
+  }
+
+  .macroRoutes h3 {
+    font-size: clamp(3.2rem, 14vw, 5rem);
   }
 
   .topicAtlas {
