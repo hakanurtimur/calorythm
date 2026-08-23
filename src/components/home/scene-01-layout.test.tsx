@@ -14,7 +14,10 @@ describe("Scene 01 editorial-noise layout", () => {
     const scene = container.querySelector<HTMLElement>('[data-scene="01"]')!;
 
     expect(scene).toHaveAttribute("data-scene-role", "editorial-noise");
-    expect(scene.querySelector('[data-pin="01"]')).not.toBeNull();
+    expect(scene.querySelector('[data-pin="01"]')).toHaveAttribute(
+      "data-orbital-content-layer",
+      "foreground",
+    );
     expect(scene.querySelectorAll('[data-motion="knowledge-fragment"]')).toHaveLength(3);
     expect(scene.querySelector('[data-motion="knowledge-copy"]')).not.toBeNull();
     expect(document.querySelectorAll("[data-orbital-thread-stage]")).toHaveLength(1);

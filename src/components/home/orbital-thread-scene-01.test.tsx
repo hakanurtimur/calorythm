@@ -60,13 +60,22 @@ describe("OrbitalThreadStage Scene 01", () => {
     const firstPath = stage.querySelector<SVGPathElement>("[data-orbit-path]")!;
 
     act(() => {
+      frames.shift()?.(1000);
+      frames.shift()?.(4000);
+    });
+    const heroWidth = Number(firstPath.style.getPropertyValue("--thread-width"));
+
+    act(() => {
       setOrbitalBaseState({ id: "01", kind: "scene", progress: 0.72 });
       window.dispatchEvent(new Event("scroll"));
     });
     act(() => {
-      Array.from({ length: 4 }, (_, index) => frames.shift()?.(1000 + index * 16));
+      Array.from({ length: 4 }, (_, index) => frames.shift()?.(4016 + index * 16));
     });
+    const sceneWidth = Number(firstPath.style.getPropertyValue("--thread-width"));
 
+    expect(heroWidth).toBeLessThanOrEqual(3);
+    expect(sceneWidth).toBeGreaterThanOrEqual(7);
     expect(stage).toHaveAttribute("data-orbital-layout", "scene-01");
     expect(stage).toHaveAttribute("preserveAspectRatio", "none");
     expect(stage.style.left).toBe("0px");
@@ -74,5 +83,6 @@ describe("OrbitalThreadStage Scene 01", () => {
     expect(stage.style.width).toBe("1440px");
     expect(stage.style.height).toBe("900px");
     expect(firstPath.getAttribute("d")).not.toBe(orbitalPaths[0].d);
+    expect(firstPath.getAttribute("d")).not.toMatch(/Z$/);
   });
 });

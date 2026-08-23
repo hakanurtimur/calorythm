@@ -88,7 +88,11 @@ export function HomeExperience() {
         data-scene-role="editorial-noise"
         id="section-01"
       >
-        <div className={styles.knowledgeViewport} data-pin="01">
+        <div
+          className={styles.knowledgeViewport}
+          data-orbital-content-layer="foreground"
+          data-pin="01"
+        >
           <div className={`${styles.sceneInner} ${styles.knowledgeInner}`}>
             <p aria-hidden="true" className={styles.sceneNumber}>01</p>
             <p aria-hidden="true" className={styles.knowledgeSignalIndex}>

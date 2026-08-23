@@ -142,11 +142,39 @@ export function OrbitalThreadControls() {
         value: orbitalThreadDefaults.scene01.radiusY,
       },
       scene01LayerSpacing: {
-        label: "Layer spacing",
+        label: "Fallback spacing",
         max: 8,
         min: 0,
         step: 0.1,
         value: orbitalThreadDefaults.scene01.layerSpacing,
+      },
+      scene01OrangeOffset: {
+        label: "Orange Y",
+        max: 28,
+        min: -28,
+        step: 0.5,
+        value: orbitalThreadDefaults.scene01.layerOffsets[0],
+      },
+      scene01CoralOffset: {
+        label: "Coral Y",
+        max: 28,
+        min: -28,
+        step: 0.5,
+        value: orbitalThreadDefaults.scene01.layerOffsets[1],
+      },
+      scene01OchreOffset: {
+        label: "Ochre Y",
+        max: 28,
+        min: -28,
+        step: 0.5,
+        value: orbitalThreadDefaults.scene01.layerOffsets[2],
+      },
+      scene01OliveOffset: {
+        label: "Olive Y",
+        max: 28,
+        min: -28,
+        step: 0.5,
+        value: orbitalThreadDefaults.scene01.layerOffsets[3],
       },
       scene01NoiseAmplitude: {
         label: "Noise depth",
@@ -365,6 +393,12 @@ export function OrbitalThreadControls() {
       },
       scene01: {
         inhaleStrokeWidth: values.scene01InhaleStrokeWidth,
+        layerOffsets: [
+          values.scene01OrangeOffset,
+          values.scene01CoralOffset,
+          values.scene01OchreOffset,
+          values.scene01OliveOffset,
+        ],
         layerSpacing: values.scene01LayerSpacing,
         noiseAmplitude: values.scene01NoiseAmplitude,
         pointerWaveBoost: values.scene01PointerWaveBoost,

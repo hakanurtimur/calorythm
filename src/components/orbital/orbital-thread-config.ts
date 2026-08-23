@@ -39,6 +39,7 @@ export type OrbitalThreadConfig = {
   };
   scene01: {
     inhaleStrokeWidth: number;
+    layerOffsets: readonly [number, number, number, number];
     layerSpacing: number;
     noiseAmplitude: number;
     pointerWaveBoost: number;
@@ -82,7 +83,7 @@ export const orbitalThreadDefaults: OrbitalThreadConfig = {
     entryStrokeWidth: 0.95,
     entranceMs: 800,
     inhaleExpansion: 0.16,
-    inhaleStrokeWidth: 20,
+    inhaleStrokeWidth: 2.8,
     layerPhaseStep: 0.62,
     pointerWaveBoost: 0.65,
     primaryWaveAmplitude: 1.35,
@@ -90,7 +91,7 @@ export const orbitalThreadDefaults: OrbitalThreadConfig = {
     primaryWaveSpeed: 0.00115,
     revealDurationMs: 900,
     revealStaggerMs: 40,
-    restStrokeWidth: 12,
+    restStrokeWidth: 1.5,
     secondaryWaveAmplitude: 0.42,
     secondaryWaveLobes: 3.6,
     secondaryWaveSpeed: 0.00165,
@@ -111,14 +112,15 @@ export const orbitalThreadDefaults: OrbitalThreadConfig = {
     secondaryWaveSpeedRatio: 0.72,
   },
   scene01: {
-    inhaleStrokeWidth: 12,
+    inhaleStrokeWidth: 14,
+    layerOffsets: [-17, -5, 8, 19],
     layerSpacing: 2.4,
     noiseAmplitude: 7,
     pointerWaveBoost: 1.35,
     radiusX: 70,
     radiusY: 9,
-    restStrokeWidth: 6.5,
-    settledWaveAmplitude: 1.2,
+    restStrokeWidth: 7.5,
+    settledWaveAmplitude: 2.4,
     waveLobes: 3.2,
     waveSpeed: 0.001,
   },

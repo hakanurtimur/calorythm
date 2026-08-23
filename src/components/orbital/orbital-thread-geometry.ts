@@ -32,6 +32,7 @@ export type CtaThreadGeometryInput = {
 export type EditorialSignalGeometryInput = {
   elapsedMs: number;
   layerIndex: number;
+  layerOffset?: number;
   layerSpacing: number;
   noiseAmplitude: number;
   progress: number;
@@ -150,15 +151,16 @@ export function interpolateGeometry(from: RingPoint[], to: RingPoint[], progress
 }
 
 /**
- * Stretches the authored CALORYTHM loop into a wide editorial signal. The
- * source and target retain the same four-cubic topology, so the one persistent
- * SVG can move between hero and scene states without cloning or crossfading.
+ * Opens the authored CALORYTHM loop into a wide editorial signal. The source
+ * and target retain the same four-cubic topology, so the one persistent SVG
+ * can move between hero and scene states without cloning or crossfading.
  */
 export function createEditorialSignalGeometry(
   source: RingPoint[],
   {
     elapsedMs,
     layerIndex,
+    layerOffset,
     layerSpacing,
     noiseAmplitude,
     progress,
@@ -177,44 +179,31 @@ export function createEditorialSignalGeometry(
   if (sceneProgress === 0) return source;
 
   const morphProgress = smoothstep(0.04, 0.42, sceneProgress);
-  const straightenProgress = smoothstep(0.18, 0.42, sceneProgress);
   const noiseProgress = smoothstep(0.16, 0.5, sceneProgress) *
     (1 - smoothstep(0.68, 0.96, sceneProgress));
   const safeLayerIndex = Number.isFinite(layerIndex) ? Math.max(0, layerIndex) : 0;
   const safeLayerSpacing = Number.isFinite(layerSpacing) ? Math.max(0, layerSpacing) : 0;
   const centerX = 50;
-  const centerY = 50 + (safeLayerIndex - 1.5) * safeLayerSpacing;
+  const fallbackLayerOffset = (safeLayerIndex - 1.5) * safeLayerSpacing;
+  const safeLayerOffset = Number.isFinite(layerOffset) ? layerOffset! : fallbackLayerOffset;
+  const centerY = 50 + safeLayerOffset;
   const safeRadiusX = Number.isFinite(radiusX) ? Math.max(1, radiusX) : 70;
   const safeRadiusY = Number.isFinite(radiusY) ? Math.max(1, radiusY) : 9;
-  const activeRadiusY = safeRadiusY * (1 - straightenProgress);
-  const horizontalControl = safeRadiusX * 0.56;
-  const verticalControl = activeRadiusY * 0.64;
-  const target: RingPoint[] = [
-    { x: centerX, y: centerY - activeRadiusY },
-    { x: centerX + horizontalControl, y: centerY - activeRadiusY },
-    { x: centerX + safeRadiusX, y: centerY - verticalControl },
-    { x: centerX + safeRadiusX, y: centerY },
-    { x: centerX + safeRadiusX, y: centerY + verticalControl },
-    { x: centerX + horizontalControl, y: centerY + activeRadiusY },
-    { x: centerX, y: centerY + activeRadiusY },
-    { x: centerX - horizontalControl, y: centerY + activeRadiusY },
-    { x: centerX - safeRadiusX, y: centerY + verticalControl },
-    { x: centerX - safeRadiusX, y: centerY },
-    { x: centerX - safeRadiusX, y: centerY - verticalControl },
-    { x: centerX - horizontalControl, y: centerY - activeRadiusY },
-    { x: centerX, y: centerY - activeRadiusY },
-  ];
+  const pointCount = source.length;
+  const target: RingPoint[] = Array.from({ length: pointCount }, (_, index) => ({
+    x: centerX - safeRadiusX + (safeRadiusX * 2 * index) / Math.max(1, pointCount - 1),
+    y: centerY,
+  }));
   const phase = (Number.isFinite(elapsedMs) ? elapsedMs : 0) * waveSpeed +
     safeLayerIndex * 0.74;
-  const amplitude =
-    (Math.max(0, settledWaveAmplitude) + Math.max(0, noiseAmplitude) * noiseProgress) *
-    (1 - straightenProgress);
-  const uniqueCount = target.length - 1;
+  const amplitude = Math.max(0, settledWaveAmplitude) +
+    Math.max(0, noiseAmplitude) * noiseProgress;
+  const segmentCount = Math.max(1, target.length - 1);
   const pointerAnchorX = centerX + Math.max(-1, Math.min(1, pointerX)) * safeRadiusX;
   const pointerAnchorY = centerY + Math.max(-1, Math.min(1, pointerY)) * safeRadiusY;
   const breathingTarget = target.map((point, index) => {
-    const seamIndex = index === uniqueCount ? 0 : index;
-    const perimeter = (seamIndex / uniqueCount) * Math.PI * 2;
+    const lineProgress = index / segmentCount;
+    const perimeter = lineProgress * Math.PI * 2;
     const primary = Math.sin(phase + perimeter * waveLobes) * amplitude;
     const detail = Math.sin(phase * 1.47 - perimeter * (waveLobes + 1.35)) *
       amplitude * 0.24;
@@ -228,15 +217,13 @@ export function createEditorialSignalGeometry(
       Math.max(0, pointerStrength) *
       Math.max(0, pointerBoost) *
       pointerInfluence *
-      Math.max(1, noiseAmplitude * 0.55) *
-      (1 - straightenProgress);
+      Math.max(1, noiseAmplitude * 0.55);
 
     return {
-      x: point.x + Math.cos(perimeter) * (primary + detail + pointerWave) * 0.08,
+      x: point.x,
       y: point.y + primary + detail + pointerWave,
     };
   });
-  breathingTarget[uniqueCount] = { ...breathingTarget[0]! };
 
   return interpolateGeometry(source, breathingTarget, morphProgress);
 }

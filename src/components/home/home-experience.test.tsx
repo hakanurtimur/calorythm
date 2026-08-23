@@ -383,7 +383,7 @@ describe("HomeExperience", () => {
     expect(getComputedStyle(motionGroup!).transform).toBe("none");
   });
 
-  it("reveals the thick hero material before a visible wave travels around its fixed center", () => {
+  it("keeps the hero threads thin while a visible wave travels around their fixed center", () => {
     const frames: FrameRequestCallback[] = [];
     vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
       frames.push(callback);
@@ -440,9 +440,10 @@ describe("HomeExperience", () => {
 
     expect(entryWidth).toBeCloseTo(0.95, 2);
     expect(openingWidths[0]).toBeGreaterThan(openingWidths[3]!);
-    expect(openingWidths[3]).toBeGreaterThan(5);
-    expect(restingWidth).toBeCloseTo(12, 1);
-    expect(inhaledWidth).toBeGreaterThan(19.5);
+    expect(openingWidths[3]).toBeGreaterThan(1);
+    expect(restingWidth).toBeCloseTo(1.5, 1);
+    expect(inhaledWidth).toBeGreaterThan(2.7);
+    expect(inhaledWidth).toBeLessThanOrEqual(3);
     expect(largestDisplacement).toBeGreaterThan(1);
     expect(traveledDistance).toBeGreaterThan(0.75);
     expect(Math.hypot(traveledCenter.x - authoredCenter.x, traveledCenter.y - authoredCenter.y))

@@ -543,6 +543,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
           : 0;
       const isProofRoute = snapshot.base.kind === "scene" && snapshot.base.id === "02";
       const isQuestionAtlas = snapshot.base.kind === "scene" && snapshot.base.id === "03";
+      const isEditorialSignal = snapshot.base.kind === "scene" && snapshot.base.id === "01";
       const ctaActive = snapshot.cta.active && snapshot.cta.anchorId === "hero-cta";
       const ctaTargetProgress = ctaActive ? 1 : 0;
       const ctaEasing = 1 - Math.exp(-config.cta.response * delta);
@@ -643,6 +644,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         let renderedPoints = createEditorialSignalGeometry(heroPoints, {
           elapsedMs: motionElapsed,
           layerIndex: index,
+          layerOffset: config.scene01.layerOffsets[index],
           layerSpacing: config.scene01.layerSpacing,
           noiseAmplitude: config.scene01.noiseAmplitude,
           pointerBoost: config.scene01.pointerWaveBoost,
@@ -660,6 +662,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
           const flatSignal = createEditorialSignalGeometry(basePoints, {
             elapsedMs: 0,
             layerIndex: index,
+            layerOffset: config.scene01.layerOffsets[index],
             layerSpacing: config.scene01.layerSpacing,
             noiseAmplitude: config.scene01.noiseAmplitude,
             progress: 1,
@@ -700,7 +703,7 @@ export function OrbitalThreadStage({ durationOverride }: OrbitalThreadStageProps
         const dash = computeThreadDash(pathProgress, index);
         path?.setAttribute(
           "d",
-          isProofRoute || isQuestionAtlas
+          isEditorialSignal || isProofRoute || isQuestionAtlas
             ? serializeCubicPath(renderedPoints, { closed: false })
             : serializeCubicLoopPath(renderedPoints),
         );

@@ -165,11 +165,12 @@
 }
 
 .orbitalThreadStage[data-orbital-layout="scene-01"] {
-  z-index: 2;
+  z-index: 1;
 }
 
 .orbitalThreadStage[data-orbital-layout="scene-01"] .orbitalThreadPath {
   mix-blend-mode: screen;
+  opacity: 0.76;
 }
 
 .orbitalThreadStage[data-orbital-layout="scene-02"] {
@@ -873,18 +874,19 @@
 }
 
 .knowledgeScene {
-  background: var(--ink);
+  background:
+    radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--ivory) 4%, transparent), transparent 50%),
+    var(--ink);
   color: var(--ivory);
   min-height: 100svh;
 }
 
 .knowledgeViewport {
-  background:
-    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--ivory) 4%, transparent), transparent 48%),
-    var(--ink);
+  background: transparent;
   min-height: 100svh;
   overflow: hidden;
   position: relative;
+  z-index: 2;
 }
 
 .knowledgeInner {

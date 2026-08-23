@@ -136,7 +136,7 @@ describe("orbital thread geometry", () => {
     expect(interpolateProgressiveGeometry(from, to, 1, { leadingPointIndex: 3 })).toEqual(to);
   });
 
-  it("morphs the authored loop into a layered editorial signal without breaking its seam", () => {
+  it("opens the authored loop into a wide editorial signal", () => {
     type SignalGeometry = (
       source: ReturnType<typeof parseCubicLoopPath>,
       input: {
@@ -190,41 +190,77 @@ describe("orbital thread geometry", () => {
     expect(createEditorialSignalGeometry(source, { ...input, progress: 0 })).toEqual(source);
     expect(Math.max(...xValues) - Math.min(...xValues)).toBeGreaterThan(130);
     expect(Math.max(...yValues) - Math.min(...yValues)).toBeLessThan(28);
-    expect(signal.at(-1)).toEqual(signal[0]);
+    expect(signal.at(-1)).not.toEqual(signal[0]);
+    expect(signal[0]!.x).toBeLessThan(signal.at(-1)!.x);
     expect(lowerLayer[0]!.y).toBeGreaterThan(signal[0]!.y + 5);
     expect(animatedMidpoint).not.toEqual(initialMidpoint);
     expect(signal.flatMap(({ x, y }) => [x, y]).every(Number.isFinite)).toBe(true);
   });
 
-  it("settles each editorial signal into an exact horizontal line before the copy enters", () => {
+  it("keeps mature scene signals alive and scatters the four layers asymmetrically", () => {
+    type ScatteredSignalGeometry = (
+      source: ReturnType<typeof parseCubicLoopPath>,
+      input: {
+        elapsedMs: number;
+        layerIndex: number;
+        layerOffset: number;
+        layerSpacing: number;
+        noiseAmplitude: number;
+        pointerBoost: number;
+        pointerStrength: number;
+        pointerX: number;
+        pointerY: number;
+        progress: number;
+        radiusX: number;
+        radiusY: number;
+        settledWaveAmplitude: number;
+        waveLobes: number;
+        waveSpeed: number;
+      },
+    ) => ReturnType<typeof parseCubicLoopPath>;
+    const createScatteredSignal = orbitalGeometry.createEditorialSignalGeometry as unknown as
+      ScatteredSignalGeometry;
     const source = parseCubicLoopPath(orbitalPaths[0].d);
     const input = {
       elapsedMs: 1200,
-      layerIndex: 1,
+      layerIndex: 0,
+      layerOffset: -17,
       layerSpacing: 2.4,
       noiseAmplitude: 7,
       pointerBoost: 1.35,
       pointerStrength: 1,
       pointerX: 0.35,
       pointerY: -0.2,
-      progress: 0.45,
+      progress: 1,
       radiusX: 70,
       radiusY: 9,
-      settledWaveAmplitude: 1.2,
+      settledWaveAmplitude: 2.4,
       waveLobes: 3.2,
       waveSpeed: 0.001,
     };
-    const signal = orbitalGeometry.createEditorialSignalGeometry(source, input);
-    const laterSignal = orbitalGeometry.createEditorialSignalGeometry(source, {
+    const signal = createScatteredSignal(source, input);
+    const laterSignal = createScatteredSignal(source, {
       ...input,
       elapsedMs: 3600,
     });
+    const layerOffsets = [-17, -5, 8, 19];
+    const centers = layerOffsets.map((layerOffset, layerIndex) => {
+      const layer = createScatteredSignal(source, {
+        ...input,
+        layerIndex,
+        layerOffset,
+      });
+      return layer.reduce((sum, point) => sum + point.y, 0) / layer.length;
+    });
+    const gaps = centers.slice(1).map((center, index) => center - centers[index]!);
 
-    expect(new Set(signal.map(({ y }) => Number(y.toFixed(6))))).toHaveProperty("size", 1);
+    expect(new Set(signal.map(({ y }) => Number(y.toFixed(3)))).size).toBeGreaterThan(3);
     expect(
       Math.max(...signal.map(({ x }) => x)) - Math.min(...signal.map(({ x }) => x)),
     ).toBeGreaterThan(130);
-    expect(laterSignal).toEqual(signal);
+    expect(laterSignal).not.toEqual(signal);
+    expect(centers).toEqual([...centers].sort((a, b) => a - b));
+    expect(new Set(gaps.map((gap) => gap.toFixed(1))).size).toBeGreaterThan(1);
   });
 
   it("morphs the flat signal into a layered three-stop editorial proof route", () => {
