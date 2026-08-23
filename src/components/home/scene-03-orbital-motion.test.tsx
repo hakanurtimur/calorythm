@@ -101,12 +101,12 @@ describe("Scene 03 orbital motion", () => {
     });
 
     expect(scene03Timeline?.scrollTrigger.pin).toBe('[data-pin="03"]');
-    expect(scene03Timeline?.scrollTrigger.end).toBe("+=220%");
+    expect(scene03Timeline?.scrollTrigger.end).toBe("+=180%");
     scene03Timeline?.scrollTrigger.onUpdate?.({ progress: 0.64 });
     expect(getOrbitalThreadSnapshot().base).toEqual({
       id: "03",
       kind: "scene",
-      progress: 0.64,
+      progress: 0.6904,
     });
     expect(container.querySelector('[data-atlas-topic-index="3"]')).toHaveAttribute(
       "data-active",

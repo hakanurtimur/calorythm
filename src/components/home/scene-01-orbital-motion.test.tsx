@@ -100,7 +100,7 @@ describe("Scene 01 orbital motion", () => {
     expect(getOrbitalThreadSnapshot().base).toEqual({
       id: "01",
       kind: "scene",
-      progress: 0.11,
+      progress: 0.1,
     });
 
     expect(sceneTimeline?.scrollTrigger.onUpdate).toBeTypeOf("function");
@@ -110,7 +110,7 @@ describe("Scene 01 orbital motion", () => {
     expect(getOrbitalThreadSnapshot().base).toEqual({
       id: "01",
       kind: "scene",
-      progress: 0.7036,
+      progress: 0.696,
     });
 
     sceneTimeline.scrollTrigger.onLeaveBack?.();

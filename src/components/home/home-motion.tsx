@@ -4,6 +4,13 @@ import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { readMotionProfile } from "@/components/motion/motion-profile";
 import { setOrbitalBaseState } from "@/components/orbital/orbital-thread-store";
+import {
+  HOME_SCROLL_CONDUCTOR_CONFIG,
+  HOME_SCROLL_SCENE_IDS,
+  clampScrollProgress,
+  resolveHomeScrollState,
+  type HomeScrollSceneId,
+} from "./home-scroll-conductor";
 import styles from "./home.module.css";
 
 export type HomeMotionRuntime = {
@@ -36,6 +43,91 @@ function clearActiveTopics(scope: HTMLElement) {
   });
 }
 
+function publishScrollGuide(
+  scope: HTMLElement,
+  sceneId: HomeScrollSceneId,
+  progress: number,
+) {
+  const guide = scope.querySelector<HTMLElement>('[data-scroll-guide=""]');
+  if (!guide) return;
+
+  setScrollGuideVisibility(scope, true);
+  const state = resolveHomeScrollState(sceneId, progress);
+  guide.dataset.activeScene = state.sceneId;
+  guide.dataset.scrollPhase = state.phase;
+  guide.style.setProperty(
+    "--scroll-guide-progress",
+    String(Number(state.globalProgress.toFixed(4))),
+  );
+
+  const current = guide.querySelector<HTMLElement>('[data-scroll-guide-current=""]');
+  if (current) current.textContent = state.currentLabel;
+
+  guide.querySelectorAll<HTMLElement>("[data-scroll-guide-item]").forEach((item) => {
+    const itemId = item.dataset.scrollGuideItem as HomeScrollSceneId | undefined;
+    const itemIndex = itemId ? HOME_SCROLL_SCENE_IDS.indexOf(itemId) : -1;
+    const isActive = itemId === sceneId;
+    item.dataset.state = isActive
+      ? "active"
+      : itemIndex < state.chapterIndex
+        ? "past"
+        : "future";
+    if (isActive) item.dataset.active = "true";
+    else delete item.dataset.active;
+
+    const link = item.querySelector("a");
+    if (isActive) link?.setAttribute("aria-current", "step");
+    else link?.removeAttribute("aria-current");
+  });
+}
+
+function setScrollGuideVisibility(scope: HTMLElement, visible: boolean) {
+  const guide = scope.querySelector<HTMLElement>('[data-scroll-guide=""]');
+  if (!guide) return;
+
+  guide.dataset.visible = visible ? "true" : "false";
+  guide.inert = !visible;
+  if (visible) guide.removeAttribute("aria-hidden");
+  else guide.setAttribute("aria-hidden", "true");
+}
+
+function resetScrollGuide(scope: HTMLElement) {
+  publishScrollGuide(scope, "hero", 0);
+}
+
+function publishSceneEntry(
+  scope: HTMLElement,
+  sceneId: Exclude<HomeScrollSceneId, "hero">,
+  progress: number,
+) {
+  const scene = scope.querySelector<HTMLElement>(`[data-scene="${sceneId}"]`);
+  if (!scene) return;
+
+  const entryProgress = clampScrollProgress(progress);
+  scene.style.setProperty("--scene-entry-progress", String(entryProgress));
+  scene.style.setProperty("--scene-entry-muted", String(entryProgress * 0.56));
+  scene.style.setProperty("--scene-entry-detail", String(entryProgress * 0.28));
+}
+
+function setSceneEntries(scope: HTMLElement, progress: number) {
+  (["01", "02", "03"] as const).forEach((sceneId) => {
+    publishSceneEntry(scope, sceneId, progress);
+  });
+}
+
+function composeSceneProgress(sceneId: Exclude<HomeScrollSceneId, "hero">, progress: number) {
+  const { entryShare } = HOME_SCROLL_CONDUCTOR_CONFIG[sceneId];
+  return entryShare + progress * (1 - entryShare);
+}
+
+function pinProgressForSceneProgress(
+  sceneId: Exclude<HomeScrollSceneId, "hero">,
+  sceneProgress: number,
+) {
+  const { entryShare } = HOME_SCROLL_CONDUCTOR_CONFIG[sceneId];
+  return clampScrollProgress((sceneProgress - entryShare) / (1 - entryShare));
+}
+
 export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: HomeMotionProps) {
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -64,11 +156,17 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
       media = undefined;
       context = undefined;
       clearActiveTopics(scope);
+      resetScrollGuide(scope);
+      setSceneEntries(scope, 1);
+      setScrollGuideVisibility(scope, false);
     };
 
     const showReducedState = () => {
       scope.dataset.motionProfile = "reduced";
       clearActiveTopics(scope);
+      resetScrollGuide(scope);
+      setSceneEntries(scope, 1);
+      setScrollGuideVisibility(scope, false);
     };
 
     async function configure() {
@@ -115,11 +213,15 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
             }
 
             scope.dataset.motionProfile = "full";
+            setSceneEntries(scope, canPin ? 0 : 1);
 
             const hero = gsap.timeline({
               defaults: { ease: "none" },
               scrollTrigger: {
-                end: "+=80%",
+                end: HOME_SCROLL_CONDUCTOR_CONFIG.hero.end,
+                onLeave: () => publishScrollGuide(scope, "01", 0),
+                onLeaveBack: () => publishScrollGuide(scope, "hero", 0),
+                onUpdate: ({ progress }) => publishScrollGuide(scope, "hero", progress),
                 pin: canPin ? '[data-pin="hero"]' : undefined,
                 scrub: 0.7,
                 start: "top top",
@@ -129,23 +231,30 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
             });
             hero.to(
               '[data-motion="hero-copy"]',
-              { autoAlpha: 0.28, duration: 0.25, y: -24 },
-              0.75,
+              { autoAlpha: 0.22, duration: 0.3, y: -24 },
+              0.58,
             );
 
-            const scene01HandoffShare = 0.22;
+            const scene01HandoffShare = HOME_SCROLL_CONDUCTOR_CONFIG["01"].entryShare;
             if (canPin) {
               ScrollTrigger.create({
                 end: "top top",
                 id: "scene-01-handoff",
-                onLeaveBack: () => setOrbitalBaseState({ kind: "hero" }),
-                onUpdate: ({ progress }) =>
+                onLeaveBack: () => {
+                  setOrbitalBaseState({ kind: "hero" });
+                  publishScrollGuide(scope, "hero", 1);
+                  publishSceneEntry(scope, "01", 0);
+                },
+                onUpdate: ({ progress }) => {
                   setOrbitalBaseState({
                     id: "01",
                     kind: "scene",
                     progress: progress * scene01HandoffShare,
-                  }),
-                start: "top bottom",
+                  });
+                  publishScrollGuide(scope, "01", progress * scene01HandoffShare);
+                  publishSceneEntry(scope, "01", progress);
+                },
+                start: "top 118%",
                 trigger: '[data-scene="01"]',
               });
             }
@@ -153,17 +262,24 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
             const knowledge = gsap.timeline({
               defaults: { ease: "none" },
               scrollTrigger: {
-                end: canPin ? "+=200%" : "bottom 30%",
-                onLeave: () =>
-                  setOrbitalBaseState({ id: "02", kind: "scene", progress: 0 }),
-                onLeaveBack: () => setOrbitalBaseState({ kind: "hero" }),
+                end: canPin ? HOME_SCROLL_CONDUCTOR_CONFIG["01"].end : "bottom 30%",
+                onLeave: () => {
+                  setOrbitalBaseState({ id: "02", kind: "scene", progress: 0 });
+                  publishScrollGuide(scope, "02", 0);
+                },
+                onLeaveBack: () => {
+                  setOrbitalBaseState({ kind: "hero" });
+                  publishScrollGuide(scope, "hero", 1);
+                },
                 onUpdate: ({ progress }) => {
+                  const sceneProgress = composeSceneProgress("01", progress);
+                  publishScrollGuide(scope, "01", sceneProgress);
+                  publishSceneEntry(scope, "01", 1);
                   if (!canPin) return;
                   setOrbitalBaseState({
                     id: "01",
                     kind: "scene",
-                    progress:
-                      scene01HandoffShare + progress * (1 - scene01HandoffShare),
+                    progress: sceneProgress,
                   });
                 },
                 pin: canPin ? '[data-pin="01"]' : undefined,
@@ -185,50 +301,69 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
             const knowledgeBody = scope.querySelector(
               `[data-motion="knowledge-copy"] .${styles.sceneBody}`,
             );
-            if (knowledgeSignalIndex) {
-              knowledge.fromTo(
-                knowledgeSignalIndex,
-                { autoAlpha: 0 },
-                { autoAlpha: 0.5, duration: 0.2 },
-                0.05,
-              );
-            }
             if (knowledgeFragments.length > 0) {
-              knowledge.fromTo(
+              knowledge.to(
                 knowledgeFragments,
-                { autoAlpha: 0, x: 18, y: 12 },
-                { autoAlpha: 0.72, duration: 0.5, stagger: 0.08, x: 0, y: 0 },
-                0.16,
+                { autoAlpha: 0.72, duration: 0.38, stagger: 0.06, x: 0, y: 0 },
+                0.08,
               );
             }
-            if (knowledgeTitleLines.length > 0) {
-              knowledge.fromTo(
-                knowledgeTitleLines,
-                { autoAlpha: 0, yPercent: 42 },
-                { autoAlpha: 1, duration: 0.46, stagger: 0.08, yPercent: 0 },
-                0.28,
+            const knowledgeExitTargets = [
+              knowledgeSignalIndex,
+              ...knowledgeFragments,
+              ...knowledgeTitleLines,
+              knowledgeBody,
+            ].filter(Boolean);
+            if (knowledgeExitTargets.length > 0) {
+              knowledge.to(
+                knowledgeExitTargets,
+                { autoAlpha: 0.16, duration: 0.18, stagger: 0.008, y: -14 },
+                pinProgressForSceneProgress(
+                  "01",
+                  HOME_SCROLL_CONDUCTOR_CONFIG["01"].exitStart,
+                ),
               );
             }
-            if (knowledgeBody) {
-              knowledge.fromTo(
-                knowledgeBody,
-                { autoAlpha: 0, y: 28 },
-                { autoAlpha: 1, duration: 0.34, y: 0 },
-                0.54,
-              );
+
+            if (canPin) {
+              const scene02EntryShare = HOME_SCROLL_CONDUCTOR_CONFIG["02"].entryShare;
+              ScrollTrigger.create({
+                end: "top top",
+                id: "scene-02-entry",
+                onLeaveBack: () => {
+                  setOrbitalBaseState({ id: "01", kind: "scene", progress: 1 });
+                  publishScrollGuide(scope, "01", 1);
+                  publishSceneEntry(scope, "02", 0);
+                },
+                onUpdate: ({ progress }) => {
+                  const sceneProgress = progress * scene02EntryShare;
+                  setOrbitalBaseState({ id: "02", kind: "scene", progress: sceneProgress });
+                  publishScrollGuide(scope, "02", sceneProgress);
+                  publishSceneEntry(scope, "02", progress);
+                },
+                start: "top bottom",
+                trigger: '[data-scene="02"]',
+              });
             }
 
             const macros = gsap.timeline({
               defaults: { ease: "none" },
               scrollTrigger: {
-                end: canPin ? "+=220%" : "bottom 28%",
-                onLeave: () =>
-                  setOrbitalBaseState({ id: "03", kind: "scene", progress: 0 }),
-                onLeaveBack: () =>
-                  setOrbitalBaseState({ id: "01", kind: "scene", progress: 1 }),
+                end: canPin ? HOME_SCROLL_CONDUCTOR_CONFIG["02"].end : "bottom 28%",
+                onLeave: () => {
+                  setOrbitalBaseState({ id: "03", kind: "scene", progress: 0 });
+                  publishScrollGuide(scope, "03", 0);
+                },
+                onLeaveBack: () => {
+                  setOrbitalBaseState({ id: "01", kind: "scene", progress: 1 });
+                  publishScrollGuide(scope, "01", 1);
+                },
                 onUpdate: ({ progress }) => {
+                  const sceneProgress = composeSceneProgress("02", progress);
+                  publishScrollGuide(scope, "02", sceneProgress);
+                  publishSceneEntry(scope, "02", 1);
                   if (!canPin) return;
-                  setOrbitalBaseState({ id: "02", kind: "scene", progress });
+                  setOrbitalBaseState({ id: "02", kind: "scene", progress: sceneProgress });
                 },
                 pin: canPin ? '[data-pin="02"]' : undefined,
                 scrub: 0.8,
@@ -247,44 +382,59 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
             const proofStops = Array.from(
               scope.querySelectorAll('[data-motion="proof-stop"]'),
             );
-            if (proofIndex) {
-              macros.fromTo(
-                proofIndex,
-                { autoAlpha: 0 },
-                { autoAlpha: 0.5, duration: 0.18 },
-                0.03,
-              );
-            }
-            if (proofTitleLines.length > 0) {
-              macros.fromTo(
-                proofTitleLines,
-                { autoAlpha: 0, yPercent: 40 },
-                { autoAlpha: 1, duration: 0.42, stagger: 0.08, yPercent: 0 },
-                0.06,
-              );
-            }
-            if (proofBody) {
-              macros.fromTo(
-                proofBody,
-                { autoAlpha: 0, y: 24 },
-                { autoAlpha: 1, duration: 0.32, y: 0 },
-                0.18,
-              );
-            }
             if (proofStops.length > 0) {
-              macros.fromTo(
+              macros.to(
                 proofStops,
-                { autoAlpha: 0.12, scale: 0.96, y: 34 },
-                { autoAlpha: 1, duration: 0.54, scale: 1, stagger: 0.18, y: 0 },
-                0.2,
+                { autoAlpha: 1, duration: 0.42, scale: 1, stagger: 0.1, y: 0 },
+                0.08,
               );
+            }
+            const proofExitTargets = [
+              proofIndex,
+              ...proofTitleLines,
+              proofBody,
+              ...proofStops,
+            ].filter(Boolean);
+            if (proofExitTargets.length > 0) {
+              macros.to(
+                proofExitTargets,
+                { autoAlpha: 0.14, duration: 0.16, stagger: 0.006, y: -12 },
+                pinProgressForSceneProgress(
+                  "02",
+                  HOME_SCROLL_CONDUCTOR_CONFIG["02"].exitStart,
+                ),
+              );
+            }
+
+            if (canPin) {
+              const scene03EntryShare = HOME_SCROLL_CONDUCTOR_CONFIG["03"].entryShare;
+              ScrollTrigger.create({
+                end: "top top",
+                id: "scene-03-entry",
+                onLeaveBack: () => {
+                  setOrbitalBaseState({ id: "02", kind: "scene", progress: 1 });
+                  publishScrollGuide(scope, "02", 1);
+                  publishSceneEntry(scope, "03", 0);
+                },
+                onUpdate: ({ progress }) => {
+                  const sceneProgress = progress * scene03EntryShare;
+                  setOrbitalBaseState({ id: "03", kind: "scene", progress: sceneProgress });
+                  publishScrollGuide(scope, "03", sceneProgress);
+                  publishSceneEntry(scope, "03", progress);
+                },
+                start: "top bottom",
+                trigger: '[data-scene="03"]',
+              });
             }
 
             const atlasTopics = Array.from(
               scope.querySelectorAll<HTMLElement>('[data-motion="atlas-topic"]'),
             );
             const activateAtlasTopic = (progress: number) => {
-              const activeIndex = Math.round(progress * Math.max(0, atlasTopics.length - 1));
+              const activeIndex = Math.min(
+                Math.max(0, atlasTopics.length - 1),
+                Math.floor(clampScrollProgress(progress) * atlasTopics.length),
+              );
               atlasTopics.forEach((topic, index) => {
                 if (index === activeIndex) topic.dataset.active = "true";
                 else delete topic.dataset.active;
@@ -293,14 +443,22 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
             const atlas = gsap.timeline({
               defaults: { ease: "none" },
               scrollTrigger: {
-                end: canPin ? "+=220%" : "bottom 24%",
-                onLeave: () =>
-                  setOrbitalBaseState({ id: "03", kind: "scene", progress: 1 }),
-                onLeaveBack: () =>
-                  setOrbitalBaseState({ id: "02", kind: "scene", progress: 1 }),
+                end: canPin ? HOME_SCROLL_CONDUCTOR_CONFIG["03"].end : "bottom 24%",
+                onLeave: () => {
+                  setOrbitalBaseState({ id: "03", kind: "scene", progress: 1 });
+                  publishScrollGuide(scope, "03", 1);
+                  setScrollGuideVisibility(scope, false);
+                },
+                onLeaveBack: () => {
+                  setOrbitalBaseState({ id: "02", kind: "scene", progress: 1 });
+                  publishScrollGuide(scope, "02", 1);
+                },
                 onUpdate: ({ progress }) => {
+                  const sceneProgress = composeSceneProgress("03", progress);
+                  publishScrollGuide(scope, "03", sceneProgress);
+                  publishSceneEntry(scope, "03", 1);
                   if (!canPin) return;
-                  setOrbitalBaseState({ id: "03", kind: "scene", progress });
+                  setOrbitalBaseState({ id: "03", kind: "scene", progress: sceneProgress });
                   activateAtlasTopic(progress);
                 },
                 pin: canPin ? '[data-pin="03"]' : undefined,
@@ -311,10 +469,26 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
               },
             });
             if (atlasTopics.length > 0) {
-              atlas.fromTo(
+              atlas.to(
                 atlasTopics,
-                { autoAlpha: 0.28, x: 28 },
-                { autoAlpha: 1, duration: 0.72, stagger: 0.1, x: 0 },
+                { autoAlpha: 1, duration: 0.38, stagger: 0.07, x: 0 },
+                0.08,
+              );
+            }
+            const atlasExitTargets = [
+              scope.querySelector('[data-atlas-index=""]'),
+              scope.querySelector('[data-motion="atlas-copy"]'),
+              ...atlasTopics,
+              scope.querySelector(`[data-scene="03"] .${styles.atlasAxis}`),
+            ].filter(Boolean);
+            if (atlasExitTargets.length > 0) {
+              atlas.to(
+                atlasExitTargets,
+                { autoAlpha: 0.14, duration: 0.14, stagger: 0.006, y: -10 },
+                pinProgressForSceneProgress(
+                  "03",
+                  HOME_SCROLL_CONDUCTOR_CONFIG["03"].exitStart,
+                ),
               );
             }
 

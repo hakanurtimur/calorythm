@@ -3,6 +3,7 @@ import { OrbitalLink } from "@/components/orbital/orbital-link";
 import { OrbitalThreadControlsLoader } from "@/components/orbital/orbital-thread-controls-loader";
 import { orbitalHomeContent } from "@/content/orbital-home";
 import { HomeMotion } from "./home-motion";
+import { HomeScrollGuide } from "./home-scroll-guide";
 import { HomeSplash } from "./home-splash";
 import { OrbitalThreadStage } from "./orbital-thread-stage";
 import styles from "./home.module.css";
@@ -27,8 +28,13 @@ export function HomeExperience() {
       <OrbitalThreadControlsLoader />
       <HomeSplash />
       <HomeMotion>
+        <HomeScrollGuide />
         <section aria-labelledby="home-hero-title" className={styles.hero} data-scene="hero">
-        <div className={styles.heroViewport} data-pin="hero">
+        <div
+          className={styles.heroViewport}
+          data-orbital-content-layer="foreground"
+          data-pin="hero"
+        >
           <header className={styles.siteHeader}>
             <a aria-label="CALORYTHM ana sayfa" className={styles.wordmark} href="#top">
               <BrandWordmark className={styles.wordmarkImage} priority />
@@ -124,7 +130,11 @@ export function HomeExperience() {
         data-scene-role="editorial-proof-route"
         id="section-02"
       >
-        <div className={styles.macroViewport} data-pin="02">
+        <div
+          className={styles.macroViewport}
+          data-orbital-content-layer="foreground"
+          data-pin="02"
+        >
           <div className={`${styles.sceneInner} ${styles.macroInner}`}>
             <p aria-hidden="true" className={styles.sceneNumber}>02</p>
             <p aria-hidden="true" className={styles.proofIndex} data-proof-index="">
@@ -165,7 +175,11 @@ export function HomeExperience() {
         data-scene-role="question-atlas"
         id="konular"
       >
-        <div className={styles.atlasViewport} data-pin="03">
+        <div
+          className={styles.atlasViewport}
+          data-orbital-content-layer="foreground"
+          data-pin="03"
+        >
           <div className={`${styles.sceneInner} ${styles.atlasInner}`}>
             <p aria-hidden="true" className={styles.sceneNumber}>03</p>
             <p aria-hidden="true" className={styles.atlasIndex} data-atlas-index="">
@@ -210,7 +224,11 @@ export function HomeExperience() {
         data-scene="04"
         id="section-04"
       >
-        <div className={styles.thoughtViewport} data-pin="04">
+        <div
+          className={styles.thoughtViewport}
+          data-orbital-content-layer="foreground"
+          data-pin="04"
+        >
           <div className={`${styles.sceneInner} ${styles.thoughtInner}`}>
             <p aria-hidden="true" className={styles.sceneNumber}>04</p>
             <div className={`${styles.sceneCopy} ${styles.thoughtCopy}`}>
@@ -231,7 +249,10 @@ export function HomeExperience() {
         data-scene="05"
         id="section-05"
       >
-        <div className={`${styles.sceneInner} ${styles.flagshipInner}`}>
+        <div
+          className={`${styles.sceneInner} ${styles.flagshipInner}`}
+          data-orbital-content-layer="foreground"
+        >
           <p className={styles.flagshipLabel}>İlk dosya <span>001</span></p>
           <div className={`${styles.sceneCopy} ${styles.flagshipCopy}`}>
             <SceneTitle section={flagship} />
@@ -251,7 +272,10 @@ export function HomeExperience() {
         data-scene="06"
         id="journal"
       >
-        <div className={`${styles.sceneInner} ${styles.journalInner}`}>
+        <div
+          className={`${styles.sceneInner} ${styles.journalInner}`}
+          data-orbital-content-layer="foreground"
+        >
           <div className={styles.journalLead}>
             <p aria-hidden="true" className={styles.sceneNumber}>06</p>
             <div className={`${styles.sceneCopy} ${styles.journalCopy}`}>
@@ -288,7 +312,10 @@ export function HomeExperience() {
         data-scene="07"
         id="hakkinda"
       >
-        <div className={`${styles.sceneInner} ${styles.finaleInner}`}>
+        <div
+          className={`${styles.sceneInner} ${styles.finaleInner}`}
+          data-orbital-content-layer="foreground"
+        >
           <p aria-hidden="true" className={styles.sceneNumber}>07</p>
           <div className={`${styles.sceneCopy} ${styles.finaleCopy}`}>
             <SceneTitle section={finale} />

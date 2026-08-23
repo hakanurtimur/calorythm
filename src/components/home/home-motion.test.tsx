@@ -151,7 +151,7 @@ describe("HomeMotion", () => {
       { trigger: '[data-scene="04"]', pin: '[data-pin="04"]' },
       { trigger: '[data-scene="05"]', pin: undefined },
     ]);
-    expect(fake.ScrollTrigger.create).toHaveBeenCalledTimes(9);
+    expect(fake.ScrollTrigger.create).toHaveBeenCalledTimes(11);
 
     unmount();
     expect(fake.media.revert).toHaveBeenCalledOnce();

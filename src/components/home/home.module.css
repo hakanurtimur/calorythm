@@ -523,17 +523,147 @@
   position: relative;
 }
 
+.home [data-orbital-content-layer="foreground"] {
+  position: relative;
+  z-index: 3;
+}
+
+.scrollGuide {
+  --scroll-guide-progress: 0;
+  color: white;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: auto 1px auto;
+  left: clamp(1.1rem, 2vw, 2.25rem);
+  mix-blend-mode: difference;
+  opacity: 1;
+  pointer-events: none;
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  transition:
+    opacity 240ms ease,
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0s;
+  visibility: visible;
+  z-index: 12;
+}
+
+.scrollGuide[data-visible="false"] {
+  opacity: 0;
+  transform: translate(-0.65rem, -50%);
+  transition-delay: 0s, 0s, 240ms;
+  visibility: hidden;
+}
+
+.motionRoot[data-motion-profile="pending"] .scrollGuide,
+.motionRoot[data-motion-profile="reduced"] .scrollGuide {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.scrollGuideCurrent {
+  align-self: start;
+  display: grid;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.52rem;
+  gap: 0.15rem;
+  letter-spacing: 0.08em;
+  margin: 0;
+  opacity: 0.72;
+}
+
+.scrollGuideCurrent span:last-child {
+  opacity: 0.42;
+}
+
+.scrollGuideTrack {
+  background: color-mix(in srgb, currentColor 20%, transparent);
+  display: block;
+  height: 9rem;
+  overflow: hidden;
+  position: relative;
+  width: 1px;
+}
+
+.scrollGuideTrack i {
+  background: currentColor;
+  display: block;
+  height: 100%;
+  transform: scaleY(var(--scroll-guide-progress));
+  transform-origin: top;
+  width: 100%;
+  will-change: transform;
+}
+
+.scrollGuide ol {
+  display: grid;
+  gap: 0.7rem;
+  list-style: none;
+  margin: -0.15rem 0 0;
+  padding: 0;
+}
+
+.scrollGuide li {
+  opacity: 0.34;
+  transition: opacity 260ms ease;
+}
+
+.scrollGuide li[data-active="true"] {
+  opacity: 1;
+}
+
+.scrollGuide a {
+  align-items: baseline;
+  color: inherit;
+  display: grid;
+  font-family: "IBM Plex Mono", monospace;
+  gap: 0.55rem;
+  grid-template-columns: 1.2rem auto;
+  pointer-events: auto;
+  text-decoration: none;
+}
+
+.scrollGuide a > span {
+  font-size: 0.48rem;
+  letter-spacing: 0.08em;
+}
+
+.scrollGuide small {
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  opacity: 0;
+  text-transform: uppercase;
+  transform: translateX(-0.35rem);
+  transition:
+    opacity 260ms ease,
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.scrollGuide li[data-active="true"] small,
+.scrollGuide a:hover small,
+.scrollGuide a:focus-visible small {
+  opacity: 1;
+  transform: none;
+}
+
+.scrollGuide li[data-state="past"] {
+  opacity: 0.52;
+}
+
 .hero,
 .scene {
   position: relative;
 }
 
 .hero {
+  background: var(--ivory);
   min-height: 100svh;
 }
 
 .heroViewport {
-  background: var(--ivory);
+  background: transparent;
   min-height: 100svh;
   overflow: hidden;
   position: relative;
@@ -993,8 +1123,7 @@
 
 .macroViewport {
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--ink) 8%, var(--ivory)) 0%, var(--ivory) 19%),
-    var(--ivory);
+    linear-gradient(180deg, color-mix(in srgb, var(--ink) 8%, transparent) 0%, transparent 19%);
   min-height: 100svh;
   overflow: hidden;
   position: relative;
@@ -1143,8 +1272,7 @@
 
 .atlasViewport {
   background:
-    linear-gradient(90deg, transparent 0 49.94%, color-mix(in srgb, var(--ink) 7%, transparent) 50%, transparent 50.06%),
-    var(--ivory);
+    linear-gradient(90deg, transparent 0 49.94%, color-mix(in srgb, var(--ink) 7%, transparent) 50%, transparent 50.06%);
   min-height: 100svh;
   overflow: hidden;
   position: relative;
@@ -1645,6 +1773,42 @@
   justify-self: end;
 }
 
+.scene[data-scene="01"],
+.scene[data-scene="02"],
+.scene[data-scene="03"] {
+  --scene-entry-detail: 0.28;
+  --scene-entry-muted: 0.56;
+  --scene-entry-progress: 1;
+}
+
+.scene[data-scene="01"] .knowledgeCopy,
+.scene[data-scene="02"] .macroCopy,
+.scene[data-scene="03"] .atlasCopy {
+  opacity: var(--scene-entry-progress);
+  will-change: opacity, transform;
+}
+
+.scene[data-scene="01"] .knowledgeSignalIndex,
+.scene[data-scene="02"] .proofIndex,
+.scene[data-scene="03"] .atlasIndex,
+.scene[data-scene="03"] .atlasAxis {
+  opacity: var(--scene-entry-muted);
+  will-change: opacity, transform;
+}
+
+.scene[data-scene="01"] .knowledgeFragments span,
+.scene[data-scene="02"] .macroRoutes li,
+.scene[data-scene="03"] .topicAtlas li {
+  opacity: var(--scene-entry-detail);
+  will-change: opacity, transform;
+}
+
+@media (max-height: 43.6875rem) {
+  .scrollGuide {
+    display: none;
+  }
+}
+
 @media (max-width: 63.9375rem) {
   .knowledgeCopy,
   .macroCopy,
@@ -1688,6 +1852,16 @@
 }
 
 @media (max-width: 47.9375rem) {
+  .scrollGuide {
+    display: none;
+  }
+
+  .scene[data-scene="01"],
+  .scene[data-scene="02"],
+  .scene[data-scene="03"] {
+    --scene-entry-progress: 1;
+  }
+
   .knowledgeScene,
   .macroScene,
   .atlasScene,
@@ -1985,5 +2159,17 @@
 
   .finaleFooter span:last-child {
     justify-self: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollGuide {
+    display: none;
+  }
+
+  .scene[data-scene="01"],
+  .scene[data-scene="02"],
+  .scene[data-scene="03"] {
+    --scene-entry-progress: 1;
   }
 }
