@@ -285,4 +285,67 @@ describe("orbital thread geometry", () => {
     expect(route[0]).not.toEqual(route[12]);
     expect(route.flatMap(({ x, y }) => [x, y]).every(Number.isFinite)).toBe(true);
   });
+
+  it("turns the proof route into separated vertical rails with a travelling focus", () => {
+    type QuestionAtlasGeometry = (
+      source: ReturnType<typeof parseCubicLoopPath>,
+      input: {
+        focusBend: number;
+        focusTravel: number;
+        layerIndex: number;
+        layerSpacing: number;
+        progress: number;
+      },
+    ) => ReturnType<typeof parseCubicLoopPath>;
+    const createQuestionAtlasGeometry = (
+      orbitalGeometry as unknown as { createQuestionAtlasGeometry?: QuestionAtlasGeometry }
+    ).createQuestionAtlasGeometry;
+
+    expect(createQuestionAtlasGeometry).toBeTypeOf("function");
+    if (!createQuestionAtlasGeometry) return;
+
+    const authored = parseCubicLoopPath(orbitalPaths[0].d);
+    const flat = orbitalGeometry.createEditorialSignalGeometry(authored, {
+      elapsedMs: 0,
+      layerIndex: 0,
+      layerSpacing: 2.4,
+      noiseAmplitude: 7,
+      progress: 1,
+      radiusX: 70,
+      radiusY: 9,
+      settledWaveAmplitude: 1.2,
+      waveLobes: 3.2,
+      waveSpeed: 0.001,
+    });
+    const proofRoute = orbitalGeometry.createEditorialProofGeometry(flat, {
+      layerIndex: 0,
+      layerSpacing: 2.8,
+      progress: 1,
+      routeDepth: 20,
+    });
+    const input = {
+      focusBend: 12,
+      focusTravel: 52,
+      layerIndex: 0,
+      layerSpacing: 3.2,
+      progress: 1,
+    };
+    const rail = createQuestionAtlasGeometry(proofRoute, input);
+    const fourthRail = createQuestionAtlasGeometry(proofRoute, {
+      ...input,
+      layerIndex: 3,
+    });
+    const earlyFocus = createQuestionAtlasGeometry(proofRoute, {
+      ...input,
+      progress: 0.4,
+    });
+
+    expect(createQuestionAtlasGeometry(proofRoute, { ...input, progress: 0 })).toEqual(proofRoute);
+    expect(Math.max(...rail.map(({ y }) => y)) - Math.min(...rail.map(({ y }) => y))).toBeGreaterThan(120);
+    expect(rail[0]!.x).toBeCloseTo(rail[12]!.x, 5);
+    expect(rail[0]).not.toEqual(rail[12]);
+    expect(fourthRail[0]!.x).toBeGreaterThan(rail[0]!.x + 9);
+    expect(earlyFocus[6]!.y).toBeLessThan(rail[6]!.y);
+    expect(rail.flatMap(({ x, y }) => [x, y]).every(Number.isFinite)).toBe(true);
+  });
 });

@@ -53,6 +53,14 @@ export type EditorialProofGeometryInput = {
   routeDepth: number;
 };
 
+export type QuestionAtlasGeometryInput = {
+  focusBend: number;
+  focusTravel: number;
+  layerIndex: number;
+  layerSpacing: number;
+  progress: number;
+};
+
 /**
  * Selects the point nearest the CTA-facing portion of a loop. Points farther
  * around the closed path receive progressively more delay during a morph.
@@ -268,6 +276,51 @@ export function createEditorialProofGeometry(
     { x: 86, y: centerY + safeRouteDepth },
     { x: 100, y: centerY },
     { x: 112, y: centerY },
+  ];
+
+  return interpolateGeometry(source, target, amount);
+}
+
+/**
+ * Rotates the Scene 02 proof route into a vertical editorial scanner. Each
+ * thread stays on its own rail while a local bend travels through the topic
+ * field as scroll progress advances.
+ */
+export function createQuestionAtlasGeometry(
+  source: RingPoint[],
+  {
+    focusBend,
+    focusTravel,
+    layerIndex,
+    layerSpacing,
+    progress,
+  }: QuestionAtlasGeometryInput,
+) {
+  const sceneProgress = clampUnit(progress);
+  if (sceneProgress === 0) return source;
+
+  const amount = smoothstep(0.04, 0.34, sceneProgress);
+  const safeLayerIndex = Number.isFinite(layerIndex) ? Math.max(0, layerIndex) : 0;
+  const safeLayerSpacing = Number.isFinite(layerSpacing) ? Math.max(0, layerSpacing) : 0;
+  const safeFocusBend = Number.isFinite(focusBend) ? Math.max(0, focusBend) : 12;
+  const safeFocusTravel = Number.isFinite(focusTravel) ? Math.max(0, focusTravel) : 52;
+  const centerX = 50 + (safeLayerIndex - 1.5) * safeLayerSpacing;
+  const focusY = 26 + sceneProgress * safeFocusTravel;
+  const bentX = centerX + safeFocusBend;
+  const target: RingPoint[] = [
+    { x: centerX, y: -12 },
+    { x: centerX, y: 0 },
+    { x: centerX, y: 12 },
+    { x: centerX, y: focusY - 18 },
+    { x: centerX, y: focusY - 12 },
+    { x: bentX, y: focusY - 6 },
+    { x: bentX, y: focusY },
+    { x: bentX, y: focusY + 6 },
+    { x: centerX, y: focusY + 12 },
+    { x: centerX, y: focusY + 18 },
+    { x: centerX, y: 96 },
+    { x: centerX, y: 106 },
+    { x: centerX, y: 118 },
   ];
 
   return interpolateGeometry(source, target, amount);

@@ -89,7 +89,7 @@ function MotionFixture({ children }: { children?: ReactNode }) {
       <section data-scene="hero"><div data-pin="hero"><i data-motion="hero-copy" /></div></section>
       <section data-scene="01"><h2 /><i data-motion="knowledge-fragment" /></section>
       <section data-scene="02"><div data-pin="02"><i data-motion="macro-route" /></div></section>
-      <section data-scene="03"><i data-motion="topic-atlas-item" /></section>
+      <section data-scene="03"><div data-pin="03"><i data-motion="atlas-topic" /></div></section>
       <section data-scene="04"><div data-pin="04"><i data-motion="thought-resolution" /></div></section>
       <section data-scene="05"><h2 /></section>
       <section data-scene="06">
@@ -147,7 +147,7 @@ describe("HomeMotion", () => {
       { trigger: '[data-scene="hero"]', pin: '[data-pin="hero"]' },
       { trigger: '[data-scene="01"]', pin: '[data-pin="01"]' },
       { trigger: '[data-scene="02"]', pin: '[data-pin="02"]' },
-      { trigger: '[data-scene="03"]', pin: undefined },
+      { trigger: '[data-scene="03"]', pin: '[data-pin="03"]' },
       { trigger: '[data-scene="04"]', pin: '[data-pin="04"]' },
       { trigger: '[data-scene="05"]', pin: undefined },
     ]);

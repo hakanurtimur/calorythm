@@ -158,23 +158,45 @@ export function HomeExperience() {
         aria-labelledby="section-03-title"
         className={`${styles.scene} ${styles.atlasScene}`}
         data-scene="03"
+        data-scene-role="question-atlas"
         id="konular"
       >
-        <div className={`${styles.sceneInner} ${styles.atlasInner}`}>
-          <p aria-hidden="true" className={styles.sceneNumber}>03</p>
-          <div className={`${styles.sceneCopy} ${styles.atlasCopy}`}>
-            <SceneTitle section={clarity} />
-            <p className={styles.sceneBody}>{clarity.body}</p>
+        <div className={styles.atlasViewport} data-pin="03">
+          <div className={`${styles.sceneInner} ${styles.atlasInner}`}>
+            <p aria-hidden="true" className={styles.sceneNumber}>03</p>
+            <p aria-hidden="true" className={styles.atlasIndex} data-atlas-index="">
+              <span>CALORYTHM / QUESTION ATLAS 003</span>
+              <span>SORU → DOSYA</span>
+            </p>
+            <div
+              className={`${styles.sceneCopy} ${styles.atlasCopy}`}
+              data-motion="atlas-copy"
+            >
+              <SceneTitle section={clarity} />
+              <p className={styles.sceneBody}>{clarity.body}</p>
+            </div>
+            <ol aria-label="Beslenme konuları" className={styles.topicAtlas}>
+              {orbitalHomeContent.topicAtlas.map((topic, index) => (
+                <li
+                  data-active={index === 0 ? "true" : undefined}
+                  data-atlas-topic-index={index}
+                  data-motion="atlas-topic"
+                  key={topic.title}
+                >
+                  <span>0{index + 1}</span>
+                  <h3>{topic.title}</h3>
+                  <p>{topic.note}</p>
+                </li>
+              ))}
+            </ol>
+            <p aria-hidden="true" className={styles.atlasAxis}>
+              <span>ARAŞTIR</span>
+              <i />
+              <span>KARŞILAŞTIR</span>
+              <i />
+              <span>ANLAT</span>
+            </p>
           </div>
-          <ol aria-label="Beslenme konuları" className={styles.topicAtlas}>
-            {orbitalHomeContent.topicAtlas.map((topic, index) => (
-              <li data-motion="topic-atlas-item" key={topic.title}>
-                <span>0{index + 1}</span>
-                <h3>{topic.title}</h3>
-                <p>{topic.note}</p>
-              </li>
-            ))}
-          </ol>
         </div>
         </section>
 

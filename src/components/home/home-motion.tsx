@@ -222,7 +222,8 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
               defaults: { ease: "none" },
               scrollTrigger: {
                 end: canPin ? "+=220%" : "bottom 28%",
-                onLeave: () => setOrbitalBaseState({ kind: "hero" }),
+                onLeave: () =>
+                  setOrbitalBaseState({ id: "03", kind: "scene", progress: 0 }),
                 onLeaveBack: () =>
                   setOrbitalBaseState({ id: "01", kind: "scene", progress: 1 }),
                 onUpdate: ({ progress }) => {
@@ -279,21 +280,43 @@ export function HomeMotion({ children, loadRuntime = loadHomeMotionRuntime }: Ho
               );
             }
 
+            const atlasTopics = Array.from(
+              scope.querySelectorAll<HTMLElement>('[data-motion="atlas-topic"]'),
+            );
+            const activateAtlasTopic = (progress: number) => {
+              const activeIndex = Math.round(progress * Math.max(0, atlasTopics.length - 1));
+              atlasTopics.forEach((topic, index) => {
+                if (index === activeIndex) topic.dataset.active = "true";
+                else delete topic.dataset.active;
+              });
+            };
             const atlas = gsap.timeline({
               defaults: { ease: "none" },
               scrollTrigger: {
-                end: "bottom 24%",
-                pin: undefined,
+                end: canPin ? "+=220%" : "bottom 24%",
+                onLeave: () =>
+                  setOrbitalBaseState({ id: "03", kind: "scene", progress: 1 }),
+                onLeaveBack: () =>
+                  setOrbitalBaseState({ id: "02", kind: "scene", progress: 1 }),
+                onUpdate: ({ progress }) => {
+                  if (!canPin) return;
+                  setOrbitalBaseState({ id: "03", kind: "scene", progress });
+                  activateAtlasTopic(progress);
+                },
+                pin: canPin ? '[data-pin="03"]' : undefined,
                 scrub: 0.6,
-                start: "top 78%",
+                start: canPin ? "top top" : "top 78%",
                 trigger: '[data-scene="03"]',
+                ...(canPin ? { anticipatePin: 1 } : {}),
               },
             });
-            atlas.fromTo(
-              '[data-motion="topic-atlas-item"]',
-              { autoAlpha: 0.3, x: 28 },
-              { autoAlpha: 1, duration: 0.72, stagger: 0.1, x: 0 },
-            );
+            if (atlasTopics.length > 0) {
+              atlas.fromTo(
+                atlasTopics,
+                { autoAlpha: 0.28, x: 28 },
+                { autoAlpha: 1, duration: 0.72, stagger: 0.1, x: 0 },
+              );
+            }
 
             const thought = gsap.timeline({
               defaults: { ease: "none" },

@@ -55,6 +55,13 @@ export type OrbitalThreadConfig = {
     restStrokeWidth: number;
     routeDepth: number;
   };
+  scene03: {
+    focusBend: number;
+    focusTravel: number;
+    inhaleStrokeWidth: number;
+    layerSpacing: number;
+    restStrokeWidth: number;
+  };
   pointer: {
     anchorRadius: number;
     intensity: number;
@@ -121,6 +128,13 @@ export const orbitalThreadDefaults: OrbitalThreadConfig = {
     restStrokeWidth: 3.2,
     routeDepth: 20,
   },
+  scene03: {
+    focusBend: 12,
+    focusTravel: 52,
+    inhaleStrokeWidth: 4.2,
+    layerSpacing: 3.2,
+    restStrokeWidth: 2.6,
+  },
   glow: {
     blur: 0.8,
     opacity: 0.46,
@@ -158,6 +172,7 @@ export function setOrbitalThreadConfig(patch: OrbitalThreadConfigPatch) {
     pointer: { ...currentConfig.pointer, ...patch.pointer },
     scene01: { ...currentConfig.scene01, ...patch.scene01 },
     scene02: { ...currentConfig.scene02, ...patch.scene02 },
+    scene03: { ...currentConfig.scene03, ...patch.scene03 },
   };
   listeners.forEach((listener) => listener());
 }

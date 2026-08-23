@@ -228,6 +228,43 @@ export function OrbitalThreadControls() {
         value: orbitalThreadDefaults.scene02.inhaleStrokeWidth,
       },
     }),
+    "Scene 03 question atlas": folder({
+      scene03FocusBend: {
+        label: "Focus bend",
+        max: 28,
+        min: 0,
+        step: 0.5,
+        value: orbitalThreadDefaults.scene03.focusBend,
+      },
+      scene03FocusTravel: {
+        label: "Focus travel",
+        max: 78,
+        min: 20,
+        step: 1,
+        value: orbitalThreadDefaults.scene03.focusTravel,
+      },
+      scene03LayerSpacing: {
+        label: "Rail spacing",
+        max: 9,
+        min: 0.5,
+        step: 0.1,
+        value: orbitalThreadDefaults.scene03.layerSpacing,
+      },
+      scene03RestStrokeWidth: {
+        label: "Rest width",
+        max: 12,
+        min: 0.5,
+        step: 0.1,
+        value: orbitalThreadDefaults.scene03.restStrokeWidth,
+      },
+      scene03InhaleStrokeWidth: {
+        label: "Inhale width",
+        max: 16,
+        min: 0.5,
+        step: 0.1,
+        value: orbitalThreadDefaults.scene03.inhaleStrokeWidth,
+      },
+    }),
     Glow: folder({
       glowBlur: {
         label: "Blur",
@@ -343,6 +380,13 @@ export function OrbitalThreadControls() {
         layerSpacing: values.scene02LayerSpacing,
         restStrokeWidth: values.scene02RestStrokeWidth,
         routeDepth: values.scene02RouteDepth,
+      },
+      scene03: {
+        focusBend: values.scene03FocusBend,
+        focusTravel: values.scene03FocusTravel,
+        inhaleStrokeWidth: values.scene03InhaleStrokeWidth,
+        layerSpacing: values.scene03LayerSpacing,
+        restStrokeWidth: values.scene03RestStrokeWidth,
       },
     });
   }, [values]);
