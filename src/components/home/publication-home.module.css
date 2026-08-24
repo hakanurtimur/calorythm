@@ -1,0 +1,840 @@
+.publicationHome {
+  --home-gutter: clamp(1.25rem, 6.3vw, 7.5rem);
+  background: var(--ivory);
+  overflow: clip;
+}
+
+.publicationHome :where(h2, h3, p, figure) {
+  margin: 0;
+}
+
+.publicationHome :where(h2, h3) {
+  text-wrap: balance;
+}
+
+.publicationHome :where(p) {
+  text-wrap: pretty;
+}
+
+.noise,
+.method,
+.flagship,
+.journal,
+.topicAtlas,
+.contribution {
+  position: relative;
+}
+
+.noise {
+  align-items: center;
+  background: var(--ink);
+  color: var(--ivory);
+  display: grid;
+  min-height: 100svh;
+  overflow: clip;
+  padding: clamp(7.5rem, 13vh, 10rem) var(--home-gutter) clamp(5rem, 10vh, 8rem);
+}
+
+.noiseShutter {
+  background: var(--coral);
+  height: clamp(0.8rem, 1.45vw, 1.6rem);
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 43%;
+  z-index: 0;
+}
+
+.noiseClaims {
+  inset: 7rem var(--home-gutter) auto;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.noiseClaims span {
+  color: color-mix(in srgb, var(--ivory) 48%, transparent);
+  display: block;
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(1.75rem, 3.2vw, 3.6rem);
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  margin-left: calc(var(--claim-offset) * 11vw);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--coral) 75%, transparent);
+  text-decoration-thickness: 0.08em;
+}
+
+.noiseStatement {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  margin-left: auto;
+  max-width: min(62rem, 78vw);
+  position: relative;
+  width: 100%;
+  z-index: 2;
+}
+
+.noiseStatement h2 {
+  font-size: clamp(3rem, 6.6vw, 6rem);
+  font-weight: 520;
+  letter-spacing: -0.038em;
+  line-height: 0.94;
+  max-width: 12ch;
+}
+
+.noiseStatement p {
+  font-size: clamp(1.05rem, 1.55vw, 1.35rem);
+  line-height: 1.7;
+  margin-left: min(22vw, 18rem);
+  max-width: 54ch;
+}
+
+.noiseStatement strong {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(0.65rem, 0.75vw, 0.78rem);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  margin-left: min(22vw, 18rem);
+  text-transform: uppercase;
+}
+
+.annotationLeaders {
+  bottom: 8%;
+  display: grid;
+  gap: 0.42rem;
+  left: var(--home-gutter);
+  position: absolute;
+  width: min(22rem, 28vw);
+}
+
+.annotationLeaders i,
+.convergence i {
+  background: var(--band-color);
+  display: block;
+}
+
+.annotationLeaders i {
+  height: 0.28rem;
+  width: calc(42% + var(--band-index) * 13%);
+}
+
+.publicationHome [data-band-tone="orange"],
+.publicationHome [data-converging-band="orange"] {
+  --band-color: var(--orange);
+  --band-index: 0;
+}
+
+.publicationHome [data-band-tone="coral"],
+.publicationHome [data-converging-band="coral"] {
+  --band-color: var(--coral);
+  --band-index: 1;
+}
+
+.publicationHome [data-band-tone="ochre"],
+.publicationHome [data-converging-band="ochre"] {
+  --band-color: var(--ochre);
+  --band-index: 2;
+}
+
+.publicationHome [data-band-tone="olive"],
+.publicationHome [data-converging-band="olive"] {
+  --band-color: var(--olive);
+  --band-index: 3;
+}
+
+.method {
+  align-items: center;
+  background: var(--ivory);
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 6rem);
+  grid-template-columns: minmax(17rem, 0.82fr) minmax(22rem, 1.18fr);
+  min-height: 100svh;
+  padding: clamp(7.5rem, 13vh, 10rem) var(--home-gutter) clamp(4.5rem, 8vh, 7rem);
+}
+
+.methodCopy {
+  display: grid;
+  gap: 1.7rem;
+}
+
+.methodCopy h2 {
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(2.8rem, 4.7vw, 5.2rem);
+  font-weight: 470;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+}
+
+.methodCopy > p:not(.methodSequence) {
+  color: color-mix(in srgb, var(--ink) 82%, transparent);
+  font-size: clamp(1rem, 1.3vw, 1.18rem);
+  line-height: 1.75;
+  max-width: 52ch;
+}
+
+.methodSequence {
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 40%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 40%, transparent);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(0.72rem, 0.86vw, 0.86rem);
+  letter-spacing: 0.035em;
+  line-height: 1.8;
+  padding: 1rem 0;
+}
+
+.evidenceFigure {
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.evidenceSurface {
+  aspect-ratio: 4 / 3;
+  background: var(--ochre);
+  overflow: clip;
+  position: relative;
+}
+
+.evidenceSurface > img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.evidenceSurface::after {
+  background: linear-gradient(90deg, transparent 68%, color-mix(in srgb, var(--ink) 18%, transparent));
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.evidenceSlices {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.evidenceSlices i {
+  background-image: url("/images/matter-source.webp");
+  background-size: 175% auto;
+  border: 1px solid color-mix(in srgb, var(--ivory) 75%, transparent);
+  bottom: var(--slice-bottom);
+  position: absolute;
+  right: var(--slice-right);
+  top: var(--slice-top);
+  width: 24%;
+}
+
+.evidenceSlices i:nth-child(1) {
+  --slice-bottom: 56%;
+  --slice-right: 4%;
+  --slice-top: 5%;
+  background-position: 84% 15%;
+}
+
+.evidenceSlices i:nth-child(2) {
+  --slice-bottom: 29%;
+  --slice-right: 10%;
+  --slice-top: 34%;
+  background-position: 70% 48%;
+}
+
+.evidenceSlices i:nth-child(3) {
+  --slice-bottom: 5%;
+  --slice-right: 4%;
+  --slice-top: 63%;
+  background-position: 88% 86%;
+}
+
+.evidenceFigure figcaption {
+  color: color-mix(in srgb, var(--ink) 75%, transparent);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.035em;
+  line-height: 1.6;
+}
+
+.flagship {
+  align-items: flex-start;
+  background: var(--coral);
+  color: var(--ink);
+  display: flex;
+  min-height: min(62rem, 110svh);
+  overflow: clip;
+  padding: clamp(8rem, 15vh, 11rem) var(--home-gutter) clamp(6rem, 12vh, 9rem);
+}
+
+.fiberScore {
+  bottom: 0;
+  height: 78%;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+}
+
+.fiberScore path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ink) 82%, transparent);
+  stroke-linecap: butt;
+  stroke-width: 17;
+  vector-effect: non-scaling-stroke;
+}
+
+.fiberScore path:nth-child(2) { stroke: color-mix(in srgb, var(--ivory) 70%, var(--coral)); }
+.fiberScore path:nth-child(3) { stroke: color-mix(in srgb, var(--ochre) 72%, var(--ink)); }
+.fiberScore path:nth-child(4) { stroke: color-mix(in srgb, var(--olive) 76%, var(--ink)); }
+
+.flagshipCopy {
+  display: grid;
+  gap: clamp(1.25rem, 2.2vw, 2.2rem);
+  max-width: 71rem;
+  position: relative;
+  z-index: 1;
+}
+
+.flagshipLabel,
+.flagshipMetadata {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(0.68rem, 0.8vw, 0.78rem);
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.flagshipCopy h2 {
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(3.8rem, 7.1vw, 6rem);
+  font-weight: 520;
+  letter-spacing: -0.04em;
+  line-height: 0.88;
+  max-width: 14ch;
+}
+
+.flagshipDeck {
+  font-size: clamp(1.05rem, 1.55vw, 1.35rem);
+  line-height: 1.65;
+  margin-left: clamp(0rem, 19vw, 17rem) !important;
+  max-width: 54ch;
+}
+
+.flagshipMetadata {
+  margin-left: clamp(0rem, 19vw, 17rem) !important;
+}
+
+.primaryLink,
+.finalLink {
+  align-items: center;
+  color: inherit;
+  display: inline-flex;
+  font-weight: 720;
+  gap: 1rem;
+  justify-content: space-between;
+  min-height: 3.4rem;
+  text-decoration: none;
+}
+
+.primaryLink {
+  border-bottom: 2px solid currentColor;
+  margin-left: clamp(0rem, 19vw, 17rem);
+  margin-top: 0.5rem;
+  width: min(17rem, 100%);
+}
+
+.journal {
+  background: var(--ivory);
+  padding: clamp(7.5rem, 14vh, 11rem) var(--home-gutter) clamp(7rem, 12vh, 10rem);
+}
+
+.journalHeader {
+  align-items: end;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1.25fr 0.75fr;
+  margin-bottom: clamp(5rem, 10vh, 8rem);
+}
+
+.journalHeader h2 {
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(4.5rem, 7vw, 6rem);
+  font-weight: 430;
+  letter-spacing: -0.04em;
+  line-height: 0.82;
+}
+
+.journalHeader p,
+.topicHeader p {
+  font-size: clamp(1rem, 1.25vw, 1.16rem);
+  line-height: 1.7;
+  max-width: 42ch;
+}
+
+.journalRiver {
+  display: grid;
+  gap: clamp(3.5rem, 7vw, 8rem);
+  grid-template-columns: minmax(0, 1.25fr) minmax(17rem, 0.75fr);
+}
+
+.leadStory,
+.note {
+  align-content: start;
+  display: grid;
+  position: relative;
+}
+
+.leadStory > i,
+.note > i {
+  background: var(--ink);
+  display: block;
+  height: 1px;
+  margin-bottom: 1.2rem;
+  width: 100%;
+}
+
+.leadStory > p:first-of-type,
+.note > p:first-of-type,
+.leadStory > span,
+.note > span {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.leadStory h3,
+.note h3 {
+  font-weight: 580;
+  letter-spacing: -0.03em;
+}
+
+.leadStory h3 {
+  font-size: clamp(2.7rem, 4.8vw, 5rem);
+  line-height: 0.98;
+  margin: 2.2rem 0 2rem;
+  max-width: 14ch;
+}
+
+.leadStory h3 a,
+.note h3 a {
+  color: inherit;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.12em;
+}
+
+.leadStory h3 a:hover,
+.note h3 a:hover {
+  text-decoration-color: var(--coral);
+}
+
+.leadStory > p:nth-of-type(2),
+.note > p:nth-of-type(2) {
+  font-size: clamp(0.98rem, 1.15vw, 1.08rem);
+  line-height: 1.75;
+  max-width: 60ch;
+}
+
+.leadStory > span,
+.note > span {
+  margin-top: 2.5rem;
+}
+
+.editorialNotes {
+  display: grid;
+  gap: clamp(4rem, 8vh, 7rem);
+  padding-top: clamp(5rem, 11vh, 9rem);
+}
+
+.note h3 {
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(2rem, 2.8vw, 3rem);
+  line-height: 1.04;
+  margin: 1.7rem 0 1.4rem;
+}
+
+.topicAtlas {
+  background: var(--butter);
+  padding: clamp(7.5rem, 14vh, 11rem) var(--home-gutter) clamp(6rem, 11vh, 9rem);
+}
+
+.topicHeader {
+  align-items: end;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1.2fr 0.8fr;
+  margin-bottom: clamp(4rem, 8vh, 7rem);
+}
+
+.topicHeader h2 {
+  font-size: clamp(3.7rem, 6.2vw, 6rem);
+  font-weight: 570;
+  letter-spacing: -0.038em;
+  line-height: 0.9;
+}
+
+.topicList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.topicList li {
+  border-top: 1px solid color-mix(in srgb, var(--ink) 44%, transparent);
+}
+
+.topicList li:last-child {
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 44%, transparent);
+}
+
+.topicList a {
+  align-items: center;
+  color: inherit;
+  display: grid;
+  gap: clamp(1rem, 3vw, 4rem);
+  grid-template-columns: minmax(10rem, 0.7fr) minmax(18rem, 1.3fr) auto;
+  min-height: clamp(7rem, 11vw, 10rem);
+  padding: 1.5rem 0;
+  text-decoration: none;
+}
+
+.topicList a > span {
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(2.25rem, 4.3vw, 4.7rem);
+  letter-spacing: -0.035em;
+  line-height: 0.94;
+}
+
+.topicList a > p {
+  font-size: clamp(0.95rem, 1.18vw, 1.1rem);
+  line-height: 1.65;
+  max-width: 55ch;
+}
+
+.topicList a > b {
+  font-size: 1.4rem;
+  font-weight: 450;
+}
+
+.topicList a:hover > span,
+.topicList a:focus-visible > span {
+  font-style: italic;
+}
+
+.topicCursor {
+  background: var(--coral);
+  height: 0.5rem;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transition: opacity 160ms ease;
+  width: clamp(2rem, 4.5vw, 5rem);
+}
+
+.topicCursor[data-active="true"] {
+  opacity: 1;
+}
+
+.contribution {
+  align-items: center;
+  background: var(--ink);
+  color: var(--ivory);
+  display: grid;
+  gap: clamp(4rem, 9vw, 10rem);
+  grid-template-columns: minmax(18rem, 0.8fr) minmax(20rem, 1.2fr);
+  min-height: 100svh;
+  padding: clamp(8rem, 15vh, 12rem) var(--home-gutter) clamp(7rem, 13vh, 10rem);
+}
+
+.convergence {
+  display: grid;
+  gap: 0.8rem;
+  justify-items: center;
+  position: relative;
+}
+
+.convergence i {
+  height: clamp(0.8rem, 1.2vw, 1.25rem);
+  width: min(100%, 35rem);
+}
+
+.convergence img {
+  height: auto;
+  margin-top: clamp(2rem, 5vh, 4rem);
+  width: clamp(8rem, 14vw, 13rem);
+}
+
+.contributionCopy {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.7rem);
+}
+
+.contributionCopy h2 {
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(3.2rem, 5.7vw, 6rem);
+  font-weight: 450;
+  letter-spacing: -0.038em;
+  line-height: 0.94;
+  max-width: 11ch;
+}
+
+.contributionCopy p {
+  font-size: clamp(1rem, 1.35vw, 1.22rem);
+  line-height: 1.75;
+  max-width: 62ch;
+}
+
+.finalLink {
+  border-bottom: 1px solid currentColor;
+  width: min(20rem, 100%);
+}
+
+.publicationHome[data-motion-profile="static"] [data-rhythm-band],
+.publicationHome[data-motion-profile="reduced"] [data-rhythm-band] {
+  animation-play-state: paused !important;
+}
+
+.publicationHome[data-motion-profile="static"] :global([data-home-scene="hero"]),
+.publicationHome[data-motion-profile="reduced"] :global([data-home-scene="hero"]) {
+  height: auto !important;
+  min-height: auto;
+}
+
+.publicationHome[data-motion-profile="static"] :global([data-home-scene="hero"]) > div,
+.publicationHome[data-motion-profile="reduced"] :global([data-home-scene="hero"]) > div {
+  display: grid;
+  gap: clamp(3rem, 7vh, 5.5rem);
+  height: auto !important;
+  min-height: 100svh;
+  overflow: clip;
+  padding: clamp(8.5rem, 15vh, 11rem) var(--home-gutter) clamp(4rem, 8vh, 6rem);
+  position: relative !important;
+  top: auto !important;
+}
+
+.publicationHome[data-motion-profile="static"] :global([data-home-scene="hero"]) article,
+.publicationHome[data-motion-profile="reduced"] :global([data-home-scene="hero"]) article {
+  inset: auto !important;
+  max-width: 46rem;
+  opacity: 1 !important;
+  position: relative !important;
+  transform: none !important;
+  width: min(100%, 46rem);
+  z-index: 9;
+}
+
+.publicationHome[data-motion-profile="static"] :global([data-home-scene="hero"]) [data-copy-zone="headline"],
+.publicationHome[data-motion-profile="static"] :global([data-home-scene="hero"]) [data-copy-zone="caption"],
+.publicationHome[data-motion-profile="reduced"] :global([data-home-scene="hero"]) [data-copy-zone="headline"],
+.publicationHome[data-motion-profile="reduced"] :global([data-home-scene="hero"]) [data-copy-zone="caption"] {
+  background: none;
+  inset: auto !important;
+  max-width: none;
+  position: relative !important;
+  transform: none !important;
+  width: auto;
+}
+
+.publicationHome[data-motion-profile="static"] :global([data-home-scene="hero"]) [data-copy-zone="caption"],
+.publicationHome[data-motion-profile="reduced"] :global([data-home-scene="hero"]) [data-copy-zone="caption"] {
+  margin-top: 1.5rem;
+  max-width: 34rem;
+}
+
+.publicationHome[data-motion-profile="static"] :global([data-home-scene="hero"]) > div > svg,
+.publicationHome[data-motion-profile="reduced"] :global([data-home-scene="hero"]) > div > svg {
+  height: 100svh;
+  opacity: 0.28;
+  position: absolute;
+}
+
+.publicationHome[data-motion-profile="static"] :global([data-home-scene="hero"]) [data-cover-signature],
+.publicationHome[data-motion-profile="reduced"] :global([data-home-scene="hero"]) [data-cover-signature] {
+  align-self: end;
+  bottom: auto;
+  left: auto;
+  position: relative;
+}
+
+@media (max-width: 1023px) {
+  .noise,
+  .method,
+  .flagship,
+  .contribution {
+    min-height: auto;
+  }
+
+  .method,
+  .contribution {
+    grid-template-columns: 1fr;
+  }
+
+  .methodCopy,
+  .contributionCopy {
+    max-width: 48rem;
+  }
+
+  .journalRiver {
+    gap: 4.5rem;
+    grid-template-columns: minmax(0, 1.1fr) minmax(15rem, 0.9fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .noise,
+  .method,
+  .flagship,
+  .journal,
+  .topicAtlas,
+  .contribution {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .noise {
+    padding-bottom: 5rem;
+    padding-top: 7rem;
+  }
+
+  .noiseClaims {
+    inset: 5.5rem 1.25rem auto;
+  }
+
+  .noiseClaims span {
+    font-size: clamp(1.3rem, 6vw, 2rem);
+    margin-left: calc(var(--claim-offset) * 4vw);
+  }
+
+  .noiseStatement {
+    max-width: none;
+  }
+
+  .noiseStatement h2 {
+    font-size: clamp(2.8rem, 13.5vw, 4.7rem);
+  }
+
+  .noiseStatement p,
+  .noiseStatement strong {
+    margin-left: 0;
+  }
+
+  .annotationLeaders {
+    display: none;
+  }
+
+  .method {
+    gap: 3.5rem;
+    padding-bottom: 5.5rem;
+    padding-top: 6.5rem;
+  }
+
+  .methodCopy h2 {
+    font-size: clamp(2.7rem, 12vw, 4.3rem);
+  }
+
+  .evidenceSlices i {
+    width: 29%;
+  }
+
+  .flagship {
+    min-height: 52rem;
+    padding-bottom: 7rem;
+    padding-top: 7rem;
+  }
+
+  .flagshipCopy h2 {
+    font-size: clamp(3.25rem, 15vw, 5.4rem);
+  }
+
+  .flagshipDeck,
+  .flagshipMetadata,
+  .primaryLink {
+    margin-left: 0 !important;
+  }
+
+  .fiberScore {
+    height: 62%;
+  }
+
+  .journal,
+  .topicAtlas {
+    padding-bottom: 6rem;
+    padding-top: 6.5rem;
+  }
+
+  .journalHeader,
+  .topicHeader,
+  .journalRiver {
+    grid-template-columns: 1fr;
+  }
+
+  .journalHeader,
+  .topicHeader {
+    margin-bottom: 4rem;
+  }
+
+  .journalRiver {
+    gap: 4rem;
+  }
+
+  .editorialNotes {
+    gap: 4rem;
+    padding-top: 0;
+  }
+
+  .topicList a {
+    align-items: start;
+    gap: 0.8rem 1rem;
+    grid-template-columns: 1fr auto;
+    min-height: auto;
+    padding: 1.8rem 0;
+  }
+
+  .topicList a > p {
+    grid-column: 1 / -1;
+  }
+
+  .topicCursor {
+    display: none;
+  }
+
+  .contribution {
+    gap: 4.5rem;
+    padding-bottom: 6rem;
+    padding-top: 7rem;
+  }
+
+  .convergence {
+    grid-row: 2;
+  }
+}
+
+@media (max-height: 699px) {
+  .noise,
+  .method,
+  .flagship,
+  .contribution {
+    min-height: auto;
+  }
+
+  .noise,
+  .method,
+  .flagship,
+  .journal,
+  .topicAtlas,
+  .contribution {
+    padding-bottom: 4.5rem;
+    padding-top: 6.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topicCursor {
+    display: none;
+  }
+}

@@ -2,18 +2,25 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import Home from "./page";
 
-describe("CALORYTHM homepage prototype", () => {
-  it("opens with one focused editorial hero instead of the legacy multi-scene landing", () => {
-    const { container } = render(<Home />);
+describe("CALORYTHM publication landing", () => {
+  it("opens the conductor cover into a complete publication", () => {
+    render(<Home />);
 
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "Beslenmenin bir ritmi var.",
+        name: /Beslenmenin bir ritmi var/i,
       }),
-    ).toBeInTheDocument();
-    expect(container.querySelectorAll("[data-home-scene]")).toHaveLength(1);
-    expect(container.querySelector('[data-scene="01"]')).not.toBeInTheDocument();
-    expect(screen.queryByTestId("home-splash")).not.toBeInTheDocument();
+    ).toBeVisible();
+    expect(screen.getByRole("link", { name: "Hikâyeyi oku" })).toHaveAttribute(
+      "href",
+      "/journal/protein-sadece-kas-icin-degildir",
+    );
+    expect(
+      screen.getByRole("heading", { name: "Konu atlası" }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "Katkı sürecini gör" }),
+    ).toHaveAttribute("href", "/about#katki");
   });
 });

@@ -1,9 +1,9 @@
-import { CalorythmMeasureHero } from "@/components/home/calorythm-measure-hero";
+import { PublicationHome } from "@/components/home/publication-home";
 
 export default function Home() {
   return (
     <main id="ana-icerik" tabIndex={-1}>
-      <CalorythmMeasureHero />
+      <PublicationHome />
     </main>
   );
 }
