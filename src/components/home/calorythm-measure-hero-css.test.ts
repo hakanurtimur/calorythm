@@ -32,6 +32,13 @@ describe("CalorythmMeasureHero skeleton layers", () => {
     expect(poseRule).not.toContain("transition:");
     expect(poseRule).not.toContain("will-change:");
     expect(rule(".skeletonOverlay")).not.toContain("opacity:");
+    expect(heroStyles).not.toMatch(
+      /data-conductor-(?:from|to)[^\{]*\{[^\}]*clip-path:/,
+    );
+    expect(rule(".figureLayer")).toContain(
+      "filter: blur(calc(var(--conductor-energy) * 1.6px))",
+    );
+    expect(rule(".figureLayer")).toContain("transform-box: view-box");
   });
 
   it("does not interpolate cursor coordinates behind the pointer", () => {

@@ -1,7 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId, useRef, type CSSProperties } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import {
   resolveCalorythmCoverBands,
   resolveCalorythmCoverMotion,
@@ -36,6 +42,12 @@ export type CalorythmCharacterPose = "measure-left" | "measure-right";
 
 type CalorythmMeasureHeroProps = {
   characterPose?: CalorythmCharacterPose;
+};
+
+type HeroMotionProfile = "full" | "pending" | "reduced" | "static";
+
+type NavigatorWithConnection = Navigator & {
+  connection?: EventTarget & { saveData?: boolean };
 };
 
 const RHYTHM_LINES = [
@@ -80,6 +92,8 @@ export function CalorythmMeasureHero({
   const visualRef = useRef<SVGSVGElement>(null);
   const lensFieldRef = useRef<SVGGElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
+  const [motionProfile, setMotionProfile] =
+    useState<HeroMotionProfile>("pending");
 
   const svgId = (name: string) => `${instanceId}-${name}`;
   const characterTransform =
@@ -88,6 +102,45 @@ export function CalorythmMeasureHero({
       : "translate(300 70) scale(0.86)";
 
   useEffect(() => {
+    const motionQuery =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(prefers-reduced-motion: reduce)")
+        : undefined;
+    const connection = (navigator as NavigatorWithConnection).connection;
+
+    const readProfile = (): Exclude<HeroMotionProfile, "pending"> => {
+      if ((motionQuery?.matches ?? true) || connection?.saveData) {
+        return "reduced";
+      }
+
+      if (window.innerWidth < 1024 || window.innerHeight < 700) {
+        return "static";
+      }
+
+      return "full";
+    };
+    const publishProfile = () => {
+      const nextProfile = readProfile();
+      setMotionProfile((currentProfile) =>
+        currentProfile === nextProfile ? currentProfile : nextProfile,
+      );
+    };
+
+    publishProfile();
+    motionQuery?.addEventListener("change", publishProfile);
+    connection?.addEventListener("change", publishProfile);
+    window.addEventListener("resize", publishProfile);
+
+    return () => {
+      motionQuery?.removeEventListener("change", publishProfile);
+      connection?.removeEventListener("change", publishProfile);
+      window.removeEventListener("resize", publishProfile);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (motionProfile === "pending") return;
+
     const hero = heroRef.current;
     const stage = stageRef.current;
     const visual = visualRef.current;
@@ -98,12 +151,9 @@ export function CalorythmMeasureHero({
     const visualElement = visual;
 
     const supportsMediaQueries = typeof window.matchMedia === "function";
-    const prefersReducedMotion =
-      supportsMediaQueries &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
     const applyCoverProgress = (progress: number) => {
       const motion = resolveCalorythmCoverMotion(progress);
+      const conductorMix = motion.conductor.mix;
 
       hero.style.setProperty("--hero-progress", motion.progress.toFixed(4));
       hero.style.setProperty("--copy-cover", motion.copyWeights.cover.toFixed(4));
@@ -123,14 +173,26 @@ export function CalorythmMeasureHero({
         "--editorial-to-journal",
         motion.transitions.editorialToJournal.toFixed(4),
       );
+      hero.style.setProperty("--conductor-mix", conductorMix.toFixed(4));
+      hero.style.setProperty(
+        "--conductor-energy",
+        motion.conductor.handoffEnergy.toFixed(4),
+      );
       hero.dataset.chapter = motion.activeChapter;
       hero.dataset.conductorFrame = String(motion.conductor.dominantFrame);
+      hero.dataset.conductorFrom = String(motion.conductor.fromFrame);
+      hero.dataset.conductorTo = String(motion.conductor.toFrame);
+      hero.dataset.conductorMotion =
+        motion.conductor.fromFrame === motion.conductor.toFrame
+          ? "hold"
+          : "handoff";
     };
 
-    if (prefersReducedMotion) {
-      hero.dataset.motion = "reduced";
+    const installStaticInspection = (profile: "reduced" | "static") => {
+      hero.dataset.motion = profile;
       hero.dataset.inspection = "static";
-      hero.dataset.conductorFrame = "1";
+      hero.dataset.cursor = "idle";
+      hero.dataset.wireframe = "idle";
       applyCoverProgress(0);
 
       const publishStaticInspection = (active: boolean) => {
@@ -145,6 +207,8 @@ export function CalorythmMeasureHero({
       const showStaticInspection = () => publishStaticInspection(true);
       const hideStaticInspection = () => publishStaticInspection(false);
 
+      publishStaticInspection(document.activeElement === visual);
+
       visual.addEventListener("focus", showStaticInspection);
       visual.addEventListener("blur", hideStaticInspection);
 
@@ -152,6 +216,10 @@ export function CalorythmMeasureHero({
         visual.removeEventListener("focus", showStaticInspection);
         visual.removeEventListener("blur", hideStaticInspection);
       };
+    };
+
+    if (motionProfile !== "full") {
+      return installStaticInspection(motionProfile);
     }
 
     const supportsPointerInspection =
@@ -196,6 +264,12 @@ export function CalorythmMeasureHero({
       const bounds = hero.getBoundingClientRect();
       const travel = Math.max(1, hero.offsetHeight - window.innerHeight);
       targetScrollProgress = clamp(-bounds.top / travel);
+
+      if (targetScrollProgress >= 0.999) {
+        scrollProgress = 1;
+        applyCoverProgress(1);
+      }
+
       startRender();
     };
 
@@ -337,12 +411,15 @@ export function CalorythmMeasureHero({
       window.removeEventListener("scroll", measureProgress);
       observer?.disconnect();
     };
-  }, []);
+  }, [motionProfile]);
 
   return (
     <section
       className={styles.hero}
       data-conductor-frame="1"
+      data-conductor-from="1"
+      data-conductor-motion="hold"
+      data-conductor-to="1"
       data-cursor="idle"
       data-home-scene="hero"
       data-wireframe="idle"
@@ -540,6 +617,7 @@ export function CalorythmMeasureHero({
 
           <g
             aria-hidden="true"
+            className={styles.figureInspectionLayer}
             data-composite-layer="wireframe"
             mask={`url(#${svgId("lens-mask")})`}
           >

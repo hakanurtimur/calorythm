@@ -7,7 +7,9 @@ const BAND_X_POSITIONS = [
   -168, 74, 322, 574, 828, 1086, 1344, 1596, 1840,
 ] as const;
 
-const CONDUCTOR_BEAT = [1, 0, 1, 2, 1] as const;
+const NEUTRAL_CONDUCTOR_FRAME = 1 as const;
+const BEAT_ENTRY_END = 0.32;
+const BEAT_EXIT_START = 0.68;
 
 export type CalorythmCoverPoint = Readonly<{
   x: number;
@@ -22,11 +24,17 @@ export type CalorythmCoverBand = Readonly<{
 }>;
 
 export type CalorythmCoverChapter = "cover" | "editorial" | "journal";
+export type CalorythmConductorFrame = 0 | 1 | 2;
 
 export type CalorythmCoverMotion = Readonly<{
   activeChapter: CalorythmCoverChapter;
   conductor: Readonly<{
-    dominantFrame: 0 | 1 | 2;
+    dominantFrame: CalorythmConductorFrame;
+    frameWeights: readonly [number, number, number];
+    fromFrame: CalorythmConductorFrame;
+    handoffEnergy: number;
+    mix: number;
+    toFrame: CalorythmConductorFrame;
   }>;
   copyWeights: Readonly<Record<CalorythmCoverChapter, number>>;
   progress: number;
@@ -121,15 +129,100 @@ export function resolveCalorythmCoverBands(): readonly CalorythmCoverBand[] {
   });
 }
 
-function resolveConductorPose(progress: number) {
-  const beatIndex = Math.min(
-    CONDUCTOR_BEAT.length - 1,
-    Math.round(progress * (CONDUCTOR_BEAT.length - 1)),
-  );
+function resolveFrameHandoff(
+  fromFrame: CalorythmConductorFrame,
+  toFrame: CalorythmConductorFrame,
+  rawMix: number,
+) {
+  const mix = fromFrame === toFrame ? 0 : clampCalorythmCoverProgress(rawMix);
+  const frameWeights: [number, number, number] = [0, 0, 0];
+
+  if (fromFrame === toFrame) {
+    frameWeights[fromFrame] = 1;
+  } else {
+    frameWeights[fromFrame] = 1 - mix;
+    frameWeights[toFrame] = mix;
+  }
 
   return {
-    dominantFrame: CONDUCTOR_BEAT[beatIndex]!,
+    dominantFrame: (mix < 0.5 ? fromFrame : toFrame) as CalorythmConductorFrame,
+    frameWeights,
+    fromFrame,
+    handoffEnergy:
+      fromFrame === toFrame
+        ? 0
+        : smoothstep(0, 1, 1 - Math.abs(mix * 2 - 1)),
+    mix,
+    toFrame,
   };
+}
+
+function resolveConductorBeat(
+  transitionProgress: number,
+  accentFrame: Exclude<CalorythmConductorFrame, 1>,
+) {
+  if (transitionProgress <= 0 || transitionProgress >= 1) {
+    return resolveFrameHandoff(
+      NEUTRAL_CONDUCTOR_FRAME,
+      NEUTRAL_CONDUCTOR_FRAME,
+      0,
+    );
+  }
+
+  if (transitionProgress < BEAT_ENTRY_END) {
+    return resolveFrameHandoff(
+      NEUTRAL_CONDUCTOR_FRAME,
+      accentFrame,
+      smoothstep(0, BEAT_ENTRY_END, transitionProgress),
+    );
+  }
+
+  if (transitionProgress <= BEAT_EXIT_START) {
+    return resolveFrameHandoff(accentFrame, accentFrame, 0);
+  }
+
+  return resolveFrameHandoff(
+    accentFrame,
+    NEUTRAL_CONDUCTOR_FRAME,
+    smoothstep(BEAT_EXIT_START, 1, transitionProgress),
+  );
+}
+
+function resolveCopySwap(transitionProgress: number) {
+  if (transitionProgress <= BEAT_ENTRY_END) {
+    return {
+      incoming: 0,
+      outgoing: 1 - smoothstep(0, BEAT_ENTRY_END, transitionProgress),
+    };
+  }
+
+  if (transitionProgress < BEAT_EXIT_START) {
+    return { incoming: 0, outgoing: 0 };
+  }
+
+  return {
+    incoming: smoothstep(BEAT_EXIT_START, 1, transitionProgress),
+    outgoing: 0,
+  };
+}
+
+function resolveConductorPose(
+  coverToEditorial: number,
+  editorialToJournal: number,
+) {
+  if (editorialToJournal > 0 && editorialToJournal < 1) {
+    return resolveConductorBeat(editorialToJournal, 2);
+  }
+
+  if (coverToEditorial > 0 && coverToEditorial < 1) {
+    return resolveConductorBeat(coverToEditorial, 0);
+  }
+
+  return resolveFrameHandoff(
+    NEUTRAL_CONDUCTOR_FRAME,
+    NEUTRAL_CONDUCTOR_FRAME,
+    0,
+  );
 }
 
 export function resolveCalorythmCoverMotion(
@@ -138,22 +231,29 @@ export function resolveCalorythmCoverMotion(
   const progress = clampCalorythmCoverProgress(rawProgress);
   const coverToEditorial = smoothstep(0.2, 0.45, progress);
   const editorialToJournal = smoothstep(0.62, 0.88, progress);
+  const coverSwap = resolveCopySwap(coverToEditorial);
+  const journalSwap = resolveCopySwap(editorialToJournal);
   const copyWeights = {
+    cover: coverSwap.outgoing,
+    editorial: coverSwap.incoming * journalSwap.outgoing,
+    journal: journalSwap.incoming,
+  };
+  const chapterWeights = {
     cover: 1 - coverToEditorial,
     editorial: coverToEditorial * (1 - editorialToJournal),
     journal: editorialToJournal,
   };
   const activeChapter = (
-    Object.entries(copyWeights) as [CalorythmCoverChapter, number][]
+    Object.entries(chapterWeights) as [CalorythmCoverChapter, number][]
   ).reduce<CalorythmCoverChapter>(
     (active, [chapter, weight]) =>
-      weight > copyWeights[active] ? chapter : active,
+      weight > chapterWeights[active] ? chapter : active,
     "cover",
   );
 
   return {
     activeChapter,
-    conductor: resolveConductorPose(progress),
+    conductor: resolveConductorPose(coverToEditorial, editorialToJournal),
     copyWeights,
     progress,
     transitions: {
