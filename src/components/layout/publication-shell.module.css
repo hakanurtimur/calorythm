@@ -1,0 +1,183 @@
+.header {
+  align-items: center;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: auto 1fr auto;
+  left: 0;
+  min-height: 5.5rem;
+  padding: max(1.1rem, env(safe-area-inset-top)) clamp(1.25rem, 4vw, 4.5rem) 1rem;
+  position: fixed;
+  right: 0;
+  top: 0;
+  transition: background-color 180ms ease, border-color 180ms ease;
+  z-index: 30;
+}
+
+.header[data-tone="solid"] {
+  background: var(--ivory);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+.header[data-tone="transparent"] {
+  background: linear-gradient(to bottom, rgba(246, 241, 232, 0.96), rgba(246, 241, 232, 0));
+}
+
+.wordmark {
+  display: block;
+  width: clamp(8.75rem, 11vw, 11.5rem);
+}
+
+.wordmark img {
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.primaryNavigation,
+.footerNavigation {
+  align-items: center;
+  display: flex;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  gap: clamp(1rem, 2vw, 2rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.primaryNavigation {
+  justify-content: flex-end;
+}
+
+.primaryNavigation a,
+.footerNavigation a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.primaryNavigation a:not(.contributeLink):hover,
+.footerNavigation a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.28rem;
+}
+
+.contributeLink {
+  border: 1px solid currentColor;
+  padding: 0.7rem 0.9rem;
+}
+
+.mobileMenu {
+  display: none;
+  position: relative;
+  z-index: 1;
+}
+
+.menuButton {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.menuIcon,
+.menuIcon::before,
+.menuIcon::after {
+  background: currentColor;
+  display: block;
+  height: 1px;
+  width: 1.35rem;
+}
+
+.menuIcon {
+  position: relative;
+}
+
+.menuIcon::before,
+.menuIcon::after {
+  content: "";
+  left: 0;
+  position: absolute;
+}
+
+.menuIcon::before {
+  top: -0.36rem;
+}
+
+.menuIcon::after {
+  top: 0.36rem;
+}
+
+.mobileNavigation {
+  background: var(--ivory);
+  display: grid;
+  gap: 1.3rem;
+  inset: 0;
+  padding: 7.5rem clamp(1.5rem, 6vw, 3rem) 2rem;
+  position: fixed;
+  z-index: 0;
+}
+
+.mobileNavigation a {
+  color: var(--ink);
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(2rem, 10vw, 3.25rem);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.footer {
+  border-top: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  padding: clamp(2.5rem, 6vw, 5rem) clamp(1.25rem, 6.3vw, 7.5rem);
+}
+
+.footerMark {
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  letter-spacing: -0.06em;
+  line-height: 0.8;
+  margin: 0;
+}
+
+.footerContent {
+  display: grid;
+  gap: 1.5rem;
+  justify-items: start;
+}
+
+.footerContent > p {
+  margin: 0;
+  max-width: 30rem;
+}
+
+.footerNavigation {
+  flex-wrap: wrap;
+  line-height: 1.7;
+}
+
+@media (max-width: 767px) {
+  .header {
+    min-height: 4.75rem;
+    padding-bottom: 0.7rem;
+  }
+
+  .primaryNavigation {
+    display: none;
+  }
+
+  .mobileMenu {
+    display: block;
+  }
+
+  .footer {
+    grid-template-columns: 1fr;
+  }
+}
