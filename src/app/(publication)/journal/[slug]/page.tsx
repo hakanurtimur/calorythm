@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
+import { ProteinVisualEssay } from "@/components/articles/protein/protein-visual-essay";
 import { EditorialNote } from "@/components/editorial/editorial-note";
 import { getArticleBySlug, getPublishedArticles } from "@/lib/content-selectors";
+
+const flagshipSlug = "protein-sadece-kas-icin-degildir";
 
 type ArticlePageProps = Readonly<{
   params: Promise<{ slug: string }>;
@@ -18,9 +21,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound();
   }
 
+  const isProteinVisualEssay =
+    article.slug === flagshipSlug && article.type === "visual-essay";
+
   return (
     <main id="ana-icerik" tabIndex={-1}>
-      <EditorialNote article={article} />
+      {isProteinVisualEssay ? (
+        <ProteinVisualEssay article={article} />
+      ) : (
+        <EditorialNote article={article} />
+      )}
     </main>
   );
 }

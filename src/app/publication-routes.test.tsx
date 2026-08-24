@@ -88,6 +88,11 @@ describe("publication routes", () => {
 
     render(page);
 
+    expect(screen.getByRole("article")).toHaveAttribute(
+      "data-article-type",
+      "editorial-note",
+    );
+
     expect(
       screen.getByRole("heading", {
         level: 1,
@@ -111,7 +116,7 @@ describe("publication routes", () => {
     );
   });
 
-  it("keeps the flagship available as a complete semantic temporary article", async () => {
+  it("dispatches only the flagship visual essay to the seven-scene renderer", async () => {
     const { default: ArticlePage } = await import(
       "./(publication)/journal/[slug]/page"
     );
@@ -121,6 +126,11 @@ describe("publication routes", () => {
 
     render(page);
 
+    expect(screen.getByRole("article")).toHaveAttribute(
+      "data-article-type",
+      "visual-essay",
+    );
+    expect(document.querySelectorAll("[data-protein-scene]")).toHaveLength(7);
     expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(9);
     expect(screen.getByRole("list", { name: "Kaynaklar" })).toBeVisible();
     expect(
@@ -128,6 +138,23 @@ describe("publication routes", () => {
         "Bu yazı genel bilimsel açıklamadır; kişisel beslenme veya tedavi önerisi değildir.",
       ),
     ).toBeVisible();
+  });
+
+  it("keeps the second short article on the editorial-note renderer", async () => {
+    const { default: ArticlePage } = await import(
+      "./(publication)/journal/[slug]/page"
+    );
+    const page = await ArticlePage({
+      params: Promise.resolve({ slug: "referans-hedef-ust-sinir" }),
+    });
+
+    render(page);
+
+    expect(screen.getByRole("article")).toHaveAttribute(
+      "data-article-type",
+      "editorial-note",
+    );
+    expect(document.querySelector("[data-protein-scene]")).toBeNull();
   });
 
   it("pre-renders every published article and rejects an unknown article slug", async () => {
