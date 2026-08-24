@@ -62,7 +62,7 @@ body {
   position: fixed;
   top: max(1rem, env(safe-area-inset-top));
   transform: translateY(-200%);
-  z-index: 10;
+  z-index: 40;
 }
 
 .skip-link:focus-visible {
