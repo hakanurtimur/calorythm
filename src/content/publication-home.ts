@@ -15,7 +15,7 @@ export const publicationHomeContent = {
     body: "Bir sonucun ne söylediğini, kimler için geçerli olduğunu ve nerede belirsizlik taşıdığını birlikte inceleriz. Açıklama, kanıtın sınırlarını saklamaz.",
   },
   flagship: {
-    label: "Görsel dosya · 001",
+    label: "Journal · Protein",
     title: "Protein Sadece Kas İçin Değildir",
     deck: "Kas, proteinin en görünür hikâyesi. Oysa proteinler aynı anda yapı kurar, tepkimeleri hızlandırır, molekül taşır, sinyal iletir ve savunmaya katılır.",
     metadata: "CALORYTHM Editorya · 9 dakika · Protein",

@@ -62,6 +62,7 @@ export function PublicationHomeMotion({
     let active = true;
     let configurationVersion = 0;
     let motionContext: ReturnType<PublicationHomeMotionRuntime["gsap"]["context"]> | undefined;
+    let removeBoundaryWatch: (() => void) | undefined;
     let removeTopicListeners: (() => void) | undefined;
     const motionQuery = typeof window.matchMedia === "function"
       ? window.matchMedia("(prefers-reduced-motion: reduce)")
@@ -100,6 +101,11 @@ export function PublicationHomeMotion({
       motionContext = undefined;
     };
 
+    const clearBoundaryWatch = () => {
+      removeBoundaryWatch?.();
+      removeBoundaryWatch = undefined;
+    };
+
     const publishSceneProgress = (selector: string, progress: number) => {
       const scene = scope.querySelector<HTMLElement>(selector);
       if (!scene) return;
@@ -107,19 +113,7 @@ export function PublicationHomeMotion({
       scene.dataset.motionProgress = progress.toFixed(3);
     };
 
-    async function configure() {
-      const version = ++configurationVersion;
-      clearMotion();
-      const profile = readProfile();
-      scope.dataset.motionProfile = profile;
-
-      if (profile !== "full") {
-        setBandLoopState("paused");
-        restoreStaticSceneState();
-        return;
-      }
-
-      setBandLoopState("running");
+    async function installMotion(version: number) {
       const { gsap, ScrollTrigger } = await loadRuntime();
       if (!active || version !== configurationVersion || readProfile() !== "full") return;
 
@@ -283,6 +277,78 @@ export function PublicationHomeMotion({
       scope.dataset.motionProfile = "full";
     }
 
+    const armBoundaryWatch = (version: number) => {
+      const boundary = scope.querySelector<HTMLElement>('[data-home-scene="noise"]');
+      if (!boundary) return;
+      const observedBoundary = boundary;
+
+      let armed = true;
+      let fallbackFrame = 0;
+      let observer: IntersectionObserver | undefined;
+
+      const detach = () => {
+        observer?.disconnect();
+        if (fallbackFrame !== 0) {
+          window.cancelAnimationFrame(fallbackFrame);
+          fallbackFrame = 0;
+        }
+        window.removeEventListener("scroll", queueBoundaryCheck);
+      };
+      const begin = () => {
+        if (!armed || !active || version !== configurationVersion || readProfile() !== "full") return;
+        armed = false;
+        detach();
+        removeBoundaryWatch = undefined;
+        void installMotion(version);
+      };
+      function checkBoundaryPosition() {
+        if (observedBoundary.getBoundingClientRect().top <= window.innerHeight * 2.5) begin();
+      }
+      function queueBoundaryCheck() {
+        if (fallbackFrame !== 0) return;
+        fallbackFrame = window.requestAnimationFrame(() => {
+          fallbackFrame = 0;
+          checkBoundaryPosition();
+        });
+      }
+
+      if (typeof window.IntersectionObserver === "function") {
+        observer = new window.IntersectionObserver(
+          (entries) => {
+            if (entries.some((entry) => (
+              entry.isIntersecting || entry.boundingClientRect.bottom <= 0
+            ))) begin();
+          },
+          { rootMargin: "160% 0px" },
+        );
+        observer.observe(observedBoundary);
+      } else {
+        window.addEventListener("scroll", queueBoundaryCheck, { passive: true });
+        if (window.scrollY > 0) queueBoundaryCheck();
+      }
+      removeBoundaryWatch = () => {
+        armed = false;
+        detach();
+      };
+    };
+
+    function configure() {
+      const version = ++configurationVersion;
+      clearBoundaryWatch();
+      clearMotion();
+      const profile = readProfile();
+      scope.dataset.motionProfile = profile;
+
+      if (profile !== "full") {
+        setBandLoopState("paused");
+        restoreStaticSceneState();
+        return;
+      }
+
+      setBandLoopState("running");
+      armBoundaryWatch(version);
+    }
+
     const handleConstraintChange = () => void configure();
     void configure();
     motionQuery?.addEventListener("change", handleConstraintChange);
@@ -295,13 +361,14 @@ export function PublicationHomeMotion({
       motionQuery?.removeEventListener("change", handleConstraintChange);
       connection?.removeEventListener("change", handleConstraintChange);
       window.removeEventListener("resize", handleConstraintChange);
+      clearBoundaryWatch();
       clearMotion();
       setBandLoopState("");
     };
   }, [loadRuntime]);
 
   return (
-    <div className={styles.publicationHome} data-motion-profile="static" ref={rootRef}>
+    <div className={styles.publicationHome} data-motion-profile="pending" ref={rootRef}>
       {children}
     </div>
   );

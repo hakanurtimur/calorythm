@@ -1,8 +1,10 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { render, within } from "@testing-library/react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { PublicationHome } from "./publication-home";
+import { PublicationHomeMotion } from "./publication-home-motion";
 
 const homeStyles = readFileSync(
   resolve(process.cwd(), "src/components/home/publication-home.module.css"),
@@ -80,6 +82,58 @@ describe("PublicationHome", () => {
       expect(link).toHaveAttribute("href", expect.stringMatching(/^\/topics\//));
       expect(link.querySelector("p")).not.toBeEmptyDOMElement();
     });
+  });
+
+  it("ships the white rhythm-ring asset used by the contribution finale", () => {
+    const ringPath = resolve(process.cwd(), "public/brand/calorythm-ring-white.svg");
+
+    expect(existsSync(ringPath)).toBe(true);
+    const ringSvg = readFileSync(ringPath, "utf8");
+    expect(ringSvg).toMatch(/^<svg\b[^>]*viewBox="0 0 128 128"/);
+    expect(ringSvg.match(/data-part="rhythm-ring"/g)).toHaveLength(4);
+    expect(ringSvg).toContain('stroke="#F6F1E8"');
+  });
+
+  it("uses editorial taxonomy without issue or first-publication framing", () => {
+    const { container } = render(<PublicationHome />);
+
+    expect(container).toHaveTextContent("Journal · Protein");
+    expect(container).not.toHaveTextContent(/\b001\b|ilk dosya|ilk içerik/i);
+    expect(
+      within(container).getByRole("heading", {
+        name: /Yediğimiz şey,\s*yalnızca bir sayı\s*değil/i,
+      }),
+    ).toBeVisible();
+  });
+
+  it("gives flagship and topic links surface-aware keyboard focus indicators", () => {
+    const { container } = render(<PublicationHome />);
+    const flagship = within(
+      container.querySelector('[data-home-scene="flagship"]') as HTMLElement,
+    ).getByRole("link", { name: "Hikâyeyi oku" });
+    const topic = within(
+      container.querySelector('[data-home-scene="topics"]') as HTMLElement,
+    ).getByRole("link", { name: /Protein/i });
+
+    expect(flagship.className).toContain("primaryLink");
+    expect(topic).toHaveAttribute("data-topic-row", "protein");
+    expect(homeStyles).toMatch(
+      /\.primaryLink:focus-visible\s*{[^}]*outline:\s*3px solid var\(--ink\)/,
+    );
+    expect(homeStyles).toMatch(
+      /\.topicList a:focus-visible\s*{[^}]*outline:\s*3px solid var\(--ink\)/,
+    );
+  });
+
+  it("server-renders a desktop-stable pending profile with native media fallbacks", () => {
+    const markup = renderToStaticMarkup(
+      <PublicationHomeMotion><span>İçerik</span></PublicationHomeMotion>,
+    );
+
+    expect(markup).toContain('data-motion-profile="pending"');
+    expect(homeStyles).toMatch(
+      /@media \(max-width: 1023px\), \(max-height: 699px\), \(prefers-reduced-motion: reduce\)[\s\S]*?data-motion-profile="pending"[\s\S]*?data-home-scene="hero"[\s\S]*?height:\s*auto\s*!important/,
+    );
   });
 
   it("replaces the sticky 290svh cover with a readable native-flow cover for static profiles", () => {
