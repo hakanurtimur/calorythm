@@ -1,8 +1,11 @@
 .worktrees/
+.playwright-cli/
 .superpowers/
 node_modules/
 .next/
 coverage/
+output/
+*.tsbuildinfo
 .env*
 !.env.example
 *.log
