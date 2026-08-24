@@ -28,8 +28,8 @@ const aboutStyles = readFileSync(
   "utf8",
 );
 
-function cssRule(source: string, selector: string) {
-  const selectorIndex = source.indexOf(selector);
+function cssRule(source: string, selector: string, startAt = 0) {
+  const selectorIndex = source.indexOf(selector, startAt);
   expect(selectorIndex, `missing CSS rule for ${selector}`).toBeGreaterThanOrEqual(0);
   const openingBrace = source.indexOf("{", selectorIndex);
   const closingBrace = source.indexOf("}", openingBrace);
@@ -284,6 +284,38 @@ describe("publication routes", () => {
     );
     expect(cssRule(aboutStyles, ".contactLink:focus-visible")).toContain(
       "outline: 3px solid var(--ivory)",
+    );
+  });
+
+  it("fits long publication and topic names inside the narrow mobile reading gutter", () => {
+    const topicMobile = topicStyles.indexOf("@media (max-width: 800px)");
+    const aboutMobile = aboutStyles.indexOf("@media (max-width: 800px)");
+
+    expect(topicMobile).toBeGreaterThanOrEqual(0);
+    expect(aboutMobile).toBeGreaterThanOrEqual(0);
+    expect(cssRule(topicStyles, ".topicIntro {", topicMobile)).toContain(
+      "grid-template-columns: minmax(0, 1fr)",
+    );
+    expect(cssRule(topicStyles, ".topicIntro h1", topicMobile)).toContain(
+      "font-size: clamp(2rem, 10vw, 4.5rem)",
+    );
+    expect(cssRule(topicStyles, ".topicIntro h1", topicMobile)).toContain(
+      "overflow-wrap: anywhere",
+    );
+    expect(cssRule(topicStyles, ".topicIntro h1", topicMobile)).toContain(
+      "min-width: 0",
+    );
+    expect(cssRule(aboutStyles, ".manifesto h1", aboutMobile)).toContain(
+      "font-size: clamp(2rem, 10vw, 4rem)",
+    );
+    expect(cssRule(aboutStyles, ".manifesto h1", aboutMobile)).toContain(
+      "overflow-wrap: anywhere",
+    );
+    expect(cssRule(aboutStyles, ".manifesto h1", aboutMobile)).toContain(
+      "min-width: 0",
+    );
+    expect(cssRule(aboutStyles, ".manifesto {", aboutMobile)).toContain(
+      "grid-template-columns: minmax(0, 1fr)",
     );
   });
 });

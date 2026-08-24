@@ -290,6 +290,10 @@
 }
 
 @media (max-width: 800px) {
+  .topicIntro {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .topicsHeader,
   .topicList a,
   .topicArticles article {
@@ -305,6 +309,13 @@
 
   .topicArticles time {
     grid-column: 1;
+  }
+
+  .topicIntro h1 {
+    font-size: clamp(2rem, 10vw, 4.5rem);
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 }
 

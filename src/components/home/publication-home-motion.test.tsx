@@ -1,4 +1,5 @@
 import { act, cleanup, render, waitFor } from "@testing-library/react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -143,7 +144,7 @@ function Fixture({ children }: { children?: ReactNode }) {
       <section data-home-scene="journal"><i data-journal-baseline="" /></section>
       <section data-home-scene="topics">
         <i data-topic-cursor="" />
-        <a data-topic-row="protein" href="/topics/protein">Protein</a>
+        <Link data-topic-row="protein" href="/topics/protein">Protein</Link>
       </section>
       <section data-home-scene="contribution"><i data-converging-band="claim" /></section>
       {children}
