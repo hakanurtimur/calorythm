@@ -1,0 +1,260 @@
+.journal {
+  --journal-gutter: clamp(1.25rem, 6.3vw, 7.5rem);
+  background: var(--ivory);
+}
+
+.journal :where(h1, h2, p) {
+  margin: 0;
+}
+
+.journal :where(h1, h2) {
+  text-wrap: balance;
+}
+
+.journal :where(p) {
+  text-wrap: pretty;
+}
+
+.masthead {
+  align-content: end;
+  background: var(--ink);
+  color: var(--ivory);
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.8rem);
+  grid-template-columns: minmax(0, 1.3fr) minmax(17rem, 0.7fr);
+  min-height: min(44rem, 78svh);
+  overflow: clip;
+  padding: clamp(10rem, 18vh, 13rem) var(--journal-gutter) clamp(4rem, 9vh, 7rem);
+  position: relative;
+}
+
+.masthead > p:first-child {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(0.68rem, 0.8vw, 0.78rem);
+  grid-column: 1 / -1;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.masthead h1 {
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(4.5rem, 9vw, 6rem);
+  font-weight: 430;
+  letter-spacing: -0.04em;
+  line-height: 0.82;
+}
+
+.masthead > p:last-of-type {
+  align-self: end;
+  font-size: clamp(1rem, 1.35vw, 1.22rem);
+  line-height: 1.75;
+  max-width: 52ch;
+}
+
+.bands {
+  bottom: clamp(1.4rem, 3vh, 2.4rem);
+  display: grid;
+  gap: 0.36rem;
+  left: 0;
+  position: absolute;
+  width: clamp(7rem, 24vw, 24rem);
+}
+
+.bands i {
+  height: 0.26rem;
+}
+
+.bands i:nth-child(1) { background: var(--orange); width: 58%; }
+.bands i:nth-child(2) { background: var(--coral); width: 76%; }
+.bands i:nth-child(3) { background: var(--ochre); width: 88%; }
+.bands i:nth-child(4) { background: var(--olive); width: 100%; }
+
+.river {
+  padding: clamp(4rem, 9vw, 8rem) var(--journal-gutter) clamp(7rem, 13vw, 11rem);
+}
+
+.flagship {
+  background: var(--coral);
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.52fr) minmax(18rem, 1.48fr);
+  min-height: min(46rem, 78svh);
+  overflow: clip;
+}
+
+.flagshipSignal {
+  align-content: center;
+  display: grid;
+  gap: clamp(0.75rem, 1.6vw, 1.35rem);
+  overflow: hidden;
+}
+
+.flagshipSignal i {
+  background: var(--ink);
+  height: clamp(0.75rem, 1.4vw, 1.3rem);
+  transform: rotate(-8deg) translateX(-8%);
+  width: 115%;
+}
+
+.flagshipSignal i:nth-child(2) { background: var(--ivory); transform: rotate(6deg) translateX(-5%); }
+.flagshipSignal i:nth-child(3) { background: var(--ochre); transform: rotate(-3deg) translateX(-11%); }
+.flagshipSignal i:nth-child(4) { background: var(--olive); transform: rotate(11deg) translateX(-4%); }
+
+.flagshipCopy {
+  align-content: center;
+  display: grid;
+  gap: clamp(1.4rem, 3vw, 2.6rem);
+  padding: clamp(3rem, 7vw, 7rem);
+}
+
+.flagshipCopy > p:first-child,
+.note > div,
+.storyMeta {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(0.66rem, 0.78vw, 0.78rem);
+  letter-spacing: 0.05em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.flagshipCopy h2 {
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(3.25rem, 6vw, 6rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  max-width: 13ch;
+}
+
+.flagshipCopy h2 a,
+.note h2 a {
+  color: inherit;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.15em;
+}
+
+.flagshipCopy h2 a:hover,
+.flagshipCopy h2 a:focus-visible,
+.note h2 a:hover,
+.note h2 a:focus-visible {
+  text-decoration-color: currentColor;
+}
+
+.flagshipCopy > p:nth-of-type(2) {
+  font-size: clamp(1rem, 1.32vw, 1.2rem);
+  line-height: 1.72;
+  max-width: 58ch;
+}
+
+.storyMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.5rem;
+}
+
+.storyMeta a {
+  color: inherit;
+}
+
+.notes {
+  display: grid;
+  gap: 0;
+  margin-left: clamp(0rem, 14vw, 14rem);
+  padding-top: clamp(5rem, 11vw, 10rem);
+}
+
+.note {
+  border-top: 1px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  display: grid;
+  gap: clamp(1.25rem, 2.6vw, 2.2rem);
+  grid-template-columns: minmax(10rem, 0.45fr) minmax(17rem, 0.8fr) minmax(17rem, 0.75fr);
+  padding: clamp(3rem, 6vw, 5.5rem) 0;
+}
+
+.note:last-child {
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 35%, transparent);
+}
+
+.note > div {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.note h2 {
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(2.2rem, 3.8vw, 4rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.note > p {
+  font-size: clamp(0.96rem, 1.15vw, 1.08rem);
+  line-height: 1.75;
+  max-width: 50ch;
+}
+
+.readLink {
+  align-items: center;
+  border-bottom: 1px solid currentColor;
+  color: inherit;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 1rem;
+  grid-column: 3;
+  justify-content: space-between;
+  justify-self: start;
+  min-height: 3rem;
+  text-decoration: none;
+  width: min(15rem, 100%);
+}
+
+.flagshipCopy h2 a:focus-visible,
+.storyMeta a:focus-visible,
+.note h2 a:focus-visible,
+.readLink:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 0.3rem;
+}
+
+@media (max-width: 900px) {
+  .masthead,
+  .flagship,
+  .note {
+    grid-template-columns: 1fr;
+  }
+
+  .flagshipSignal {
+    min-height: 12rem;
+  }
+
+  .notes {
+    margin-left: 0;
+  }
+
+  .readLink {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .masthead {
+    min-height: 38rem;
+  }
+
+  .flagshipSignal {
+    min-height: 9rem;
+  }
+}
+
+@media (max-height: 699px) and (orientation: landscape) {
+  .masthead,
+  .flagship {
+    min-height: auto;
+  }
+
+  .masthead {
+    padding-bottom: 4rem;
+    padding-top: 7.5rem;
+  }
+}
