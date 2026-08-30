@@ -58,7 +58,7 @@ describe("calorythm cover motion", () => {
     );
   });
 
-  it("swaps cover chapters through one clean editorial breathing interval", () => {
+  it("maps three copy chapters to three persistent conductor poses", () => {
     expect(resolveCalorythmCoverMotion(0).copyWeights).toEqual({
       cover: 1,
       editorial: 0,
@@ -69,44 +69,47 @@ describe("calorythm cover motion", () => {
       editorial: 1,
       journal: 0,
     });
-    expect(resolveCalorythmCoverMotion(0.325).copyWeights).toEqual({
-      cover: 0,
-      editorial: 0,
-      journal: 0,
-    });
-    expect(resolveCalorythmCoverMotion(0.75).copyWeights).toEqual({
-      cover: 0,
-      editorial: 0,
-      journal: 0,
-    });
     expect(resolveCalorythmCoverMotion(1).copyWeights).toEqual({
       cover: 0,
       editorial: 0,
       journal: 1,
     });
 
-    for (let step = 0; step <= 100; step += 1) {
-      const weights = Object.values(
-        resolveCalorythmCoverMotion(step / 100).copyWeights,
-      );
+    expect(resolveCalorythmCoverMotion(0).conductor.dominantFrame).toBe(1);
+    expect(resolveCalorythmCoverMotion(0.5).conductor.dominantFrame).toBe(0);
+    expect(resolveCalorythmCoverMotion(1).conductor.dominantFrame).toBe(2);
 
-      expect(weights.reduce((total, weight) => total + weight, 0)).toBeLessThanOrEqual(1);
-      expect(weights.filter((weight) => weight > 0.001).length).toBeLessThanOrEqual(1);
+    for (let step = 0; step <= 100; step += 1) {
+      const motion = resolveCalorythmCoverMotion(step / 100);
+      const weights = Object.values(motion.copyWeights);
+      const frameByChapter = { cover: 1, editorial: 0, journal: 2 } as const;
+
+      expect(weights.reduce((total, weight) => total + weight, 0)).toBeCloseTo(1, 8);
+      expect(weights.filter((weight) => weight > 0.001).length).toBeLessThanOrEqual(2);
       weights.forEach((weight) => {
         expect(weight).toBeGreaterThanOrEqual(0);
         expect(weight).toBeLessThanOrEqual(1);
       });
+
+      expect(motion.conductor.frameWeights).toEqual([
+        motion.copyWeights.editorial,
+        motion.copyWeights.cover,
+        motion.copyWeights.journal,
+      ]);
+      expect(motion.conductor.dominantFrame).toBe(
+        frameByChapter[motion.activeChapter],
+      );
     }
   });
 
-  it("conducts only while the corresponding copy transition is moving", () => {
-    const firstLift = resolveCalorythmCoverMotion(0.25);
-    const firstReturn = resolveCalorythmCoverMotion(0.4);
-    const secondDrop = resolveCalorythmCoverMotion(0.67);
-    const secondReturn = resolveCalorythmCoverMotion(0.83);
+  it("moves each pose once while its matching copy crossfades", () => {
+    const firstLift = resolveCalorythmCoverMotion(0.3);
+    const editorialHold = resolveCalorythmCoverMotion(0.5);
+    const secondDrop = resolveCalorythmCoverMotion(0.68);
+    const journalHold = resolveCalorythmCoverMotion(0.9);
 
     expect(firstLift.copyWeights.cover).toBeGreaterThan(0);
-    expect(firstLift.copyWeights.editorial).toBe(0);
+    expect(firstLift.copyWeights.editorial).toBeGreaterThan(0);
     expect(firstLift.copyWeights.journal).toBe(0);
     expect(firstLift.conductor.fromFrame).toBe(1);
     expect(firstLift.conductor.toFrame).toBe(0);
@@ -114,23 +117,29 @@ describe("calorythm cover motion", () => {
     expect(firstLift.conductor.mix).toBeLessThan(1);
     expect(firstLift.conductor.handoffEnergy).toBeGreaterThan(0);
 
-    expect(firstReturn.conductor.fromFrame).toBe(0);
-    expect(firstReturn.conductor.toFrame).toBe(1);
-    expect(firstReturn.copyWeights.cover).toBe(0);
-    expect(firstReturn.copyWeights.editorial).toBeGreaterThan(0);
+    expect(editorialHold.conductor.fromFrame).toBe(0);
+    expect(editorialHold.conductor.toFrame).toBe(0);
+    expect(editorialHold.copyWeights).toEqual({
+      cover: 0,
+      editorial: 1,
+      journal: 0,
+    });
 
-    expect(secondDrop.conductor.fromFrame).toBe(1);
+    expect(secondDrop.conductor.fromFrame).toBe(0);
     expect(secondDrop.conductor.toFrame).toBe(2);
     expect(secondDrop.copyWeights.editorial).toBeGreaterThan(0);
-    expect(secondDrop.copyWeights.journal).toBe(0);
+    expect(secondDrop.copyWeights.journal).toBeGreaterThan(0);
 
-    expect(secondReturn.conductor.fromFrame).toBe(2);
-    expect(secondReturn.conductor.toFrame).toBe(1);
-    expect(secondReturn.copyWeights.editorial).toBe(0);
-    expect(secondReturn.copyWeights.journal).toBeGreaterThan(0);
+    expect(journalHold.conductor.fromFrame).toBe(2);
+    expect(journalHold.conductor.toFrame).toBe(2);
+    expect(journalHold.copyWeights).toEqual({
+      cover: 0,
+      editorial: 0,
+      journal: 1,
+    });
   });
 
-  it("holds one clear pose at the chapter landmarks", () => {
+  it("keeps the exact three-beat pose sequence in both scroll directions", () => {
     expect(resolveCalorythmCoverMotion(0).conductor).toMatchObject({
       dominantFrame: 1,
       frameWeights: [0, 1, 0],
@@ -139,7 +148,7 @@ describe("calorythm cover motion", () => {
       mix: 0,
       toFrame: 1,
     });
-    expect(resolveCalorythmCoverMotion(0.325).conductor).toMatchObject({
+    expect(resolveCalorythmCoverMotion(0.5).conductor).toMatchObject({
       dominantFrame: 0,
       frameWeights: [1, 0, 0],
       fromFrame: 0,
@@ -147,15 +156,7 @@ describe("calorythm cover motion", () => {
       mix: 0,
       toFrame: 0,
     });
-    expect(resolveCalorythmCoverMotion(0.5).conductor).toMatchObject({
-      dominantFrame: 1,
-      frameWeights: [0, 1, 0],
-      fromFrame: 1,
-      handoffEnergy: 0,
-      mix: 0,
-      toFrame: 1,
-    });
-    expect(resolveCalorythmCoverMotion(0.75).conductor).toMatchObject({
+    expect(resolveCalorythmCoverMotion(1).conductor).toMatchObject({
       dominantFrame: 2,
       frameWeights: [0, 0, 1],
       fromFrame: 2,
@@ -163,21 +164,12 @@ describe("calorythm cover motion", () => {
       mix: 0,
       toFrame: 2,
     });
-    expect(resolveCalorythmCoverMotion(1).conductor).toMatchObject({
-      dominantFrame: 1,
-      frameWeights: [0, 1, 0],
-      fromFrame: 1,
-      handoffEnergy: 0,
-      mix: 0,
-      toFrame: 1,
-    });
-
     expect(
-      [0, 0.325, 0.5, 0.75, 1, 0.75, 0.5, 0.325, 0].map(
+      [0, 0.5, 1, 0.5, 0].map(
         (progress) =>
           resolveCalorythmCoverMotion(progress).conductor.dominantFrame,
       ),
-    ).toEqual([1, 0, 1, 2, 1, 2, 1, 0, 1]);
+    ).toEqual([1, 0, 2, 0, 1]);
   });
 
   it("keeps every raster handoff continuous with at most two visible poses", () => {
@@ -192,7 +184,7 @@ describe("calorythm cover motion", () => {
       });
     }
 
-    [0.2, 0.45, 0.62, 0.88].forEach((boundary) => {
+    [0.22, 0.38, 0.6, 0.76].forEach((boundary) => {
       const before = resolveCalorythmCoverMotion(boundary - 0.0001).conductor.frameWeights;
       const after = resolveCalorythmCoverMotion(boundary + 0.0001).conductor.frameWeights;
 

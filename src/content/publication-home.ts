@@ -1,18 +1,31 @@
 export const publicationHomeContent = {
   noise: {
-    title: "Beslenme hakkında çok fazla kesin cümle var.",
-    body: "Her gün yeni bir iddia dolaşıma giriyor. CALORYTHM, bu gürültünün içinde kaynağı, kanıtı ve bağlamı görünür hâle getirir.",
-    claims: [
-      "Karbonhidrat daima kötüdür.",
-      "Tek doğru öğün saati vardır.",
-      "Bir sayı her bedeni açıklar.",
-    ],
-    resolution: "İddia · Kaynak · Kanıt · Bağlam",
+    title: "Peki, hangisi yayımlanmaya değer?",
+    body: "Bir fikri yayına dönüştürmeden önce neye dayandığına, nerede geçerli olduğuna ve neyi açıklamadığına bakıyoruz.",
+    resolution: "Araştırma · Bağlam · Editoryal özen",
   },
   method: {
-    title: "Bir iddiayı yayımlamadan önce, nereden geldiğine bakarız.",
-    sequence: "Kaynak → Kanıtın gücü → Bağlam → Anlatım.",
-    body: "Bir sonucun ne söylediğini, kimler için geçerli olduğunu ve nerede belirsizlik taşıdığını birlikte inceleriz. Açıklama, kanıtın sınırlarını saklamaz.",
+    beats: [
+      {
+        id: "opening",
+        label: "02 / Görsel dosyalar",
+        title: "Bir konu, tek bir sonuçtan ibaret değildir.",
+        body: "Bir besinin bedende izlediği yolu, yapısını, enerjiye dönüşümünü ve araştırma verisindeki karşılığını birlikte okuyoruz.",
+      },
+      {
+        id: "layers",
+        label: "Katmanları aç",
+        title: "Bilgiyi, bağlantılarıyla birlikte görünür kılıyoruz.",
+        body: "Sindirim ve emilimden mikro yapıya; metabolik akıştan bireysel yanıta kadar.",
+      },
+      {
+        id: "story",
+        label: "CALORYTHM Journal",
+        title: "Her dosya, kendi görsel dünyasını kurar.",
+        body: "Böylece bir konuyu yalnızca okumaz; nasıl çalıştığını da görürsün.",
+      },
+    ],
+    caption: "Her görsel dosya; araştırma, beden ve gündelik yaşam arasında bağ kurar.",
   },
   flagship: {
     label: "Journal · Protein",
@@ -23,15 +36,15 @@ export const publicationHomeContent = {
   },
   journal: {
     title: "Journal",
-    introduction: "Yayımlanmış görsel dosyalar ve kapsamı açık editoryal notlar.",
+    introduction: "Uzun görsel dosyalar, kısa editoryal notlar ve kaynakları açık anlatılar.",
   },
   topics: {
     title: "Konu atlası",
     introduction: "Beslenme bilimini tek bir doğrusal rotaya sıkıştırmadan, merak ettiğin yerden aç.",
   },
   contribution: {
-    title: "İyi bilgi, iyi editörlükle büyür.",
-    body: "CALORYTHM; beslenme bilimini özenle ele alan uzmanların, araştırmacıların ve yazarların katkılarına açıktır. Her metin kaynak, kapsam ve anlatım açısından editoryal süreçten geçer.",
-    cta: "Katkı sürecini gör",
+    title: "Beslenme üzerine iyi bir fikrin varsa, birlikte anlatalım.",
+    body: "Bir araştırman, sahadan bir gözlemin ya da peşinden gittiğin bir soru varsa bize getir. Birlikte kaynaklandırır, tasarlar ve yayına hazırlarız.",
+    cta: "Fikrini paylaş",
   },
 } as const;

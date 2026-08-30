@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  --publication-shell-height: 4.9rem;
   --ivory: #f6f1e8;
   --ink: #20211e;
   --apricot: #f3a65a;
@@ -28,7 +29,7 @@
 html {
   background: var(--ivory);
   scroll-behavior: smooth;
-  scroll-padding-top: 1rem;
+  scroll-padding-top: calc(var(--publication-shell-height) + env(safe-area-inset-top));
 }
 
 body {
@@ -38,6 +39,12 @@ body {
   margin: 0;
   min-width: 20rem;
   overflow-x: clip;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --publication-shell-height: 4.75rem;
+  }
 }
 
 ::selection {

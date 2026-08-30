@@ -1,9 +1,18 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { contributionLinePaths } from "./publication-home-contribution-geometry";
+import {
+  buildJournalLinePath,
+  mapJournalRowCenterToViewBox,
+} from "./publication-home-journal-geometry";
+import { buildRhythmRailTipLattice } from "@/lib/rhythm-rail-geometry";
 import styles from "./publication-home.module.css";
 
+export { buildJournalLinePath, mapJournalRowCenterToViewBox };
+
 export type PublicationHomeMotionRuntime = {
+  DrawSVGPlugin: (typeof import("gsap/DrawSVGPlugin"))["DrawSVGPlugin"];
   ScrollTrigger: (typeof import("gsap/ScrollTrigger"))["ScrollTrigger"];
   gsap: (typeof import("gsap"))["gsap"];
 };
@@ -19,13 +28,57 @@ type NavigatorWithConnection = Navigator & {
   connection?: EventTarget & { saveData?: boolean };
 };
 
+const RHYTHM_BAND_IDS = ["claim", "source", "context", "editorial"] as const;
+const JOURNAL_LINE_BASE_X = [78, 122, 166, 210] as const;
+const JOURNAL_LINE_TIP_X = buildRhythmRailTipLattice({
+  anchor: 272,
+  baseXs: JOURNAL_LINE_BASE_X,
+});
+const PROTEIN_ROLE_IDS = ["structure", "catalysis", "transport", "signal", "defense"] as const;
+const RHYTHM_BAND_STEP = 0.055;
+const NOISE_BAND_STAGGER = 0.13;
+const NOISE_FEED_DURATION = 0.38;
+const NOISE_FORM_DURATION = 0.72;
+const NOISE_RELEASE_DURATION = 0.28;
+const FOLIO_BEAT_TRANSITIONS = [
+  { at: 1.28, from: "opening", to: "layers" },
+  { at: 2.62, from: "layers", to: "story" },
+] as const;
+const FOLIO_PAGE_ENTRIES = [
+  {
+    at: 0.42,
+    from: { rotation: 12, scale: 0.25, xPercent: 180, yPercent: 100 },
+    id: "physiology",
+    toRotation: -10,
+  },
+  {
+    at: 1.08,
+    from: { rotation: 11, scale: 0.3, xPercent: 125, yPercent: 125 },
+    id: "structure",
+    toRotation: -5,
+  },
+  {
+    at: 1.74,
+    from: { rotation: 10, scale: 0.34, xPercent: 78, yPercent: 115 },
+    id: "metabolism",
+    toRotation: 1.5,
+  },
+  {
+    at: 2.4,
+    from: { rotation: 9, scale: 0.38, xPercent: 35, yPercent: 100 },
+    id: "research",
+    toRotation: 8,
+  },
+] as const;
+
 async function loadPublicationMotionRuntime(): Promise<PublicationHomeMotionRuntime> {
-  const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+  const [{ DrawSVGPlugin }, { gsap }, { ScrollTrigger }] = await Promise.all([
+    import("gsap/DrawSVGPlugin"),
     import("gsap"),
     import("gsap/ScrollTrigger"),
   ]);
 
-  return { gsap, ScrollTrigger };
+  return { DrawSVGPlugin, gsap, ScrollTrigger };
 }
 
 export function resolvePublicationMotionProfile({
@@ -63,6 +116,7 @@ export function PublicationHomeMotion({
     let configurationVersion = 0;
     let motionContext: ReturnType<PublicationHomeMotionRuntime["gsap"]["context"]> | undefined;
     let removeBoundaryWatch: (() => void) | undefined;
+    let removeJournalListeners: (() => void) | undefined;
     let removeTopicListeners: (() => void) | undefined;
     const motionQuery = typeof window.matchMedia === "function"
       ? window.matchMedia("(prefers-reduced-motion: reduce)")
@@ -90,11 +144,22 @@ export function PublicationHomeMotion({
       });
       const topicScene = scope.querySelector<HTMLElement>('[data-home-scene="topics"]');
       const topicCursor = topicScene?.querySelector<HTMLElement>("[data-topic-cursor]");
+      const journalScene = scope.querySelector<HTMLElement>('[data-home-scene="journal"]');
       if (topicScene) delete topicScene.dataset.activeTopic;
       if (topicCursor) topicCursor.dataset.active = "false";
+      if (journalScene) delete journalScene.dataset.activeJournalStory;
+      journalScene?.querySelectorAll<HTMLElement>("[data-journal-story]").forEach((story) => {
+        delete story.dataset.journalStoryActive;
+      });
+      journalScene?.querySelectorAll<SVGPathElement>("[data-journal-line]").forEach((path, index) => {
+        const baseX = JOURNAL_LINE_BASE_X[index] ?? JOURNAL_LINE_BASE_X[0];
+        path.setAttribute("d", buildJournalLinePath({ baseX, targetY: 500, tipX: baseX }));
+      });
     };
 
     const clearMotion = () => {
+      removeJournalListeners?.();
+      removeJournalListeners = undefined;
       removeTopicListeners?.();
       removeTopicListeners = undefined;
       motionContext?.revert();
@@ -114,129 +179,450 @@ export function PublicationHomeMotion({
     };
 
     async function installMotion(version: number) {
-      const { gsap, ScrollTrigger } = await loadRuntime();
+      const { DrawSVGPlugin, gsap, ScrollTrigger } = await loadRuntime();
       if (!active || version !== configurationVersion || readProfile() !== "full") return;
 
-      gsap.registerPlugin(ScrollTrigger);
+      gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
       motionContext = gsap.context(() => {
-        const hero = gsap.timeline({
+        const handoff = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
             trigger: '[data-home-scene="hero"]',
             start: "bottom bottom",
-            end: "+=48%",
-            scrub: 0.45,
+            endTrigger: '[data-home-scene="noise"]',
+            end: "top top",
+            invalidateOnRefresh: true,
+            scrub: 0.65,
             onUpdate: ({ progress }) => {
               publishSceneProgress('[data-home-scene="hero"]', progress);
               setBandLoopState(progress >= 0.999 ? "paused" : "running");
             },
           },
         });
-        hero
-          .to("[data-rhythm-band]", { duration: 0.78, stagger: 0.035, xPercent: 122 }, 0)
-          .to("[data-copy-zone]", { autoAlpha: 0, duration: 0.36, y: -24 }, 0)
+        handoff
+          .to("[data-copy-zone]", { autoAlpha: 0, duration: 0.3, y: -24 }, 0)
           .to(
             '[data-composite-layer="stone"], [data-composite-layer="foreground-occluder"]',
-            { duration: 0.5, scale: 0.985, transformOrigin: "50% 70%", yPercent: 1.2 },
+            { duration: 0.38, scale: 0.985, transformOrigin: "50% 70%", yPercent: 1.2 },
             0,
           );
+
+        RHYTHM_BAND_IDS.forEach((id, index) => {
+          const exitAt = index * RHYTHM_BAND_STEP;
+
+          handoff.to(
+            `[data-rhythm-band="${id}"]`,
+            { duration: 0.36, xPercent: 122 },
+            exitAt,
+          );
+        });
 
         const noise = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
             trigger: '[data-home-scene="noise"]',
             start: "top top",
-            end: "+=78%",
+            end: "+=140%",
             pin: '[data-home-scene="noise"]',
-            scrub: 0.55,
+            scrub: 0.9,
             onUpdate: ({ progress }) => publishSceneProgress('[data-home-scene="noise"]', progress),
           },
         });
-        noise
-          .fromTo(
-            "[data-noise-shutter]",
-            { scaleX: 0, transformOrigin: "left center" },
-            { duration: 0.62, scaleX: 1 },
-          )
-          .fromTo(
-            "[data-noise-fragment]",
-            { xPercent: (index: number) => index % 2 === 0 ? -18 : 21 },
-            { duration: 0.7, stagger: 0.08, xPercent: 0 },
-            0.14,
+
+        RHYTHM_BAND_IDS.forEach((id, index) => {
+          const feedAt = index * NOISE_BAND_STAGGER;
+          const formAt = feedAt + NOISE_FEED_DURATION;
+
+          noise.fromTo(
+            `[data-noise-apostrophe-feeder="${id}"]`,
+            { autoAlpha: 1, drawSVG: "0% 0%" },
+            {
+              drawSVG: "0% 100%",
+              duration: NOISE_FEED_DURATION,
+              immediateRender: true,
+            },
+            feedAt,
           );
+          noise.fromTo(
+            `[data-noise-apostrophe-band="${id}"]`,
+            { autoAlpha: 1, drawSVG: "0% 0%" },
+            {
+              drawSVG: "0% 100%",
+              duration: NOISE_FORM_DURATION,
+              immediateRender: true,
+            },
+            formAt,
+          );
+          noise.to(
+            `[data-noise-apostrophe-feeder="${id}"]`,
+            { drawSVG: "100% 100%", duration: NOISE_RELEASE_DURATION },
+            formAt,
+          );
+        });
 
         const method = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
             trigger: '[data-home-scene="method"]',
             start: "top top",
-            end: "+=82%",
+            end: "+=340%",
             pin: '[data-home-scene="method"]',
-            scrub: 0.6,
+            scrub: 0.86,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
             onUpdate: ({ progress }) => publishSceneProgress('[data-home-scene="method"]', progress),
           },
         });
-        method.fromTo(
-          "[data-evidence-slice]",
-          { clipPath: "inset(0 100% 0 0)" },
-          { clipPath: "inset(0 0% 0 0)", duration: 0.82, stagger: 0.1 },
-        );
+        method.to("[data-folio-progress-fill]", { duration: 3.58, scaleX: 1 }, 0);
+
+        FOLIO_PAGE_ENTRIES.forEach(({ at, from, id, toRotation }) => {
+          method.fromTo(
+            `[data-folio-page="${id}"]`,
+            { ...from, opacity: 0 },
+            {
+              duration: 0.74,
+              ease: "power3.out",
+              immediateRender: true,
+              opacity: 1,
+              rotation: toRotation,
+              scale: 1,
+              xPercent: 0,
+              yPercent: 0,
+            },
+            at,
+          );
+          method.fromTo(
+            `[data-folio-page-label="${id}"]`,
+            { opacity: 0, y: 10 },
+            {
+              duration: 0.3,
+              ease: "power2.out",
+              immediateRender: true,
+              opacity: 1,
+              y: 0,
+            },
+            at + 0.44,
+          );
+        });
+
+        FOLIO_BEAT_TRANSITIONS.forEach(({ at, from, to }) => {
+          method.to(
+            `[data-folio-beat="${from}"]`,
+            { duration: 0.22, opacity: 0, y: -18 },
+            at - 0.12,
+          );
+          method.fromTo(
+            `[data-folio-beat="${to}"]`,
+            { opacity: 0, y: 22 },
+            { duration: 0.32, immediateRender: true, opacity: 1, y: 0 },
+            at,
+          );
+        });
 
         const flagship = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
             trigger: '[data-home-scene="flagship"]',
-            start: "top 78%",
-            end: "bottom 28%",
-            scrub: 0.55,
+            start: "top top",
+            end: "+=240%",
+            pin: '[data-protein-flagship-stage]',
+            scrub: 0.82,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
             onUpdate: ({ progress }) => publishSceneProgress('[data-home-scene="flagship"]', progress),
           },
         });
-        flagship.to("[data-fiber-path]", {
-          duration: 1,
-          rotation: (index: number) => (index - 1.5) * 0.7,
-          transformOrigin: "50% 50%",
-          xPercent: (index: number) => (index - 1.5) * 3.2,
-          y: (index: number) => (index - 1.5) * 24,
+        flagship
+          .fromTo(
+            "[data-protein-flagship-image]",
+            {
+              opacity: 0,
+              scale: 1.48,
+              transformOrigin: "73% 45%",
+              xPercent: 5,
+              yPercent: 4,
+            },
+            {
+              duration: 1.38,
+              ease: "power2.out",
+              immediateRender: true,
+              opacity: 1,
+              scale: 1,
+              transformOrigin: "73% 45%",
+              xPercent: 0,
+              yPercent: 0,
+            },
+            0,
+          )
+          .fromTo(
+            "[data-protein-flagship-title]",
+            { opacity: 0, y: 34 },
+            { duration: 0.42, ease: "power3.out", immediateRender: true, opacity: 1, y: 0 },
+            0.48,
+          );
+
+        PROTEIN_ROLE_IDS.forEach((role, index) => {
+          flagship.fromTo(
+            `[data-protein-role="${role}"]`,
+            { opacity: 0, y: 14 },
+            {
+              duration: 0.3,
+              ease: "power2.out",
+              immediateRender: true,
+              opacity: 1,
+              y: 0,
+            },
+            0.82 + index * 0.24,
+          );
         });
 
+        flagship
+          .fromTo(
+            "[data-protein-flagship-deck]",
+            { opacity: 0, y: 18 },
+            { duration: 0.34, ease: "power2.out", immediateRender: true, opacity: 1, y: 0 },
+            2.12,
+          )
+          .fromTo(
+            `.${styles.flagshipMetadata}`,
+            { opacity: 0, y: 12 },
+            { duration: 0.28, ease: "power2.out", immediateRender: true, opacity: 1, y: 0 },
+            2.22,
+          )
+          .fromTo(
+            "[data-protein-flagship-cta]",
+            { opacity: 0, y: 18 },
+            { duration: 0.34, ease: "power2.out", immediateRender: true, opacity: 1, y: 0 },
+            2.26,
+          );
+
         const journal = gsap.timeline({
-          defaults: { ease: "power3.out" },
+          defaults: { ease: "power2.inOut" },
           scrollTrigger: {
             trigger: '[data-home-scene="journal"]',
-            start: "top 82%",
-            end: "bottom 35%",
-            scrub: 0.5,
+            start: "top 86%",
+            end: "top -20%",
+            scrub: 0.62,
             onUpdate: ({ progress }) => publishSceneProgress('[data-home-scene="journal"]', progress),
           },
         });
-        journal.fromTo(
-          "[data-journal-baseline]",
-          { scaleX: 0.08, transformOrigin: "left center" },
-          { duration: 0.7, scaleX: 1, stagger: 0.15 },
+        journal
+          .fromTo(
+            "[data-journal-line]",
+            { drawSVG: "0% 0%" },
+            {
+              drawSVG: "0% 100%",
+              duration: 0.78,
+              immediateRender: true,
+              stagger: 0.075,
+            },
+          )
+          .fromTo(
+            "[data-journal-story-entrance]",
+            { opacity: 0, y: 34 },
+            {
+              duration: 0.52,
+              immediateRender: true,
+              opacity: 1,
+              stagger: 0.1,
+              y: 0,
+            },
+            0.18,
+          )
+          .fromTo(
+            "[data-journal-index-cta]",
+            { opacity: 0, x: -24 },
+            { duration: 0.34, immediateRender: true, opacity: 1, x: 0 },
+            0.6,
+          );
+
+        const journalScene = scope.querySelector<HTMLElement>('[data-home-scene="journal"]');
+        const journalField = journalScene?.querySelector<SVGElement>("[data-journal-line-field]");
+        const journalLines = Array.from(
+          journalScene?.querySelectorAll<SVGPathElement>("[data-journal-line]") ?? [],
         );
+        const journalStories = Array.from(
+          journalScene?.querySelectorAll<HTMLElement>("[data-journal-story]") ?? [],
+        );
+        if (journalScene && journalField && journalLines.length === 4 && journalStories.length > 0) {
+          let focusedStory: HTMLElement | undefined;
+          let hoveredStory: HTMLElement | undefined;
+          const removers: Array<() => void> = [];
+          const setActiveStory = (story: HTMLElement | undefined) => {
+            journalStories.forEach((candidate) => {
+              candidate.dataset.journalStoryActive = candidate === story ? "true" : "false";
+            });
+
+            if (!story) {
+              delete journalScene.dataset.activeJournalStory;
+              gsap.to(journalLines, {
+                attr: {
+                  d: (index: number) => {
+                    const baseX = JOURNAL_LINE_BASE_X[index] ?? JOURNAL_LINE_BASE_X[0];
+                    return buildJournalLinePath({ baseX, targetY: 500, tipX: baseX });
+                  },
+                },
+                duration: 0.42,
+                ease: "power2.inOut",
+                overwrite: "auto",
+              });
+              return;
+            }
+
+            const fieldBounds = journalField.getBoundingClientRect();
+            const storyBounds = story.getBoundingClientRect();
+            const targetY = mapJournalRowCenterToViewBox({
+              fieldHeight: fieldBounds.height,
+              fieldTop: fieldBounds.top,
+              rowHeight: storyBounds.height,
+              rowTop: storyBounds.top,
+            });
+            journalScene.dataset.activeJournalStory = story.dataset.journalStory ?? "";
+            gsap.to(journalLines, {
+              attr: {
+                d: (index: number) => buildJournalLinePath({
+                  baseX: JOURNAL_LINE_BASE_X[index] ?? JOURNAL_LINE_BASE_X[0],
+                  targetY,
+                  tipX: JOURNAL_LINE_TIP_X[index] ?? JOURNAL_LINE_TIP_X[0] ?? 272,
+                }),
+              },
+              duration: 0.5,
+              ease: "power3.out",
+              overwrite: "auto",
+            });
+          };
+
+          journalStories.forEach((story) => {
+            const link = story.querySelector<HTMLElement>("[data-journal-story-link]");
+            const handleEnter = () => {
+              hoveredStory = story;
+              setActiveStory(story);
+            };
+            const handleLeave = () => {
+              if (hoveredStory === story) hoveredStory = undefined;
+              setActiveStory(focusedStory);
+            };
+            const handleFocus = () => {
+              focusedStory = story;
+              setActiveStory(story);
+            };
+            const handleBlur = () => {
+              if (focusedStory === story) focusedStory = undefined;
+              setActiveStory(hoveredStory);
+            };
+
+            story.addEventListener("mouseenter", handleEnter);
+            story.addEventListener("mouseleave", handleLeave);
+            link?.addEventListener("focus", handleFocus);
+            link?.addEventListener("blur", handleBlur);
+            removers.push(() => {
+              story.removeEventListener("mouseenter", handleEnter);
+              story.removeEventListener("mouseleave", handleLeave);
+              link?.removeEventListener("focus", handleFocus);
+              link?.removeEventListener("blur", handleBlur);
+            });
+          });
+          removeJournalListeners = () => {
+            removers.forEach((remove) => remove());
+            gsap.killTweensOf(journalLines);
+            focusedStory = undefined;
+            hoveredStory = undefined;
+            delete journalScene.dataset.activeJournalStory;
+            journalStories.forEach((story) => delete story.dataset.journalStoryActive);
+            journalLines.forEach((path, index) => {
+              const baseX = JOURNAL_LINE_BASE_X[index] ?? JOURNAL_LINE_BASE_X[0];
+              path.setAttribute("d", buildJournalLinePath({ baseX, targetY: 500, tipX: baseX }));
+            });
+          };
+        }
 
         const contribution = gsap.timeline({
-          defaults: { ease: "power3.out" },
+          defaults: { ease: "none" },
           scrollTrigger: {
             trigger: '[data-home-scene="contribution"]',
-            start: "top 80%",
-            end: "bottom 42%",
-            scrub: 0.55,
+            start: "top 84%",
+            end: "top 12%",
+            scrub: 0.75,
             onUpdate: ({ progress }) => publishSceneProgress('[data-home-scene="contribution"]', progress),
           },
         });
         contribution
           .fromTo(
-            "[data-converging-band]",
-            { xPercent: (index: number) => index % 2 === 0 ? -42 : 42 },
-            { duration: 0.72, stagger: 0.05, xPercent: 0 },
+            "[data-contribution-figure]",
+            {
+              clipPath: "inset(0% 0% 0% 100%)",
+              scale: 1.045,
+              x: 64,
+            },
+            {
+              clipPath: "inset(0% 0% 0% 0%)",
+              duration: 0.68,
+              immediateRender: true,
+              scale: 1,
+              transformOrigin: "72% 58%",
+              x: 0,
+            },
           )
           .fromTo(
-            '[data-home-scene="contribution"] img',
-            { rotation: -8, scale: 0.86 },
-            { duration: 0.52, rotation: 0, scale: 1 },
+            "[data-contribution-line]",
+            {
+              attr: {
+                d: (index: number) => contributionLinePaths[index]?.from ?? contributionLinePaths[0].from,
+              },
+              drawSVG: "0% 0%",
+            },
+            {
+              attr: {
+                d: (index: number) => contributionLinePaths[index]?.to ?? contributionLinePaths[0].to,
+              },
+              drawSVG: "0% 100%",
+              duration: 0.78,
+              immediateRender: true,
+              stagger: 0.045,
+            },
+            0.08,
+          )
+          .fromTo(
+            "[data-contribution-apostrophe]",
+            {
+              autoAlpha: 0,
+              rotate: 9,
+              scale: 0.78,
+              y: 26,
+            },
+            {
+              autoAlpha: 1,
+              duration: 0.46,
+              ease: "power2.out",
+              immediateRender: true,
+              rotate: 3,
+              scale: 1,
+              transformOrigin: "50% 18%",
+              y: 0,
+            },
             0.3,
+          )
+          .fromTo(
+            "[data-contribution-copy]",
+            { clipPath: "inset(0% 0% 100% 0%)", y: 30 },
+            {
+              clipPath: "inset(0% 0% 0% 0%)",
+              duration: 0.6,
+              immediateRender: true,
+              y: 0,
+            },
+            0.22,
+          )
+          .fromTo(
+            "[data-contribution-cta-rule]",
+            { scaleX: 0 },
+            {
+              duration: 0.4,
+              immediateRender: true,
+              scaleX: 1,
+              transformOrigin: "left center",
+            },
+            0.56,
           );
 
         const topicScene = scope.querySelector<HTMLElement>('[data-home-scene="topics"]');

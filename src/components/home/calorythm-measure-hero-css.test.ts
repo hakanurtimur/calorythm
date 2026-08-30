@@ -35,9 +35,9 @@ describe("CalorythmMeasureHero skeleton layers", () => {
     expect(heroStyles).not.toMatch(
       /data-conductor-(?:from|to)[^\{]*\{[^\}]*clip-path:/,
     );
-    expect(rule(".figureLayer")).toContain(
-      "filter: blur(calc(var(--conductor-energy) * 1.6px))",
-    );
+    expect(rule(".figureLayer")).not.toContain("filter:");
+    expect(rule(".figureInspectionLayer")).not.toContain("filter:");
+    expect(rule("@keyframes figure-enter")).not.toContain("filter:");
     expect(rule(".figureLayer")).toContain("transform-box: view-box");
   });
 
@@ -71,5 +71,22 @@ describe("CalorythmMeasureHero skeleton layers", () => {
     expect(captionRule).toContain("left: var(--cover-caption-left)");
     expect(signatureRule).toContain("bottom: var(--cover-baseline)");
     expect(signatureRule).toContain("left: var(--cover-gutter)");
+  });
+
+  it("hands chapter copy off through complementary masks without ghost text", () => {
+    expect(rule(".opening :is(h1, p) {")).toContain(
+      "clip-path: inset(0 0 calc(var(--cover-to-editorial) * 100%) 0)",
+    );
+    expect(rule(".method :is(h2, p) {")).toContain(
+      "clip-path: inset( calc((1 - var(--cover-to-editorial)) * 100%) 0 calc(var(--editorial-to-journal) * 100%) 0 )",
+    );
+    expect(rule(".journalStatement > :is(h2, p) {")).toContain(
+      "clip-path: inset( calc((1 - var(--editorial-to-journal)) * 100%) 0 0 0 )",
+    );
+    expect(rule("\n.opening {")).toContain("opacity: 1");
+    expect(rule("\n.method {")).toContain("opacity: 1");
+    expect(rule("\n.opening {")).not.toContain("filter:");
+    expect(rule("\n.method {")).not.toContain("filter:");
+    expect(rule("\n.journalStatement {")).not.toContain("filter:");
   });
 });

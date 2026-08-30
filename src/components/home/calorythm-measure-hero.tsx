@@ -109,7 +109,7 @@ export function CalorythmMeasureHero({
     const connection = (navigator as NavigatorWithConnection).connection;
 
     const readProfile = (): Exclude<HeroMotionProfile, "pending"> => {
-      if ((motionQuery?.matches ?? true) || connection?.saveData) {
+      if ((motionQuery?.matches ?? false) || connection?.saveData) {
         return "reduced";
       }
 
@@ -143,14 +143,57 @@ export function CalorythmMeasureHero({
 
     const hero = heroRef.current;
     const stage = stageRef.current;
+    if (!hero || !stage) return;
+
+    if (motionProfile !== "full") {
+      hero.dataset.motion = motionProfile;
+      hero.dataset.inspection = "static";
+      hero.dataset.cursor = "idle";
+      hero.dataset.wireframe = "idle";
+      hero.dataset.chapter = "cover";
+      hero.style.setProperty("--hero-progress", "0.0000");
+      hero.style.setProperty("--copy-cover", "1.0000");
+      hero.style.setProperty("--copy-editorial", "0.0000");
+      hero.style.setProperty("--copy-journal", "0.0000");
+      hero.style.setProperty("--cover-to-editorial", "0.0000");
+      hero.style.setProperty("--editorial-to-journal", "0.0000");
+      hero.style.setProperty("--conductor-mix", "0.0000");
+      hero.style.setProperty("--conductor-energy", "0.0000");
+      return;
+    }
+
     const visual = visualRef.current;
     const cursor = cursorRef.current;
 
-    if (!hero || !stage || !visual || !cursor) return;
+    if (!visual || !cursor) return;
     const cursorElement = cursor;
     const visualElement = visual;
-
+    const copyChapters = [
+      ...hero.querySelectorAll<HTMLElement>("[data-copy-chapter]"),
+    ];
+    let publishedCopyState = "";
     const supportsMediaQueries = typeof window.matchMedia === "function";
+    const publishCopySemantics = (
+      activeChapter: string,
+      revealAll = false,
+    ) => {
+      const nextState = revealAll ? "all" : activeChapter;
+      if (publishedCopyState === nextState) return;
+
+      publishedCopyState = nextState;
+      copyChapters.forEach((chapter) => {
+        const isActive = chapter.dataset.copyChapter === activeChapter;
+
+        chapter.dataset.copyState = revealAll || isActive ? "active" : "inactive";
+        if (revealAll || isActive) {
+          chapter.removeAttribute("aria-hidden");
+          chapter.removeAttribute("inert");
+        } else {
+          chapter.setAttribute("aria-hidden", "true");
+          chapter.setAttribute("inert", "");
+        }
+      });
+    };
     const applyCoverProgress = (progress: number) => {
       const motion = resolveCalorythmCoverMotion(progress);
       const conductorMix = motion.conductor.mix;
@@ -178,49 +221,30 @@ export function CalorythmMeasureHero({
         "--conductor-energy",
         motion.conductor.handoffEnergy.toFixed(4),
       );
-      hero.dataset.chapter = motion.activeChapter;
-      hero.dataset.conductorFrame = String(motion.conductor.dominantFrame);
-      hero.dataset.conductorFrom = String(motion.conductor.fromFrame);
-      hero.dataset.conductorTo = String(motion.conductor.toFrame);
-      hero.dataset.conductorMotion =
+      if (hero.dataset.chapter !== motion.activeChapter) {
+        hero.dataset.chapter = motion.activeChapter;
+      }
+      publishCopySemantics(motion.activeChapter);
+      const conductorFrame = String(motion.conductor.dominantFrame);
+      const conductorFrom = String(motion.conductor.fromFrame);
+      const conductorTo = String(motion.conductor.toFrame);
+      const conductorMotion =
         motion.conductor.fromFrame === motion.conductor.toFrame
           ? "hold"
           : "handoff";
+      if (hero.dataset.conductorFrame !== conductorFrame) {
+        hero.dataset.conductorFrame = conductorFrame;
+      }
+      if (hero.dataset.conductorFrom !== conductorFrom) {
+        hero.dataset.conductorFrom = conductorFrom;
+      }
+      if (hero.dataset.conductorTo !== conductorTo) {
+        hero.dataset.conductorTo = conductorTo;
+      }
+      if (hero.dataset.conductorMotion !== conductorMotion) {
+        hero.dataset.conductorMotion = conductorMotion;
+      }
     };
-
-    const installStaticInspection = (profile: "reduced" | "static") => {
-      hero.dataset.motion = profile;
-      hero.dataset.inspection = "static";
-      hero.dataset.cursor = "idle";
-      hero.dataset.wireframe = "idle";
-      applyCoverProgress(0);
-
-      const publishStaticInspection = (active: boolean) => {
-        const cx = SOURCE_WIDTH * 0.59;
-        const cy = SOURCE_HEIGHT * 0.43;
-        hero.dataset.wireframe = active ? "active" : "idle";
-        lensFieldRef.current?.setAttribute(
-          "transform",
-          `translate(${cx.toFixed(2)} ${cy.toFixed(2)}) rotate(-8) scale(${active ? 1 : 0})`,
-        );
-      };
-      const showStaticInspection = () => publishStaticInspection(true);
-      const hideStaticInspection = () => publishStaticInspection(false);
-
-      publishStaticInspection(document.activeElement === visual);
-
-      visual.addEventListener("focus", showStaticInspection);
-      visual.addEventListener("blur", hideStaticInspection);
-
-      return () => {
-        visual.removeEventListener("focus", showStaticInspection);
-        visual.removeEventListener("blur", hideStaticInspection);
-      };
-    };
-
-    if (motionProfile !== "full") {
-      return installStaticInspection(motionProfile);
-    }
 
     const supportsPointerInspection =
       !supportsMediaQueries ||
@@ -232,6 +256,7 @@ export function CalorythmMeasureHero({
     let animationFrame = 0;
     let targetScrollProgress = 0;
     let scrollProgress = 0;
+    let lastRenderTime = 0;
     let isVisible = true;
     let stageBounds: Pick<DOMRect, "height" | "left" | "top" | "width"> = {
       height: Math.max(1, window.innerHeight),
@@ -264,11 +289,6 @@ export function CalorythmMeasureHero({
       const bounds = hero.getBoundingClientRect();
       const travel = Math.max(1, hero.offsetHeight - window.innerHeight);
       targetScrollProgress = clamp(-bounds.top / travel);
-
-      if (targetScrollProgress >= 0.999) {
-        scrollProgress = 1;
-        applyCoverProgress(1);
-      }
 
       startRender();
     };
@@ -308,8 +328,13 @@ export function CalorythmMeasureHero({
       }
     }
 
-    function render() {
+    function render(timestamp: number) {
       animationFrame = 0;
+      const elapsed =
+        lastRenderTime === 0 ? 16.67 : clamp(timestamp - lastRenderTime, 0, 64);
+      const scrollEase = 1 - Math.exp(-elapsed / 112);
+      const lensEase = 1 - Math.exp(-elapsed / 148);
+      lastRenderTime = timestamp;
 
       if (pendingPointer) {
         const pointer = pendingPointer;
@@ -344,23 +369,28 @@ export function CalorythmMeasureHero({
         };
       }
 
-      scrollProgress += (targetScrollProgress - scrollProgress) * 0.13;
-      lens.x += (targetLens.x - lens.x) * 0.11;
-      lens.y += (targetLens.y - lens.y) * 0.11;
-      lens.active += (targetLens.active - lens.active) * 0.1;
-      lensScale += (targetLens.active - lensScale) * 0.1;
+      scrollProgress += (targetScrollProgress - scrollProgress) * scrollEase;
+      lens.x += (targetLens.x - lens.x) * lensEase;
+      lens.y += (targetLens.y - lens.y) * lensEase;
+      lens.active += (targetLens.active - lens.active) * lensEase;
+      lensScale += (targetLens.active - lensScale) * lensEase;
 
-      applyCoverProgress(scrollProgress);
-      lensFieldRef.current?.setAttribute(
-        "transform",
-        `translate(${lens.x.toFixed(2)} ${lens.y.toFixed(2)}) rotate(${(-8 + (lens.x / SOURCE_WIDTH - 0.5) * 10).toFixed(2)}) scale(${lensScale.toFixed(4)})`,
-      );
+      if (Math.abs(targetScrollProgress - scrollProgress) < 0.0002) {
+        scrollProgress = targetScrollProgress;
+      }
 
       const lensIsMoving =
         Math.abs(targetLens.x - lens.x) > 0.02 ||
         Math.abs(targetLens.y - lens.y) > 0.02 ||
         Math.abs(targetLens.active - lens.active) > 0.002 ||
         Math.abs(targetLens.active - lensScale) > 0.002;
+      applyCoverProgress(scrollProgress);
+      if (lensIsMoving) {
+        lensFieldRef.current?.setAttribute(
+          "transform",
+          `translate(${lens.x.toFixed(2)} ${lens.y.toFixed(2)}) rotate(${(-8 + (lens.x / SOURCE_WIDTH - 0.5) * 10).toFixed(2)}) scale(${lensScale.toFixed(4)})`,
+        );
+      }
       const scrollIsMoving =
         Math.abs(targetScrollProgress - scrollProgress) > 0.0002;
 
@@ -416,22 +446,31 @@ export function CalorythmMeasureHero({
   return (
     <section
       className={styles.hero}
-      data-conductor-frame="1"
-      data-conductor-from="1"
-      data-conductor-motion="hold"
-      data-conductor-to="1"
+      {...(motionProfile === "full"
+        ? {
+            "data-conductor-frame": "1",
+            "data-conductor-from": "1",
+            "data-conductor-motion": "hold",
+            "data-conductor-to": "1",
+          }
+        : {})}
       data-cursor="idle"
+      data-header-tone="light"
+      data-hero-visual={motionProfile === "full" ? "full" : "poster"}
+      data-chapter="cover"
       data-home-scene="hero"
       data-wireframe="idle"
       ref={heroRef}
     >
       <div className={styles.stage} id="top" ref={stageRef}>
+        {motionProfile === "full" ? (
         <svg
           aria-label="Beslenmenin ritmini yöneten ve elma taşıyan mermer bir figür; anatomik katmanı incelemek için odağa al"
           className={styles.visualComposite}
           data-character-pose={characterPose}
           data-evidence-visual="threads"
-          preserveAspectRatio="xMidYMid slice"
+          data-hero-visual="full"
+          preserveAspectRatio="xMaxYMid slice"
           ref={visualRef}
           role="img"
           tabIndex={0}
@@ -635,40 +674,84 @@ export function CalorythmMeasureHero({
           </g>
 
         </svg>
+        ) : (
+          <div className={styles.posterVisual}>
+            <Image
+              alt="Beslenmenin ritmini yöneten ve elma taşıyan mermer bir figür"
+              className={styles.posterImage}
+              data-hero-visual="poster"
+              height={SOURCE_HEIGHT}
+              sizes="100vw"
+              src={CONDUCTOR_FRAMES[1].source}
+              width={SOURCE_WIDTH}
+            />
+            <svg
+              aria-hidden="true"
+              className={styles.posterRhythmBands}
+              preserveAspectRatio="xMidYMid slice"
+              viewBox={`0 0 ${SOURCE_WIDTH} ${SOURCE_HEIGHT}`}
+            >
+              {RHYTHM_LINES.map((line, index) => (
+                <path
+                  className={styles.rhythmBand}
+                  data-rhythm-band={line.id}
+                  d={INITIAL_BANDS[index]?.d}
+                  key={line.id}
+                  stroke={line.color}
+                  strokeLinecap="butt"
+                  strokeWidth={INITIAL_BANDS[index]?.strokeWidth ?? 20}
+                  vectorEffect="non-scaling-stroke"
+                />
+              ))}
+            </svg>
+          </div>
+        )}
 
-        <article className={styles.opening}>
+        <article className={styles.opening} data-copy-chapter="cover">
           <h1 data-copy-zone="headline">
-            <span>Beslenmenin</span>
-            <em>bir ritmi var.</em>
+            <span>Beslenme hakkında</span>
+            <em>çok şey söyleniyor.</em>
           </h1>
           <p className={styles.intro} data-copy-zone="caption">
-            CALORYTHM, beslenme bilimini görsel hikâyelerle anlatan bağımsız
-            bir dijital yayın.
+            <Image
+              alt=""
+              data-cover-wordmark="primary"
+              height={82}
+              loading="eager"
+              src="/brand/calorythm-wordmark-primary.svg"
+              unoptimized
+              width={794}
+            />
+            <span>Bağımsız beslenme bilimi yayını.</span>
           </p>
         </article>
 
-        <article className={styles.method}>
+        {motionProfile === "full" ? <article className={styles.method} data-copy-chapter="editorial">
           <h2 data-copy-zone="headline">
-            Yediğimiz şey,
-            <em>yalnızca bir sayı</em>
-            değil.
+            <span>Biz önce</span>
+            <em>neye dayandığına</em>
+            <span>bakıyoruz.</span>
           </h2>
           <p data-copy-zone="caption">
-            Bir besini yalnızca kalorisiyle değil, bedenin onunla ne yaptığıyla
-            birlikte ele alıyoruz.
+            Araştırmaları okuyor, bağlamını koruyor ve yayımlanmaya değer olanı
+            seçiyoruz.
           </p>
-        </article>
+        </article> : null}
 
-        <article className={styles.journalStatement}>
+        {motionProfile === "full" ? <article
+          className={styles.journalStatement}
+          data-copy-chapter="journal"
+        >
           <h2 data-copy-zone="headline">
-            Beden sadece almaz.
-            <em>Cevap verir.</em>
+            <span>Sonra bilgiyi,</span>
+            <em>görsel bir hikâyeye</em>
+            <span>dönüştürüyoruz.</span>
           </h2>
           <p data-copy-zone="caption">
-            Sindirim, enerji, hareket, uyku ve toparlanma; aynı sistemin
-            birbirini etkileyen parçalarıdır.
+            CALORYTHM, beslenme bilimini özenli ve anlaşılır bir görsel
+            anlatımla ele alan bağımsız bir dijital dergi.
           </p>
-        </article>
+        </article> : null}
 
         <div
           aria-hidden="true"

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandWordmark } from "@/components/brand/brand-wordmark";
+import { PublicationHeaderSurface } from "./publication-header-surface";
 import { PublicationMenu } from "./publication-menu";
 import styles from "./publication-shell.module.css";
 
@@ -11,9 +12,9 @@ export type PublicationNavigationItem = Readonly<{
 }>;
 
 export const publicationNavigation: readonly PublicationNavigationItem[] = [
-  { href: "/journal", label: "Journal" },
-  { href: "/topics", label: "Konular" },
-  { href: "/about", label: "Hakkında" },
+  { href: "/journal", label: "Yazılar" },
+  { href: "/topics", label: "Konu Atlası" },
+  { href: "/about", label: "Yayın" },
 ];
 
 type PublicationHeaderProps = Readonly<{
@@ -21,10 +22,23 @@ type PublicationHeaderProps = Readonly<{
 }>;
 
 export function PublicationHeader({ tone = "transparent" }: PublicationHeaderProps) {
+  const initialSurface = "light" as const;
+
   return (
-    <header className={styles.header} data-tone={tone}>
+    <header
+      className={styles.header}
+      data-compact="false"
+      data-surface={initialSurface}
+      data-tone={tone}
+      id="publication-header"
+    >
       <Link aria-label="CALORYTHM ana sayfa" className={styles.wordmark} href="/">
-        <BrandWordmark priority />
+        <span className={styles.wordmarkPrimary}>
+          <BrandWordmark priority />
+        </span>
+        <span aria-hidden="true" className={styles.wordmarkInverse}>
+          <BrandWordmark priority variant="inverse" />
+        </span>
       </Link>
       <nav aria-label="Ana navigasyon" className={styles.primaryNavigation}>
         {publicationNavigation.map((item) => (
@@ -33,10 +47,14 @@ export function PublicationHeader({ tone = "transparent" }: PublicationHeaderPro
           </Link>
         ))}
         <Link className={styles.contributeLink} href="/about#katki">
-          Yazar olarak katıl
+          Fikir gönder
         </Link>
       </nav>
       <PublicationMenu items={publicationNavigation} />
+      <PublicationHeaderSurface
+        fallbackTone={initialSurface}
+        headerId="publication-header"
+      />
     </header>
   );
 }

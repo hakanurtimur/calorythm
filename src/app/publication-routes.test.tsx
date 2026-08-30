@@ -199,11 +199,81 @@ describe("publication routes", () => {
 
     render(page);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Protein" })).toBeVisible();
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Protein, bedende tek bir iş yapmaz.",
+      }),
+    ).toBeVisible();
     expect(screen.getAllByRole("article")).toHaveLength(3);
     expect(
       screen.getByRole("link", { name: "Protein Sadece Kas İçin Değildir" }),
     ).toHaveAttribute("href", "/journal/protein-sadece-kas-icin-degildir");
+  });
+
+  it("publishes Protein-specific metadata with its editorial cover image", async () => {
+    const topicRoute = await import("./(publication)/topics/[slug]/page");
+    const generateMetadata = (
+      topicRoute as typeof topicRoute & {
+        generateMetadata?: (props: {
+          params: Promise<{ slug: string }>;
+        }) => Promise<{
+          description?: string | null;
+          openGraph?: {
+            images?: Array<{ alt?: string; url: string } | string>;
+            title?: string;
+          } | null;
+          title?: string;
+        }>;
+      }
+    ).generateMetadata;
+
+    expect(generateMetadata).toBeTypeOf("function");
+
+    const metadata = await generateMetadata!({
+      params: Promise.resolve({ slug: "protein" }),
+    });
+
+    expect(metadata.title).toBe("Protein");
+    expect(metadata.description).toMatch(/yapı.*onarım.*taşıma.*savunma/i);
+    expect(metadata.openGraph).toMatchObject({
+      title: "Protein",
+      images: [
+        {
+          alt: expect.stringMatching(/protein/i),
+          url: "https://calorythm-iota.vercel.app/images/topics/protein-atlas-hero-v1.webp",
+        },
+      ],
+    });
+  });
+
+  it("art-directs Protein as an image-led topic dossier", async () => {
+    const { default: TopicPage } = await import(
+      "./(publication)/topics/[slug]/page"
+    );
+    const page = await TopicPage({
+      params: Promise.resolve({ slug: "protein" }),
+    });
+
+    render(page);
+
+    const dossier = document.querySelector<HTMLElement>(
+      '[data-topic-dossier="protein"]',
+    );
+    expect(dossier).toBeVisible();
+
+    const hero = dossier!.querySelector<HTMLElement>("[data-topic-hero]");
+    expect(hero).toBeVisible();
+    expect(hero).toHaveAttribute("data-header-tone", "dark");
+
+    const cover = within(hero!).getByRole("img", { name: /protein.*kapak/i });
+    expect(decodeURIComponent(cover.getAttribute("src") ?? "")).toContain(
+      "/images/topics/protein-atlas-hero-v1.webp",
+    );
+
+    const stories = within(dossier!).getAllByRole("article");
+    expect(stories).toHaveLength(3);
+    expect(stories[0]).toHaveAttribute("data-editorial-role", "flagship");
   });
 
   it("names a growing archive instead of inventing a story for an empty topic", async () => {

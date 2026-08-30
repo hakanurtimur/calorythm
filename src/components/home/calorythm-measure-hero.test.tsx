@@ -34,12 +34,36 @@ function installFullMotionEnvironment() {
 }
 
 describe("CalorythmMeasureHero", () => {
-  it("maps the hero scroll to one anatomical conducting beat", () => {
+  it("uses only the middle-pose poster on mobile", async () => {
+    vi.stubGlobal("innerWidth", 390);
+    vi.stubGlobal("innerHeight", 844);
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) => ({
+        addEventListener: vi.fn(),
+        matches: false,
+        media: query,
+        onchange: null,
+        removeEventListener: vi.fn(),
+      })),
+    );
+
+    const { container } = render(<CalorythmMeasureHero />);
+
+    await waitFor(() =>
+      expect(screen.getByRole("img")).toHaveAttribute(
+        "data-hero-visual",
+        "poster",
+      ),
+    );
+    expect(container.querySelectorAll("[data-conductor-frame]")).toHaveLength(0);
+    expect(container.querySelectorAll('[data-mask-source="skeleton"]')).toHaveLength(0);
+  });
+
+  it("maps the three editorial chapters to three unique conducting poses", () => {
     expect(resolveConductorFrame(0)).toBe(1);
-    expect(resolveConductorFrame(0.325)).toBe(0);
-    expect(resolveConductorFrame(0.5)).toBe(1);
-    expect(resolveConductorFrame(0.75)).toBe(2);
-    expect(resolveConductorFrame(1)).toBe(1);
+    expect(resolveConductorFrame(0.5)).toBe(0);
+    expect(resolveConductorFrame(1)).toBe(2);
   });
 
   it("publishes copy and raster handoff values from the same scroll sample", () => {
@@ -88,7 +112,7 @@ describe("CalorythmMeasureHero", () => {
     );
 
     expect(copyCover).toBeGreaterThan(0);
-    expect(copyEditorial).toBe(0);
+    expect(copyEditorial).toBeGreaterThan(0);
     expect(copyCover).toBeLessThan(1);
     expect(hero).toHaveAttribute("data-conductor-from", "1");
     expect(hero).toHaveAttribute("data-conductor-to", "0");
@@ -106,13 +130,13 @@ describe("CalorythmMeasureHero", () => {
     ).toHaveAttribute("role", "img");
   });
 
-  it("uses the CALORYTHM brand promise as the cover headline", () => {
+  it("opens with the publication problem instead of an article claim", () => {
     render(<CalorythmMeasureHero />);
 
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /Beslenmenin bir ritmi var\./i,
+        name: /Beslenme hakkında çok şey söyleniyor\./i,
       }),
     ).toBeInTheDocument();
   });
@@ -123,13 +147,35 @@ describe("CalorythmMeasureHero", () => {
     expect(screen.queryByRole("link", { name: "CALORYTHM ana sayfa" })).not.toBeInTheDocument();
   });
 
-  it("identifies CALORYTHM as an independent digital visual-story nutrition publication", () => {
+  it("identifies CALORYTHM as an independent digital visual-story nutrition journal", () => {
     render(<CalorythmMeasureHero />);
 
-    const publicationPromise = screen.getByText(/bağımsız.*dijital.*yayın/i);
+    const publicationPromise = screen.getByText(/bağımsız.*dijital.*dergi/i);
     expect(publicationPromise).toHaveTextContent(/CALORYTHM/i);
     expect(publicationPromise).toHaveTextContent(/beslenme bilimi/i);
-    expect(publicationPromise).toHaveTextContent(/görsel hikâye/i);
+    expect(publicationPromise).toHaveTextContent(/görsel.*anlat/i);
+  });
+
+  it("pairs each of the three positions with one connected editorial statement", () => {
+    const { container } = render(<CalorythmMeasureHero />);
+    const chapters = [
+      ...container.querySelectorAll<HTMLElement>("[data-copy-chapter]"),
+    ];
+
+    expect(chapters.map((chapter) => chapter.dataset.copyChapter)).toEqual([
+      "cover",
+      "editorial",
+      "journal",
+    ]);
+    expect(chapters[0]).toHaveTextContent(
+      /Bağımsız beslenme bilimi yayını\./i,
+    );
+    expect(chapters[1]?.querySelector("h2")).toHaveAccessibleName(
+      /Biz önce neye dayandığına bakıyoruz\./i,
+    );
+    expect(chapters[2]?.querySelector("h2")).toHaveAccessibleName(
+      /Sonra bilgiyi, görsel bir hikâyeye dönüştürüyoruz\./i,
+    );
   });
 
   it("distributes every chapter between headline and caption zones with the rhythm-ring signature", () => {
@@ -140,6 +186,9 @@ describe("CalorythmMeasureHero", () => {
       '[data-cover-signature="rhythm-ring"]',
     );
     const signatureImage = signature?.querySelector("img");
+    const coverWordmark = container.querySelector(
+      '[data-cover-wordmark="primary"]',
+    );
 
     expect(headlines).toHaveLength(3);
     expect(captions).toHaveLength(3);
@@ -147,6 +196,10 @@ describe("CalorythmMeasureHero", () => {
     expect(signatureImage?.getAttribute("src")).toContain(
       "/brand/calorythm-ring-primary.svg",
     );
+    expect(coverWordmark?.getAttribute("src")).toContain(
+      "/brand/calorythm-wordmark-primary.svg",
+    );
+    expect(coverWordmark).toHaveAttribute("loading", "eager");
   });
 
   it("keeps issue numbers and publication dates off the timeless cover", () => {
@@ -246,7 +299,7 @@ describe("CalorythmMeasureHero", () => {
     const visual = container.querySelector('[data-evidence-visual="threads"]')!;
 
     expect(visual).toHaveAttribute("viewBox", "0 0 1672 941");
-    expect(visual).toHaveAttribute("preserveAspectRatio", "xMidYMid slice");
+    expect(visual).toHaveAttribute("preserveAspectRatio", "xMaxYMid slice");
 
     const compositeLayers = [
       ...container.querySelectorAll("[data-composite-layer]"),
@@ -489,26 +542,13 @@ describe("CalorythmMeasureHero", () => {
 
     const { container } = render(<CalorythmMeasureHero />);
     const hero = container.querySelector<HTMLElement>("[data-home-scene]")!;
-    const stage = hero.firstElementChild!;
-    const visual = container.querySelector<SVGSVGElement>(
-      '[data-evidence-visual="threads"]',
-    )!;
-
-    fireEvent.pointerMove(stage, { clientX: 640, clientY: 360 });
-
     expect(hero).toHaveAttribute("data-motion", "reduced");
     expect(hero).toHaveAttribute("data-inspection", "static");
-    expect(hero).toHaveAttribute("data-conductor-frame", "1");
-    expect(hero).toHaveAttribute("data-conductor-from", "1");
-    expect(hero).toHaveAttribute("data-conductor-to", "1");
+    expect(screen.getByRole("img")).toHaveAttribute("data-hero-visual", "poster");
+    expect(container.querySelectorAll("[data-conductor-frame]")).toHaveLength(0);
+    expect(container.querySelectorAll('[data-mask-source="skeleton"]')).toHaveLength(0);
     expect(hero).toHaveAttribute("data-wireframe", "idle");
     expect(requestAnimationFrame).not.toHaveBeenCalled();
-
-    fireEvent.focus(visual);
-    expect(hero).toHaveAttribute("data-wireframe", "active");
-    expect(requestAnimationFrame).not.toHaveBeenCalled();
-    fireEvent.blur(visual);
-    expect(hero).toHaveAttribute("data-wireframe", "idle");
   });
 
   it("keeps one neutral raster pose and skips the scroll loop on static viewports", () => {
@@ -530,9 +570,8 @@ describe("CalorythmMeasureHero", () => {
     const hero = container.querySelector<HTMLElement>("[data-home-scene]")!;
 
     expect(hero).toHaveAttribute("data-motion", "static");
-    expect(hero).toHaveAttribute("data-conductor-frame", "1");
-    expect(hero).toHaveAttribute("data-conductor-from", "1");
-    expect(hero).toHaveAttribute("data-conductor-to", "1");
+    expect(screen.getByRole("img")).toHaveAttribute("data-hero-visual", "poster");
+    expect(container.querySelectorAll("[data-conductor-frame]")).toHaveLength(0);
     expect(hero.style.getPropertyValue("--conductor-energy")).toBe("0.0000");
     expect(requestAnimationFrame).not.toHaveBeenCalled();
   });
@@ -568,9 +607,6 @@ describe("CalorythmMeasureHero", () => {
     const { container } = render(<CalorythmMeasureHero />);
     const hero = container.querySelector<HTMLElement>("[data-home-scene]")!;
     const stage = hero.firstElementChild!;
-    const lensField = container.querySelector(
-      '[data-inspection-shape="organic"]',
-    )!.parentElement!;
     await waitFor(() => expect(hero).toHaveAttribute("data-motion", "full"));
 
     const initialFrame = animationFrames.shift();
@@ -578,7 +614,6 @@ describe("CalorythmMeasureHero", () => {
     fireEvent.pointerMove(stage, { clientX: 640, clientY: 360 });
     const inspectionFrame = animationFrames.shift();
     if (inspectionFrame) act(() => inspectionFrame(16));
-    expect(lensField.getAttribute("transform")).not.toContain("scale(0)");
 
     requestAnimationFrame.mockClear();
     act(() => {
@@ -587,9 +622,9 @@ describe("CalorythmMeasureHero", () => {
     });
     await waitFor(() => expect(hero).toHaveAttribute("data-motion", "reduced"));
 
-    expect(hero).toHaveAttribute("data-conductor-frame", "1");
+    expect(screen.getByRole("img")).toHaveAttribute("data-hero-visual", "poster");
+    expect(container.querySelectorAll("[data-conductor-frame]")).toHaveLength(0);
     expect(hero.style.getPropertyValue("--conductor-energy")).toBe("0.0000");
-    expect(lensField.getAttribute("transform")).toContain("scale(0)");
     requestAnimationFrame.mockClear();
     fireEvent.scroll(window);
     expect(requestAnimationFrame).not.toHaveBeenCalled();
@@ -619,7 +654,8 @@ describe("CalorythmMeasureHero", () => {
     });
     await waitFor(() => expect(hero).toHaveAttribute("data-motion", "static"));
 
-    expect(hero).toHaveAttribute("data-conductor-frame", "1");
+    expect(screen.getByRole("img")).toHaveAttribute("data-hero-visual", "poster");
+    expect(container.querySelectorAll("[data-conductor-frame]")).toHaveLength(0);
     expect(hero.style.getPropertyValue("--conductor-energy")).toBe("0.0000");
     requestAnimationFrame.mockClear();
     fireEvent.scroll(window);

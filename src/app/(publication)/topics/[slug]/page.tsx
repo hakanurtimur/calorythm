@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ProteinTopicLanding } from "@/components/topics/protein-topic-landing";
 import { topics } from "@/content/topics";
 import { getArticlesForTopic, getTopicBySlug } from "@/lib/content-selectors";
 import styles from "../topics.module.css";
@@ -12,12 +14,49 @@ export function generateStaticParams() {
   return topics.map((topic) => ({ slug: topic.slug }));
 }
 
+export async function generateMetadata({ params }: TopicPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const topic = getTopicBySlug(slug);
+
+  if (!topic) return {};
+
+  if (topic.slug === "protein") {
+    return {
+      title: "Protein",
+      description:
+        "Proteinin yapı, onarım, taşıma ve savunmadaki rollerini görsel bir konu atlasıyla keşfet.",
+      openGraph: {
+        title: "Protein",
+        description:
+          "Kasın ötesinde proteinin yapı, kataliz, taşıma, sinyal ve savunma rollerini izle.",
+        images: [
+          {
+            alt: "CALORYTHM Protein Atlası kapak görseli",
+            height: 941,
+            url: "https://calorythm-iota.vercel.app/images/topics/protein-atlas-hero-v1.webp",
+            width: 1672,
+          },
+        ],
+      },
+    };
+  }
+
+  return {
+    title: topic.title,
+    description: topic.definition,
+  };
+}
+
 export default async function TopicPage({ params }: TopicPageProps) {
   const { slug } = await params;
   const topic = getTopicBySlug(slug);
 
   if (!topic) {
     notFound();
+  }
+
+  if (topic.slug === "protein") {
+    return <ProteinTopicLanding />;
   }
 
   const relatedArticles = getArticlesForTopic(topic.slug);

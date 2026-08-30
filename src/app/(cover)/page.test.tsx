@@ -9,7 +9,7 @@ describe("CALORYTHM publication landing", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /Beslenmenin bir ritmi var/i,
+        name: /Beslenme hakkında çok şey söyleniyor/i,
       }),
     ).toBeVisible();
     expect(screen.getByRole("link", { name: "Hikâyeyi oku" })).toHaveAttribute(
@@ -20,7 +20,7 @@ describe("CALORYTHM publication landing", () => {
       screen.getByRole("heading", { name: "Konu atlası" }),
     ).toBeVisible();
     expect(
-      screen.getByRole("link", { name: "Katkı sürecini gör" }),
+      screen.getByRole("link", { name: "Fikrini paylaş" }),
     ).toHaveAttribute("href", "/about#katki");
   });
 });

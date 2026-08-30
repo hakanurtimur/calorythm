@@ -1,8 +1,8 @@
 .hero {
   --cover-baseline: clamp(4.25rem, 8.15vh, 5.5rem);
-  --cover-caption-gap: clamp(2rem, 1.9vw, 2.25rem);
+  --cover-caption-gap: clamp(1rem, 1.3vw, 1.5rem);
   --cover-gutter: clamp(1.5rem, 6.3vw, 7.5rem);
-  --cover-seal-size: clamp(6.25rem, 6.4vw, 7rem);
+  --cover-seal-size: clamp(3.25rem, 3.5vw, 4rem);
   --cover-caption-left: calc(
     var(--cover-gutter) + var(--cover-seal-size) + var(--cover-caption-gap)
   );
@@ -56,6 +56,43 @@
   z-index: 2;
 }
 
+.posterVisual {
+  height: 100%;
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+  width: 100%;
+  z-index: 2;
+}
+
+.posterVisual::after {
+  background:
+    radial-gradient(circle at 58% 43%, transparent 28%, rgba(246, 241, 232, 0.36) 76%),
+    linear-gradient(90deg, rgba(246, 241, 232, 0.2), transparent 42% 74%, rgba(246, 241, 232, 0.42));
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.posterImage,
+.posterRhythmBands {
+  height: 100%;
+  inset: 0;
+  object-fit: cover;
+  object-position: 58% center;
+  position: absolute;
+  width: 100%;
+}
+
+.posterRhythmBands {
+  pointer-events: none;
+}
+
+.hero[data-hero-visual="poster"] {
+  height: 100svh;
+}
+
 .visualComposite:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--coral) 72%, var(--ink));
   outline-offset: -0.65rem;
@@ -67,17 +104,15 @@
 
 .figureLayer {
   animation: figure-enter 980ms 70ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  filter: blur(calc(var(--conductor-energy) * 1.6px));
-  transform: translate3d(0, calc(var(--conductor-energy) * 0.22rem), 0)
-    scale(calc(1 + var(--conductor-energy) * 0.006));
+  transform: translate3d(0, calc(var(--conductor-energy) * 0.32rem), 0)
+    scale(calc(1 + var(--conductor-energy) * 0.008));
   transform-box: view-box;
   transform-origin: 50% 54%;
 }
 
 .figureInspectionLayer {
-  filter: blur(calc(var(--conductor-energy) * 1.6px));
-  transform: translate3d(0, calc(var(--conductor-energy) * 0.22rem), 0)
-    scale(calc(1 + var(--conductor-energy) * 0.006));
+  transform: translate3d(0, calc(var(--conductor-energy) * 0.32rem), 0)
+    scale(calc(1 + var(--conductor-energy) * 0.008));
   transform-box: view-box;
   transform-origin: 50% 54%;
 }
@@ -135,12 +170,38 @@
   inset: 0;
   pointer-events: none;
   position: absolute;
+  will-change: opacity, transform;
   z-index: 9;
 }
 
 .opening {
-  opacity: var(--copy-cover);
+  opacity: 1;
   transform: translate3d(0, calc(var(--cover-to-editorial) * -3rem), 0);
+}
+
+.opening :is(h1, p),
+.method :is(h2, p),
+.journalStatement :is(h2, p) {
+  will-change: clip-path;
+}
+
+.opening :is(h1, p) {
+  clip-path: inset(0 0 calc(var(--cover-to-editorial) * 100%) 0);
+}
+
+.method :is(h2, p) {
+  clip-path: inset(
+    calc((1 - var(--cover-to-editorial)) * 100%)
+    0
+    calc(var(--editorial-to-journal) * 100%)
+    0
+  );
+}
+
+.journalStatement > :is(h2, p) {
+  clip-path: inset(
+    calc((1 - var(--editorial-to-journal)) * 100%) 0 0 0
+  );
 }
 
 .opening h1,
@@ -164,6 +225,8 @@
 }
 
 .opening h1 span,
+.method h2 span,
+.journalStatement h2 span,
 .opening h1 em,
 .method h2 em,
 .journalStatement h2 em {
@@ -187,22 +250,36 @@
 .method > p,
 .journalStatement > p {
   bottom: var(--cover-baseline);
-  font-size: clamp(0.92rem, 1vw, 1.1rem);
+  font-size: clamp(0.8rem, 0.86vw, 0.96rem);
   left: var(--cover-caption-left);
   line-height: 1.6;
   margin: 0;
-  max-width: 23rem;
+  max-width: 20rem;
   position: absolute;
   text-wrap: pretty;
-  width: min(23rem, 26vw);
+  width: min(20rem, 23vw);
 }
 
 .intro {
   animation: copy-enter 720ms 440ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  display: grid;
+  gap: 0.65rem;
+  line-height: 1.48;
+}
+
+.intro img {
+  display: block;
+  height: auto;
+  width: clamp(8.5rem, 8.7vw, 10rem);
+}
+
+.intro span {
+  display: block;
+  max-width: 17rem;
 }
 
 .method {
-  opacity: var(--copy-editorial);
+  opacity: 1;
   transform: translate3d(
     0,
     calc((1 - var(--cover-to-editorial)) * 2.8rem - var(--editorial-to-journal) * 2.8rem),
@@ -224,7 +301,7 @@
 }
 
 .journalStatement {
-  opacity: var(--copy-journal);
+  opacity: 1;
   transform: translate3d(0, calc((1 - var(--copy-journal)) * 2.8rem), 0);
 }
 
@@ -341,7 +418,6 @@
 
 @keyframes figure-enter {
   from {
-    filter: blur(10px);
     opacity: 0;
     transform: translateY(1.2rem) scale(1.018);
   }
@@ -349,7 +425,6 @@
 
 @keyframes copy-enter {
   from {
-    clip-path: inset(0 0 100% 0);
     opacity: 0;
     transform: translateY(1.4rem);
   }
@@ -388,6 +463,14 @@
     opacity: 0.58;
   }
 
+  .posterVisual {
+    opacity: 0.6;
+  }
+
+  .posterImage {
+    object-position: 61% center;
+  }
+
   .opening,
   .method,
   .journalStatement {
@@ -418,7 +501,7 @@
   .journalStatement > p {
     background: rgba(246, 241, 232, 0.78);
     bottom: 4.25rem;
-    left: 8rem;
+    left: calc(1.25rem + var(--cover-seal-size) + 0.9rem);
     max-width: none;
     right: 1.25rem;
     width: auto;
@@ -427,7 +510,7 @@
   .coverSignature {
     bottom: 4.25rem;
     left: 1.25rem;
-    width: 6.25rem;
+    width: var(--cover-seal-size);
   }
 
   .method h2,
@@ -473,6 +556,7 @@
   .opening,
   .method,
   .journalStatement {
+    filter: none;
     inset: auto;
     opacity: 1;
     position: relative;
@@ -487,6 +571,7 @@
   .method > p,
   .journalStatement > p {
     background: none;
+    clip-path: none;
     inset: auto;
     max-width: none;
     position: relative;
