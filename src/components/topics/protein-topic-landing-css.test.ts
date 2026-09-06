@@ -7,25 +7,23 @@ const styles = readFileSync(
   "utf8",
 );
 
-const tabletStyles = styles.slice(
-  styles.indexOf("@media (max-width: 900px)"),
-  styles.indexOf("@media (max-width: 560px)"),
-);
 const mobileStyles = styles.slice(styles.indexOf("@media (max-width: 560px)"));
 
 describe("Protein topic responsive art direction", () => {
-  it("keeps the rhythm rail on tablet without relying on a sticky scroll scene", () => {
-    expect(tabletStyles).not.toMatch(/\.heroLight,\s*\.heroRails/);
-    expect(tabletStyles).toMatch(/\.heroRails\s*{[\s\S]*?opacity:/);
-    expect(tabletStyles).toMatch(
-      /\.rolesSticky\s*{[\s\S]*?position:\s*relative/,
-    );
+  it("uses one natural-flow light atlas instead of a multi-viewport sticky scene", () => {
+    expect(styles).toMatch(/\.roles\s*{[\s\S]*?background:\s*var\(--ivory\)/);
+    expect(styles).not.toContain("430svh");
+    expect(styles).not.toMatch(/\.roles(?:Sticky|Frame)\s*{[\s\S]*?position:\s*sticky/);
   });
 
-  it("replaces the pinned theatre with sequential visual chapters on narrow mobile", () => {
-    expect(mobileStyles).toMatch(/\.heroRails\s*{[\s\S]*?display:\s*none/);
-    expect(mobileStyles).toMatch(/\.roleStage\s*{[\s\S]*?display:\s*none/);
-    expect(mobileStyles).toMatch(/\.roleMobileSequence\s*{[\s\S]*?display:\s*grid/);
+  it("keeps one integrated brand spine and readable ledger on narrow mobile", () => {
+    expect(styles).not.toContain(".heroRails");
+    expect(styles).toContain(".roleLedger");
+    expect(styles).toContain(".roleSpine");
+    expect(mobileStyles).not.toMatch(/\.roleSpine\s*{[\s\S]*?display:\s*none/);
+    expect(styles).not.toContain(".roleScore");
+    expect(styles).not.toMatch(/content:\s*["']P["']/);
+    expect(styles).not.toMatch(/\.roleList\s+button/);
     expect(styles).not.toContain("overflow-wrap: anywhere");
   });
 });

@@ -2,7 +2,38 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { ProteinTopicLanding } from "./protein-topic-landing";
 
-const proteinRoles = ["Yapı", "Kataliz", "Taşıma", "Sinyal", "Savunma"] as const;
+const proteinRoles = [
+  {
+    example: /Kollajen · Keratin · Aktin/i,
+    label: "Yapı",
+    note: /Kas lifinden hücre iskeletine/i,
+    verb: "Kurar.",
+  },
+  {
+    example: /Pepsin · Amilaz · ATP sentaz/i,
+    label: "Kataliz",
+    note: /Protein yapılı enzimler/i,
+    verb: "Hızlandırır.",
+  },
+  {
+    example: /Hemoglobin · Albumin · Taşıyıcılar/i,
+    label: "Taşıma",
+    note: /Hemoglobin oksijeni/i,
+    verb: "Taşır.",
+  },
+  {
+    example: /İnsülin · Reseptörler/i,
+    label: "Sinyal",
+    note: /hücrelerin birbirini duymasına/i,
+    verb: "Haber verir.",
+  },
+  {
+    example: /Antikorlar · Kompleman proteinleri/i,
+    label: "Savunma",
+    note: /bedenin yabancıyı tanıma/i,
+    verb: "Tanır.",
+  },
+] as const;
 
 const proteinStories = [
   {
@@ -35,36 +66,58 @@ describe("ProteinTopicLanding", () => {
         name: "Protein, bedende tek bir iş yapmaz.",
       }),
     ).toBeVisible();
+    expect(document.querySelector("[data-protein-hero-rail]")).toBeNull();
   });
 
-  it("makes all five protein roles available as one readable set", () => {
+  it("presents all five protein roles as readable editorial entries instead of controls", () => {
     const roles = screen.getByRole("list", {
       name: "Proteinin bedendeki rolleri",
     });
     const items = within(roles).getAllByRole("listitem");
 
     expect(items).toHaveLength(5);
-    expect(items.map((item) => item.textContent?.trim())).toEqual(proteinRoles);
+    expect(within(roles).queryAllByRole("button")).toHaveLength(0);
+    proteinRoles.forEach(({ example, label, note, verb }, index) => {
+      const item = items[index]!;
+      expect(item).toHaveAttribute("data-protein-role-row");
+      expect(within(item).getByText(label, { exact: true })).toBeVisible();
+      expect(within(item).getByText(verb, { exact: true })).toBeVisible();
+      expect(within(item).getByText(note)).toBeVisible();
+      expect(within(item).getByText(example)).toBeVisible();
+    });
   });
 
-  it("stages the five roles around one decisive anatomical atlas instead of a texture carousel", () => {
-    const theatre = screen.getByRole("figure", {
-      name: "Proteinin bedendeki görevlerini gösteren anatomik atlas",
-    });
-
-    expect(within(theatre).getAllByRole("img")).toHaveLength(1);
-    expect(within(theatre).getByRole("img")).toHaveAttribute(
-      "src",
-      expect.stringContaining("protein-role-atlas-v2.webp"),
+  it("runs four uninterrupted straight brand lines through the complete role ledger", () => {
+    const rolesSection = document.querySelector<HTMLElement>(
+      '[data-protein-topic-scene="roles"]',
     );
+    const ledger = rolesSection?.querySelector<HTMLElement>(
+      "[data-protein-role-ledger]",
+    );
+
+    expect(rolesSection).toHaveAttribute("data-header-tone", "light");
     expect(
-      new Set(
-        Array.from(theatre.querySelectorAll("img"), (image) => image.getAttribute("src")),
-      ),
-    ).toHaveLength(1);
-    expect(theatre.querySelectorAll("[data-role-marker]")).toHaveLength(5);
-    expect(theatre.querySelector("[data-protein-role-focus-lens]")).not.toBeNull();
-    expect(document.querySelector("[data-role-texture]")).toBeNull();
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Tek bir ad. Beş farklı iş.",
+      }),
+    ).toBeVisible();
+    expect(rolesSection?.querySelectorAll("img")).toHaveLength(0);
+    expect(ledger).toBeInTheDocument();
+    const spineLines = Array.from(
+      ledger?.querySelectorAll<SVGLineElement>("[data-protein-role-spine-line]") ?? [],
+    );
+
+    expect(spineLines).toHaveLength(4);
+    spineLines.forEach((line) => {
+      expect(line.tagName.toLowerCase()).toBe("line");
+      expect(line).toHaveAttribute("y1", "0");
+      expect(line).toHaveAttribute("y2", "1000");
+      expect(line).toHaveAttribute("x1", line.getAttribute("x2"));
+    });
+    expect(rolesSection?.querySelector("figure")).toBeNull();
+    expect(document.querySelector("[data-active-protein-role]")).toBeNull();
+    expect(document.querySelector("[aria-pressed]")).toBeNull();
   });
 
   it("links to every published Protein reading", () => {

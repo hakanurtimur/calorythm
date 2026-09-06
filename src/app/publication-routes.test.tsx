@@ -131,7 +131,7 @@ describe("publication routes", () => {
       "visual-essay",
     );
     expect(document.querySelectorAll("[data-protein-scene]")).toHaveLength(7);
-    expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(9);
+    expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(8);
     expect(screen.getByRole("list", { name: "Kaynaklar" })).toBeVisible();
     expect(
       screen.getByText(
@@ -178,7 +178,7 @@ describe("publication routes", () => {
 
     render(<TopicsPage />);
 
-    const topics = screen.getAllByRole("link", { name: /konusundaki yazıları gör/i });
+    const topics = screen.getAllByRole("link", { name: /konusunu keşfet/i });
     expect(topics).toHaveLength(8);
     expect(topics[0]).toHaveAttribute("href", "/topics/protein");
     expect(topics[7]).toHaveAttribute("href", "/topics/mikro-besinler");
@@ -266,6 +266,12 @@ describe("publication routes", () => {
     expect(hero).toBeVisible();
     expect(hero).toHaveAttribute("data-header-tone", "dark");
 
+    const roles = dossier!.querySelector<HTMLElement>(
+      '[data-protein-topic-scene="roles"]',
+    );
+    expect(roles).toBeVisible();
+    expect(roles).toHaveAttribute("data-header-tone", "light");
+
     const cover = within(hero!).getByRole("img", { name: /protein.*kapak/i });
     expect(decodeURIComponent(cover.getAttribute("src") ?? "")).toContain(
       "/images/topics/protein-atlas-hero-v1.webp",
@@ -314,8 +320,8 @@ describe("publication routes", () => {
 
     render(<AboutPage />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "CALORYTHM nedir?" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Editoryal yöntem" })).toBeVisible();
+    expect(screen.getByRole("heading", { level: 1, name: "Beslenmeyi anlamak için." })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Editoryal yöntem." })).toBeVisible();
     expect(screen.getByText(/diyetisyenlik/i)).toBeVisible();
     expect(screen.getByText(/yazılım ve tasarım/i)).toBeVisible();
     const contribution = document.querySelector("#katki");
@@ -332,14 +338,16 @@ describe("publication routes", () => {
 
     render(<AboutPage />);
 
-    expect(screen.getByRole("link", { name: "Katkı için iletişime geç" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Başvuru bilgisi" })).toHaveAttribute(
       "href",
       "#iletisim-bilgisi",
     );
     const contactNote = document.querySelector("#iletisim-bilgisi");
     expect(contactNote).toHaveTextContent(
-      "Yayın sahibi, canlıya geçmeden önce NEXT_PUBLIC_EDITORIAL_CONTACT_URL değerini yapılandırmalıdır.",
+      "Katkı başvuruları henüz açılmadı.",
     );
+    expect(contactNote).not.toHaveTextContent("NEXT_PUBLIC_EDITORIAL_CONTACT_URL");
+    expect(screen.queryByRole("link", { name: "Katkı için iletişime geç" })).not.toBeInTheDocument();
   });
 
   it("uses the configured editorial contact destination without inventing another channel", async () => {
@@ -403,7 +411,7 @@ describe("publication routes", () => {
       "min-width: 0",
     );
     expect(cssRule(aboutStyles, ".manifesto h1", aboutMobile)).toContain(
-      "font-size: clamp(2rem, 10vw, 4rem)",
+      "font-size: clamp(2.3rem, 11.8vw, 5.3rem)",
     );
     expect(cssRule(aboutStyles, ".manifesto h1", aboutMobile)).toContain(
       "overflow-wrap: anywhere",

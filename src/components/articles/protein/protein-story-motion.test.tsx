@@ -19,61 +19,63 @@ const originalIntersectionObserver = Object.getOwnPropertyDescriptor(
 );
 const originalMatchMedia = Object.getOwnPropertyDescriptor(window, "matchMedia");
 
-const sceneNames = [
-  "frame",
-  "roles",
-  "turnover",
-  "digestion",
-  "reference",
-  "pattern",
-  "resolution",
-] as const;
-
 function Fixture({ children }: { children?: ReactNode }) {
   return (
     <>
-      <section data-protein-scene="frame">
-        <div data-protein-pin="frame">
-          <strong data-protein-frame-word>KAS</strong>
-          <span data-protein-frame-role="structure">Yapı</span>
+      <header data-protein-scene="cover">
+        <h1 data-protein-cover-title>Protein sadece kas için değildir</h1>
+        <div aria-hidden="true">
+          {Array.from({ length: 5 }, (_, index) => (
+            <i data-protein-cover-mask-panel={`panel-${index}`} key={`panel-${index}`} />
+          ))}
         </div>
-      </section>
+        <div aria-hidden="true">
+          {Array.from({ length: 5 }, (_, index) => (
+            <i data-protein-cover-strand={`strand-${index}`} key={`strand-${index}`} />
+          ))}
+        </div>
+      </header>
+
       <section data-protein-scene="roles">
-        <svg><g data-protein-role="structure"><line data-protein-score-rule /></g></svg>
-        {Array.from({ length: 5 }, (_, index) => (
-          <p data-protein-role-copy={`role-${index}`} key={index}>Rol {index + 1}</p>
-        ))}
+        <h2>Protein bedende aynı anda beş iş görür</h2>
+        <ul>
+          {Array.from({ length: 5 }, (_, index) => (
+            <li data-protein-role-copy={`role-${index}`} key={`role-${index}`}>
+              <i aria-hidden="true" data-protein-role-line={`role-${index}`} />
+              <strong>Rol {index + 1}</strong>
+              <p>Okunabilir açıklama {index + 1}</p>
+            </li>
+          ))}
+        </ul>
       </section>
-      <section data-protein-scene="turnover">
-        <div data-protein-turnover-visual="material" data-protein-image-layer="material" />
-        <ol>
-          <li data-protein-turnover-state="building" />
-          <li data-protein-turnover-state="working" />
-          <li data-protein-turnover-state="dismantling" />
-        </ol>
-      </section>
+
       <section data-protein-scene="digestion">
+        <h2>Bir lokma aynı biçimde kalmaz</h2>
         <div data-protein-pin="digestion">
-          <div data-protein-digestion-visual="transformation" data-protein-image-layer="digestion" />
-          <i data-protein-digestion-focus />
+          <div data-protein-image-layer="digestion">
+            {Array.from({ length: 3 }, (_, index) => (
+              <i
+                aria-hidden="true"
+                data-protein-digestion-fragment={`fragment-${index}`}
+                key={`fragment-${index}`}
+              />
+            ))}
+            <i aria-hidden="true" data-protein-digestion-focus />
+          </div>
+          <ol>
+            {Array.from({ length: 3 }, (_, index) => (
+              <li data-protein-digestion-state={`state-${index}`} key={`state-${index}`}>
+                Sindirim açıklaması {index + 1}
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
-      <section data-protein-scene="reference">
-        <div data-protein-reference-rail="population" />
-        <div data-protein-reference-rail="sport" />
-        <div data-protein-reference-rail="assessment" />
-      </section>
-      <section data-protein-scene="pattern">
-        <div data-protein-pin="pattern">
-          <div data-protein-image-layer="pattern" />
-          <i data-protein-chord-row="one" data-protein-pattern-slice="one" />
-          <i data-protein-chord-row="two" data-protein-pattern-slice="two" />
-          <i data-protein-chord-row="three" data-protein-pattern-slice="three" />
-        </div>
-      </section>
-      <section data-protein-scene="resolution">
-        <i data-protein-resolution-mark="one" />
-      </section>
+
+      <section data-protein-scene="turnover"><h2>Dönüşüm</h2></section>
+      <section data-protein-scene="reference"><h2>Referans değerler</h2></section>
+      <section data-protein-scene="pattern"><h2>Örüntü</h2></section>
+      <section data-protein-scene="resolution"><h2>Sonuç</h2></section>
       {children}
     </>
   );
@@ -89,7 +91,6 @@ function installEnvironment({
   const desktopListeners = new Set<EventListenerOrEventListenerObject>();
   const connection = new EventTarget() as EventTarget & { saveData: boolean };
   connection.saveData = saveData;
-  const addConnectionListener = vi.spyOn(connection, "addEventListener");
   const removeConnectionListener = vi.spyOn(connection, "removeEventListener");
   const motionQuery = {
     addEventListener: vi.fn(
@@ -134,19 +135,10 @@ function installEnvironment({
   });
 
   return {
-    addConnectionListener,
     connection,
     desktopQuery,
     motionQuery,
     removeConnectionListener,
-    setReducedMotion(nextValue: boolean) {
-      motionQuery.matches = nextValue;
-      const event = new Event("change");
-      motionListeners.forEach((listener) => {
-        if (typeof listener === "function") listener(event);
-        else listener.handleEvent(event);
-      });
-    },
     setSaveData(nextValue: boolean) {
       connection.saveData = nextValue;
       connection.dispatchEvent(new Event("change"));
@@ -206,7 +198,7 @@ function installIntersectionObserver() {
     disconnect,
     observe,
     reveal() {
-      if (!callback || !target) throw new Error("Frame scene was not observed");
+      if (!callback || !target) throw new Error("Cover scene was not observed");
       callback(
         [{ isIntersecting: true, target } as IntersectionObserverEntry],
         {} as IntersectionObserver,
@@ -229,20 +221,26 @@ type TimelineConfig = {
   defaults?: { ease?: string };
   scrollTrigger?: {
     end?: string;
-    onUpdate?: (state: { progress: number }) => void;
+    endTrigger?: Element;
+    invalidateOnRefresh?: boolean;
+    once?: boolean;
     pin?: Element;
     pinSpacing?: boolean;
-    start?: string;
+    scrub?: boolean | number;
+    start?: string | (() => string);
     trigger?: Element;
   };
 };
 
+type AnimationStep = {
+  from?: Record<string, unknown>;
+  kind: "fromTo" | "set" | "to";
+  target: unknown;
+  to: Record<string, unknown>;
+};
+
 function createRuntime() {
-  const animationSteps: Array<{
-    from: Record<string, unknown>;
-    target: unknown;
-    to: Record<string, unknown>;
-  }> = [];
+  const animationSteps: AnimationStep[] = [];
   const animationVars: Record<string, unknown>[] = [];
   const timelines: Array<{ config: TimelineConfig }> = [];
   const context = { revert: vi.fn() };
@@ -262,14 +260,24 @@ function createRuntime() {
             to: Record<string, unknown>,
           ) => {
             animationVars.push(from, to);
-            animationSteps.push({ from, target, to });
+            animationSteps.push({ from, kind: "fromTo", target, to });
             return timeline;
           },
         ),
-        to: vi.fn((_target: unknown, vars: Record<string, unknown>) => {
-          animationVars.push(vars);
-          return timeline;
-        }),
+        set: vi.fn(
+          (target: unknown, vars: Record<string, unknown>) => {
+            animationVars.push(vars);
+            animationSteps.push({ kind: "set", target, to: vars });
+            return timeline;
+          },
+        ),
+        to: vi.fn(
+          (target: unknown, vars: Record<string, unknown>) => {
+            animationVars.push(vars);
+            animationSteps.push({ kind: "to", target, to: vars });
+            return timeline;
+          },
+        ),
       };
       return timeline;
     }),
@@ -283,6 +291,20 @@ function createRuntime() {
     runtime: { gsap, ScrollTrigger: {} } as unknown as ProteinStoryMotionRuntime,
     timelines,
   };
+}
+
+function elementsFromTarget(target: unknown): Element[] {
+  if (target instanceof Element) return [target];
+  if (target instanceof NodeList || Array.isArray(target)) {
+    return Array.from(target).filter((item): item is Element => item instanceof Element);
+  }
+  return [];
+}
+
+function sceneName(element: Element | undefined) {
+  return element
+    ?.closest<HTMLElement>("[data-protein-scene]")
+    ?.dataset.proteinScene;
 }
 
 afterEach(() => {
@@ -317,17 +339,18 @@ describe("resolveProteinMotionProfile", () => {
 });
 
 describe("ProteinStoryMotion", () => {
-  it("server-renders complete semantic children behind a pending motion root", () => {
+  it("server-renders all copy behind a pending motion root", () => {
     const markup = renderToString(
       <ProteinStoryMotion>
-        <h2>Kas, hikâyenin tamamı değil</h2>
-        <p>Complete article copy</p>
+        <Fixture><p>Makalenin tamamı okunabilir.</p></Fixture>
       </ProteinStoryMotion>,
     );
 
     expect(markup).toContain('data-protein-motion="pending"');
-    expect(markup).toContain("Kas, hikâyenin tamamı değil");
-    expect(markup).toContain("Complete article copy");
+    expect(markup).toContain("Protein sadece kas için değildir");
+    expect(markup).toMatch(/Okunabilir açıklama (?:<!-- -->)?5/);
+    expect(markup).toMatch(/Sindirim açıklaması (?:<!-- -->)?3/);
+    expect(markup).toContain("Makalenin tamamı okunabilir.");
   });
 
   it.each([
@@ -335,7 +358,7 @@ describe("ProteinStoryMotion", () => {
     [{ saveData: true }, "reduced"],
     [{ width: 1023 }, "static"],
     [{ height: 699 }, "static"],
-  ] as const)("never loads the runtime for %o", async (environment, expected) => {
+  ] as const)("keeps copy static and never loads GSAP for %o", async (environment, expected) => {
     installEnvironment(environment);
     const loadRuntime = vi.fn();
     const { container } = render(
@@ -345,10 +368,12 @@ describe("ProteinStoryMotion", () => {
     await waitFor(() => {
       expect(container.firstChild).toHaveAttribute("data-protein-motion", expected);
     });
+    expect(container).toHaveTextContent("Okunabilir açıklama 5");
+    expect(container).toHaveTextContent("Sindirim açıklaması 3");
     expect(loadRuntime).not.toHaveBeenCalled();
   });
 
-  it("defers full runtime loading until the frame scene approaches", async () => {
+  it("defers full runtime loading until the cover approaches", async () => {
     installEnvironment();
     const observer = installIntersectionObserver();
     const fake = createRuntime();
@@ -363,7 +388,7 @@ describe("ProteinStoryMotion", () => {
     });
     expect(loadRuntime).not.toHaveBeenCalled();
     expect(observer.observe).toHaveBeenCalledWith(
-      container.querySelector('[data-protein-scene="frame"]'),
+      container.querySelector('[data-protein-scene="cover"]'),
     );
     expect(observer.rootMargin()).toBe("100% 0px");
     expect(
@@ -373,10 +398,10 @@ describe("ProteinStoryMotion", () => {
     act(() => observer.reveal());
 
     await waitFor(() => expect(loadRuntime).toHaveBeenCalledOnce());
-    await waitFor(() => expect(fake.gsap.timeline).toHaveBeenCalledTimes(7));
+    await waitFor(() => expect(fake.gsap.timeline).toHaveBeenCalledTimes(3));
   });
 
-  it("disconnects an armed observer without loading when unmounted", async () => {
+  it("disconnects an armed observer without loading on unmount", async () => {
     installEnvironment();
     const observer = installIntersectionObserver();
     const loadRuntime = vi.fn();
@@ -401,7 +426,7 @@ describe("ProteinStoryMotion", () => {
     render(<ProteinStoryMotion loadRuntime={loadRuntime}><Fixture /></ProteinStoryMotion>);
 
     await waitFor(() => expect(loadRuntime).toHaveBeenCalledOnce());
-    await waitFor(() => expect(fake.gsap.timeline).toHaveBeenCalledTimes(7));
+    await waitFor(() => expect(fake.gsap.timeline).toHaveBeenCalledTimes(3));
   });
 
   it("suppresses a stale async install after the viewport becomes static", async () => {
@@ -429,7 +454,7 @@ describe("ProteinStoryMotion", () => {
     expect(fake.gsap.timeline).not.toHaveBeenCalled();
   });
 
-  it("creates seven ordered scene timelines and pins only frame, digestion, and pattern", async () => {
+  it("installs exactly the cover, handoff, and digestion timelines", async () => {
     installEnvironment();
     const observer = installIntersectionObserver();
     const fake = createRuntime();
@@ -443,87 +468,49 @@ describe("ProteinStoryMotion", () => {
       expect(container.firstChild).toHaveAttribute("data-protein-motion", "full");
     });
     act(() => observer.reveal());
-    await waitFor(() => expect(fake.timelines).toHaveLength(7));
+    await waitFor(() => expect(fake.timelines).toHaveLength(3));
 
-    expect(
-      fake.timelines.map(({ config }) => (
-        config.scrollTrigger?.trigger as HTMLElement | undefined
-      )?.closest<HTMLElement>("[data-protein-scene]")?.dataset.proteinScene),
-    ).toEqual(sceneNames);
-    expect(
-      fake.timelines
-        .filter(({ config }) => config.scrollTrigger?.pin)
-        .every(({ config }) => config.scrollTrigger?.trigger === config.scrollTrigger?.pin),
-    ).toBe(true);
-    expect(
-      fake.timelines
-        .filter(({ config }) => config.scrollTrigger?.pin)
-        .map(({ config }) => (
-          config.scrollTrigger?.pin as HTMLElement | undefined
-        )?.dataset.proteinPin),
-    ).toEqual(["frame", "digestion", "pattern"]);
-    expect(
-      fake.timelines
-        .filter(({ config }) => config.scrollTrigger?.pin)
-        .every(({ config }) => config.scrollTrigger?.pinSpacing === false),
-    ).toBe(true);
-    expect(fake.timelines.map(({ config }) => config.defaults?.ease)).toEqual(
-      Array.from({ length: 7 }, () => "none"),
-    );
-    const railStep = fake.animationSteps.find(({ target }) => (
-      target instanceof NodeList
-      && Array.from(target).some(
-        (node) => node instanceof HTMLElement
-          && node.hasAttribute("data-protein-reference-rail"),
-      )
-    ));
-    expect(railStep?.from).toEqual(expect.objectContaining({ scaleX: 0.94 }));
-    expect(railStep?.from).not.toHaveProperty("xPercent");
-    const materialStep = fake.animationSteps.find(
-      ({ target }) => target instanceof HTMLElement
-        && target.hasAttribute("data-protein-turnover-visual"),
-    );
-    expect(materialStep?.from).toEqual(expect.objectContaining({
-      clipPath: expect.stringContaining("inset"),
-      scale: 1.04,
-    }));
-    const turnoverStatesStep = fake.animationSteps.find(({ target }) => (
-      target instanceof NodeList
-      && Array.from(target).some(
-        (node) => node instanceof HTMLElement
-          && node.hasAttribute("data-protein-turnover-state"),
-      )
-    ));
-    expect(turnoverStatesStep?.from).toEqual(
-      expect.objectContaining({ autoAlpha: 0.48, y: 18 }),
-    );
-    expect(turnoverStatesStep?.to).toEqual(
-      expect.objectContaining({ autoAlpha: 1, stagger: expect.any(Number), y: 0 }),
-    );
-    const animatedElements = fake.animationSteps.flatMap(({ target }) => {
-      if (target instanceof Element) return [target];
-      if (target instanceof NodeList) return Array.from(target).filter(
-        (item): item is Element => item instanceof Element,
-      );
-      return [];
+    const [cover, handoff, digestion] = fake.timelines.map(
+      ({ config }) => config,
+    ) as [TimelineConfig, TimelineConfig, TimelineConfig];
+    expect(fake.timelines.map(({ config }) => sceneName(config.scrollTrigger?.trigger))).toEqual([
+      "cover",
+      "cover",
+      "digestion",
+    ]);
+    expect(cover.scrollTrigger).toMatchObject({
+      invalidateOnRefresh: true,
+      once: true,
     });
-    expect(
-      animatedElements.some((element) => element.hasAttribute("data-protein-image-layer")),
-    ).toBe(true);
-    expect(
-      animatedElements.some((element) => element.hasAttribute("data-protein-score-rule")),
-    ).toBe(true);
-    expect(
-      animatedElements.some((element) => element.hasAttribute("data-protein-pattern-slice")),
-    ).toBe(true);
-    expect(
-      animatedElements.some((element) => element.hasAttribute("data-protein-pin")),
-    ).toBe(false);
+    expect(cover.scrollTrigger?.start).toBeTypeOf("function");
+    expect(cover.scrollTrigger?.pin).toBeUndefined();
+    expect(cover.scrollTrigger?.scrub).toBeUndefined();
+
+    expect(handoff.scrollTrigger?.end).toBe("top 48%");
+    expect(handoff.scrollTrigger?.scrub).toBeTypeOf("number");
+    expect(handoff.scrollTrigger?.pin).toBeUndefined();
+    expect(sceneName(handoff.scrollTrigger?.endTrigger)).toBe("roles");
+
+    expect(digestion.scrollTrigger?.end).toBe("+=78%");
+    expect(digestion.scrollTrigger?.start).toBeTypeOf("function");
+    expect(digestion.scrollTrigger?.scrub).toBeTypeOf("number");
+    expect(digestion.scrollTrigger?.pin).toHaveAttribute("data-protein-pin", "digestion");
+    expect(digestion.scrollTrigger?.trigger).toBe(digestion.scrollTrigger?.pin);
+    expect(digestion.scrollTrigger?.pinSpacing).not.toBe(false);
+    expect(fake.timelines.filter(({ config }) => config.scrollTrigger?.pin)).toHaveLength(1);
+    expect(fake.timelines.filter(({ config }) => (
+      config.scrollTrigger?.scrub !== undefined
+    ))).toHaveLength(2);
+    expect(fake.timelines.map(({ config }) => config.defaults?.ease)).toEqual([
+      "power3.out",
+      "none",
+      "none",
+    ]);
   });
 
-  it("derives progress, endpoint state, and active role from current progress in both directions", async () => {
+  it("targets only approved decorative layers and leaves readable copy untouched", async () => {
     installEnvironment();
-    const observer = installIntersectionObserver();
+    Reflect.deleteProperty(window, "IntersectionObserver");
     const fake = createRuntime();
     const { container } = render(
       <ProteinStoryMotion loadRuntime={vi.fn().mockResolvedValue(fake.runtime)}>
@@ -531,46 +518,112 @@ describe("ProteinStoryMotion", () => {
       </ProteinStoryMotion>,
     );
 
-    await waitFor(() => {
-      expect(container.firstChild).toHaveAttribute("data-protein-motion", "full");
-    });
-    act(() => observer.reveal());
-    await waitFor(() => expect(fake.timelines).toHaveLength(7));
-    const frame = container.querySelector<HTMLElement>('[data-protein-scene="frame"]')!;
-    const roles = container.querySelector<HTMLElement>('[data-protein-scene="roles"]')!;
-    const roleCopies = Array.from(
-      roles.querySelectorAll<HTMLElement>("[data-protein-role-copy]"),
+    await waitFor(() => expect(fake.timelines).toHaveLength(3));
+    const animatedElements = new Set(
+      fake.animationSteps.flatMap(({ target }) => elementsFromTarget(target)),
     );
 
-    act(() => fake.timelines[0]?.config.scrollTrigger?.onUpdate?.({ progress: 1.4 }));
-    expect(frame.style.getPropertyValue("--protein-scene-progress")).toBe("1.000");
-    expect(frame).toHaveAttribute("data-protein-motion-state", "end");
-    act(() => fake.timelines[0]?.config.scrollTrigger?.onUpdate?.({ progress: -0.3 }));
-    expect(frame.style.getPropertyValue("--protein-scene-progress")).toBe("0.000");
-    expect(frame).toHaveAttribute("data-protein-motion-state", "start");
+    expect([...animatedElements].filter((element) => (
+      element.hasAttribute("data-protein-cover-mask-panel")
+    ))).toHaveLength(5);
+    expect([...animatedElements].filter((element) => (
+      element.hasAttribute("data-protein-cover-strand")
+    ))).toHaveLength(5);
+    expect([...animatedElements].filter((element) => (
+      element.hasAttribute("data-protein-role-line")
+    ))).toHaveLength(5);
+    expect([...animatedElements].filter((element) => (
+      element.hasAttribute("data-protein-digestion-fragment")
+    ))).toHaveLength(3);
+    expect([...animatedElements].filter((element) => (
+      element.hasAttribute("data-protein-cover-title")
+    ))).toHaveLength(1);
+    expect([...animatedElements].filter((element) => (
+      element.hasAttribute("data-protein-image-layer")
+    ))).toHaveLength(1);
+    expect([...animatedElements].filter((element) => (
+      element.hasAttribute("data-protein-digestion-focus")
+    ))).toHaveLength(1);
 
-    act(() => fake.timelines[1]?.config.scrollTrigger?.onUpdate?.({ progress: 0.52 }));
-    expect(roles).toHaveAttribute("data-protein-motion-state", "active");
-    expect(roleCopies.map((copy) => copy.dataset.proteinRoleActive)).toEqual([
-      "false",
-      "false",
-      "true",
-      "false",
-      "false",
-    ]);
-    act(() => fake.timelines[1]?.config.scrollTrigger?.onUpdate?.({ progress: 0 }));
-    expect(roles.style.getPropertyValue("--protein-scene-progress")).toBe("0.000");
-    expect(roles).toHaveAttribute("data-protein-motion-state", "start");
-    expect(roleCopies.map((copy) => copy.dataset.proteinRoleActive)).toEqual([
-      "false",
-      "false",
-      "false",
-      "false",
-      "false",
-    ]);
+    const displayedBeforeTweening = fake.animationSteps
+      .filter(({ kind, to }) => kind === "set" && to.display === "block")
+      .flatMap(({ target }) => elementsFromTarget(target));
+    expect(displayedBeforeTweening.filter((element) => (
+      element.hasAttribute("data-protein-cover-mask-panel")
+    ))).toHaveLength(5);
+    expect(displayedBeforeTweening.filter((element) => (
+      element.hasAttribute("data-protein-digestion-fragment")
+    ))).toHaveLength(3);
+
+    expect([...animatedElements].some((element) => element.matches(
+      "[data-protein-role-copy], [data-protein-digestion-state], p, li, h2, h3, strong",
+    ))).toBe(false);
+    expect(container).toHaveTextContent("Okunabilir açıklama 5");
+    expect(container).toHaveTextContent("Sindirim açıklaması 3");
   });
 
-  it("cleans the scoped context and all constraints on profile change and unmount", async () => {
+  it("uses transform-only tween properties without loops or per-frame publishers", async () => {
+    installEnvironment();
+    Reflect.deleteProperty(window, "IntersectionObserver");
+    const fake = createRuntime();
+    const { container } = render(
+      <ProteinStoryMotion loadRuntime={vi.fn().mockResolvedValue(fake.runtime)}>
+        <Fixture />
+      </ProteinStoryMotion>,
+    );
+
+    await waitFor(() => expect(fake.timelines).toHaveLength(3));
+    const forbiddenProperties = [
+      "autoAlpha",
+      "clipPath",
+      "height",
+      "left",
+      "opacity",
+      "top",
+      "width",
+    ];
+    const allowedProperties = new Set([
+      "duration",
+      "scale",
+      "scaleX",
+      "stagger",
+      "transformOrigin",
+      "xPercent",
+      "yPercent",
+    ]);
+    const discreteSets = fake.animationSteps
+      .filter(({ kind }) => kind === "set")
+      .map(({ to }) => to);
+    expect(discreteSets).toEqual([
+      { display: "block" },
+      { display: "block" },
+    ]);
+
+    fake.animationSteps
+      .filter(({ kind }) => kind !== "set")
+      .flatMap(({ from, to }) => from ? [from, to] : [to])
+      .forEach((vars) => {
+      expect(Object.keys(vars).every((property) => allowedProperties.has(property))).toBe(true);
+      forbiddenProperties.forEach((property) => {
+        expect(vars).not.toHaveProperty(property);
+      });
+      expect(vars).not.toMatchObject({ repeat: -1 });
+      expect(vars).not.toMatchObject({ yoyo: true });
+      });
+    fake.timelines.forEach(({ config }) => {
+      expect(config.scrollTrigger).not.toHaveProperty("onUpdate");
+    });
+
+    container.querySelectorAll<HTMLElement>("[data-protein-scene]").forEach((scene) => {
+      expect(scene.style.getPropertyValue("--protein-scene-progress")).toBe("");
+      expect(scene).not.toHaveAttribute("data-protein-motion-state");
+    });
+    container.querySelectorAll<HTMLElement>("[data-protein-role-copy]").forEach((role) => {
+      expect(role).not.toHaveAttribute("data-protein-role-active");
+    });
+  });
+
+  it("cleans the scoped context and constraints on profile change and unmount", async () => {
     const environment = installEnvironment();
     const observer = installIntersectionObserver();
     const fake = createRuntime();
@@ -584,19 +637,12 @@ describe("ProteinStoryMotion", () => {
       expect(container.firstChild).toHaveAttribute("data-protein-motion", "full");
     });
     act(() => observer.reveal());
-    await waitFor(() => expect(fake.timelines).toHaveLength(7));
+    await waitFor(() => expect(fake.timelines).toHaveLength(3));
     act(() => environment.setSaveData(true));
     await waitFor(() => {
       expect(container.firstChild).toHaveAttribute("data-protein-motion", "reduced");
     });
     expect(fake.context.revert).toHaveBeenCalledOnce();
-    container.querySelectorAll<HTMLElement>("[data-protein-scene]").forEach((scene) => {
-      expect(scene.style.getPropertyValue("--protein-scene-progress")).toBe("");
-      expect(scene).not.toHaveAttribute("data-protein-motion-state");
-    });
-    container.querySelectorAll<HTMLElement>("[data-protein-role-copy]").forEach((role) => {
-      expect(role).not.toHaveAttribute("data-protein-role-active");
-    });
 
     unmount();
     expect(environment.motionQuery.removeEventListener).toHaveBeenCalledWith(
@@ -613,7 +659,7 @@ describe("ProteinStoryMotion", () => {
     );
   });
 
-  it("registers a shared runtime plugin once and creates no continuous animation", async () => {
+  it("registers a shared runtime plugin once across remounts", async () => {
     installEnvironment();
     Reflect.deleteProperty(window, "IntersectionObserver");
     const fake = createRuntime();
@@ -621,48 +667,25 @@ describe("ProteinStoryMotion", () => {
     const first = render(
       <ProteinStoryMotion loadRuntime={loadRuntime}><Fixture /></ProteinStoryMotion>,
     );
-    await waitFor(() => expect(fake.timelines).toHaveLength(7));
+    await waitFor(() => expect(fake.timelines).toHaveLength(3));
     first.unmount();
     render(<ProteinStoryMotion loadRuntime={loadRuntime}><Fixture /></ProteinStoryMotion>);
-    await waitFor(() => expect(fake.timelines).toHaveLength(14));
+    await waitFor(() => expect(fake.timelines).toHaveLength(6));
 
     expect(fake.gsap.registerPlugin).toHaveBeenCalledOnce();
-    expect(fake.animationVars).not.toContainEqual(expect.objectContaining({ repeat: -1 }));
-    expect(fake.animationVars).not.toContainEqual(expect.objectContaining({ yoyo: true }));
   });
 
-  it("uses observer-driven loading without raw scroll or frame fallbacks and keeps CSS non-sticky", () => {
+  it("uses scoped observer-driven motion without raw frame loops or progress publishing", () => {
     const motionSource = readFileSync(
-      resolve(
-        process.cwd(),
-        "src/components/articles/protein/protein-story-motion.tsx",
-      ),
-      "utf8",
-    );
-    const essayStyles = readFileSync(
-      resolve(
-        process.cwd(),
-        "src/components/articles/protein/protein-visual-essay.module.css",
-      ),
+      resolve(process.cwd(), "src/components/articles/protein/protein-story-motion.tsx"),
       "utf8",
     );
 
     expect(motionSource).not.toMatch(/addEventListener\(\s*["']scroll/i);
     expect(motionSource).not.toMatch(/requestAnimationFrame|cancelAnimationFrame/);
     expect(motionSource).not.toMatch(/killAll|getAll\(\)|ScrollTrigger\.kill/i);
-    expect(essayStyles).not.toMatch(/position\s*:\s*sticky/i);
-    expect(essayStyles).not.toMatch(/\.article\s*\{[^}]*overflow\s*:\s*clip/i);
-    expect(essayStyles).toMatch(
-      /@media\s*\(min-width:\s*1024px\)\s*and\s*\(min-height:\s*700px\)/i,
-    );
-    expect(essayStyles).toMatch(
-      /\.motionRoot\[data-protein-motion="full"\][^{]*\.frameScene\s*\{[^}]*min-height:/i,
-    );
-    expect(essayStyles).toMatch(
-      /\.motionRoot\[data-protein-motion="pending"\][^{]*\.digestionScene\s*\{[^}]*min-height:/i,
-    );
-    expect(essayStyles).toMatch(
-      /data-protein-motion="full"[^}]*data-protein-motion-state="active"[^}]*\{[^}]*will-change:/i,
-    );
+    expect(motionSource).not.toMatch(/onUpdate\s*:/);
+    expect(motionSource).not.toMatch(/style\.setProperty/);
+    expect(motionSource).not.toMatch(/proteinRoleActive|proteinMotionState/);
   });
 });

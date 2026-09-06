@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { ProteinVisualEssay } from "@/components/articles/protein/protein-visual-essay";
+import { ProteinQualityNote } from "@/components/articles/protein/protein-quality-note";
+import { ProteinReferenceNote } from "@/components/articles/protein/protein-reference-note";
 import { EditorialNote } from "@/components/editorial/editorial-note";
 import { getArticleBySlug, getPublishedArticles } from "@/lib/content-selectors";
 
@@ -28,6 +30,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     <main id="ana-icerik" tabIndex={-1}>
       {isProteinVisualEssay ? (
         <ProteinVisualEssay article={article} />
+      ) : article.slug === "protein-kalitesi-ne-demek" ? (
+        <ProteinQualityNote article={article} />
+      ) : article.slug === "referans-hedef-ust-sinir" ? (
+        <ProteinReferenceNote article={article} />
       ) : (
         <EditorialNote article={article} />
       )}

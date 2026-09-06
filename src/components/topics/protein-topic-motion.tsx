@@ -18,8 +18,6 @@ type NavigatorWithConnection = Navigator & {
   connection?: EventTarget & { saveData?: boolean };
 };
 
-const ROLE_IDS = ["structure", "catalysis", "transport", "signal", "defense"] as const;
-
 export function resolveProteinTopicMotionProfile({
   height,
   reducedMotion,
@@ -60,16 +58,8 @@ export function ProteinTopicMotion({
     let active = true;
     let configurationVersion = 0;
     let currentProfile: ProteinTopicMotionProfile | undefined;
-    let focusedRole: HTMLElement | null = null;
-    let hoveredRole: HTMLElement | null = null;
-    let scrolledRole: HTMLElement | null = null;
-    let publishedRole: HTMLElement | null = null;
     let motionContext: ReturnType<ProteinTopicMotionRuntime["gsap"]["context"]> | undefined;
     let removePointerLight: (() => void) | undefined;
-    const roleListeners: Array<() => void> = [];
-    const roleButtons = Array.from(
-      scope.querySelectorAll<HTMLButtonElement>("[data-role-id]"),
-    );
     const motionQuery = typeof window.matchMedia === "function"
       ? window.matchMedia("(prefers-reduced-motion: reduce)")
       : undefined;
@@ -88,64 +78,6 @@ export function ProteinTopicMotion({
         width: window.innerWidth,
       });
     };
-
-    const publishRole = () => {
-      const nextRole = focusedRole ?? hoveredRole ?? scrolledRole ?? roleButtons[0] ?? null;
-      if (!nextRole || nextRole === publishedRole) return;
-      publishedRole = nextRole;
-      const roleId = nextRole.dataset.roleId ?? ROLE_IDS[0];
-      scope.dataset.activeProteinRole = roleId;
-
-      roleButtons.forEach((button) => {
-        button.setAttribute("aria-pressed", String(button === nextRole));
-      });
-      scope.querySelectorAll<HTMLElement>("[data-role-description]").forEach((description) => {
-        description.setAttribute(
-          "aria-hidden",
-          String(description.dataset.roleDescription !== roleId),
-        );
-      });
-    };
-
-    roleButtons.forEach((button) => {
-      const handlePointerEnter = () => {
-        if (pointerQuery && !pointerQuery.matches) return;
-        hoveredRole = button;
-        publishRole();
-      };
-      const handlePointerLeave = () => {
-        if (hoveredRole === button) hoveredRole = null;
-        publishRole();
-      };
-      const handleFocus = () => {
-        focusedRole = button;
-        publishRole();
-      };
-      const handleBlur = () => {
-        if (focusedRole === button) focusedRole = null;
-        publishRole();
-      };
-      const handleClick = () => {
-        scrolledRole = button;
-        publishRole();
-      };
-
-      button.addEventListener("pointerenter", handlePointerEnter);
-      button.addEventListener("pointerleave", handlePointerLeave);
-      button.addEventListener("focus", handleFocus);
-      button.addEventListener("blur", handleBlur);
-      button.addEventListener("click", handleClick);
-      roleListeners.push(() => {
-        button.removeEventListener("pointerenter", handlePointerEnter);
-        button.removeEventListener("pointerleave", handlePointerLeave);
-        button.removeEventListener("focus", handleFocus);
-        button.removeEventListener("blur", handleBlur);
-        button.removeEventListener("click", handleClick);
-      });
-    });
-
-    scrolledRole = roleButtons[0] ?? null;
-    publishRole();
 
     const clearMotion = () => {
       removePointerLight?.();
@@ -175,12 +107,6 @@ export function ProteinTopicMotion({
             { autoAlpha: 0, y: 28 },
             { autoAlpha: 1, duration: 0.9, stagger: 0.09, y: 0 },
             0.16,
-          )
-          .fromTo(
-            "[data-protein-hero-rail]",
-            { strokeDashoffset: 1 },
-            { duration: 1.05, stagger: 0.075, strokeDashoffset: 0 },
-            0.38,
           );
 
         gsap.timeline({
@@ -196,23 +122,20 @@ export function ProteinTopicMotion({
           .to("[data-protein-topic-hero-image]", { duration: 1, scale: 1.018 }, 0)
           .to("[data-protein-topic-hero-light]", { autoAlpha: 0.32, duration: 1 }, 0);
 
-        ScrollTrigger.create({
-          trigger: '[data-protein-topic-scene="roles"]',
-          start: "top 72%",
-          end: "bottom 28%",
-          onUpdate: ({ progress }) => {
-            if (focusedRole || hoveredRole || roleButtons.length === 0) return;
-            const nextIndex = Math.min(
-              roleButtons.length - 1,
-              Math.max(0, Math.floor(progress * roleButtons.length)),
-            );
-            const nextRole = roleButtons[nextIndex];
-            if (nextRole && nextRole !== scrolledRole) {
-              scrolledRole = nextRole;
-              publishRole();
-            }
+        gsap.timeline({
+          defaults: { ease: "power3.out" },
+          scrollTrigger: {
+            trigger: '[data-protein-topic-scene="roles"]',
+            start: "top 78%",
+            once: true,
           },
-        });
+        })
+          .fromTo(
+            "[data-protein-role-row]",
+            { y: 18 },
+            { duration: 0.78, stagger: 0.08, y: 0, ease: "power3.out" },
+            0,
+          );
 
         const heroVisual = scope.querySelector<HTMLElement>("[data-protein-topic-hero-visual]");
         const heroLight = scope.querySelector<HTMLElement>("[data-protein-topic-hero-light]");
@@ -262,7 +185,6 @@ export function ProteinTopicMotion({
       active = false;
       configurationVersion += 1;
       clearMotion();
-      roleListeners.forEach((removeListener) => removeListener());
       window.removeEventListener("resize", configure);
       motionQuery?.removeEventListener?.("change", configure);
       connection?.removeEventListener?.("change", configure);
@@ -271,7 +193,6 @@ export function ProteinTopicMotion({
 
   return (
     <div
-      data-active-protein-role="structure"
       data-motion-profile="pending"
       data-protein-topic-motion-root=""
       ref={rootRef}

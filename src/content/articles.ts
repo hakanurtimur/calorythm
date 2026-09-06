@@ -71,7 +71,7 @@ export const articles = [
     slug: "protein-sadece-kas-icin-degildir",
     title: "Protein Sadece Kas İçin Değildir",
     eyebrow: "Bedenin bakım dili",
-    deck: "Kas, proteinin en görünür hikâyesi. Oysa proteinler aynı anda yapı kurar, tepkimeleri hızlandırır, molekül taşır, sinyal iletir ve savunmaya katılır.",
+    deck: "Protein ile kas arasındaki ilişki gerçektir. Ama proteinlerin bedendeki işi kasla sınırlı değildir.",
     author: "CALORYTHM Editorya",
     publishedAt: "2026-08-24",
     readingMinutes: 9,
@@ -80,27 +80,21 @@ export const articles = [
     status: "published",
     body: [
       {
-        heading: "Kas, hikâyenin tamamı değil",
+        heading: "Tek bir ad. Beş farklı iş.",
         paragraphs: [
-          "Protein ile kas arasındaki ilişki gerçektir; ancak proteinlerin bedendeki işi bununla bitmez. Yapı kurma, onarım, taşıma, sinyal ve savunma aynı bakım dilinin parçalarıdır.",
-        ],
-      },
-      {
-        heading: "Görünmeyen işler",
-        paragraphs: [
-          "Proteinler dokuların yapısına katılır, enzim olarak tepkimeleri hızlandırır, molekülleri taşır, hücreler arası sinyal iletir ve bağışıklık savunmasına katılır.",
-        ],
-      },
-      {
-        heading: "Beden bitmiş bir yapı değildir",
-        paragraphs: [
-          "Vücut proteinleri sürekli sentezlenir, işlev görür ve parçalanır. Açığa çıkan amino asitlerin bir bölümü yeniden kullanılır.",
+          "Kas bu tablonun yalnızca bir parçasıdır; proteinler farklı dokularda yapı, kataliz, taşıma, sinyal ve savunma görevleri üstlenir.",
         ],
       },
       {
         heading: "Bir lokma, aynı biçimde kalmaz",
         paragraphs: [
           "Besinlerdeki protein sindirim sırasında daha küçük peptitlere ve amino asitlere ayrılır. Emilen amino asitler dolaşıma katılır; vücut bunları değişen yapı, onarım, taşıma, sinyal, kataliz ve savunma gereksinimlerinde kullanır.",
+        ],
+      },
+      {
+        heading: "Beden bitmiş bir yapı değildir",
+        paragraphs: [
+          "Vücut proteinleri sürekli sentezlenir, işlev görür ve parçalanır. Açığa çıkan amino asitlerin bir bölümü yeniden kullanılır.",
         ],
       },
       {
@@ -116,9 +110,9 @@ export const articles = [
         ],
       },
       {
-        heading: "Bakım dili",
+        heading: "Protein kas için de çalışır. Ama hikâye orada bitmez.",
         paragraphs: [
-          "Hangi bağlamda, hangi beslenme örüntüsü içinde ve ne amaçla? Protein için anlamlı yanıt, bu üç soruyu birlikte düşünmekle başlar.",
+          "Yediğimiz protein amino asitlere ayrılır; bu amino asitler sürekli yenilenen protein yapılarına katılabilir. Kas, proteinin bedendeki geniş rolünün yalnızca bir parçasıdır.",
         ],
       },
     ],
@@ -129,7 +123,7 @@ export const articles = [
     slug: "protein-kalitesi-ne-demek",
     title: "Bir proteini “kaliteli” yapan ne?",
     eyebrow: "Örüntüyü okumak",
-    deck: "Amino asit bileşimi ve sindirilebilirlik önemlidir; ama tek bir rozet, beslenme örüntüsünün tamamını anlatmaz.",
+    deck: "Ne kadar protein aldığımız kadar, o proteinin hangi amino asitleri sağladığı ve ne kadar sindirilebildiği de önemli.",
     author: "CALORYTHM Editorya",
     publishedAt: "2026-08-24",
     readingMinutes: 4,
@@ -178,7 +172,11 @@ export const articles = [
         ],
       },
     ],
-    references: [coreProteinReferences[0], coreProteinReferences[1], coreProteinReferences[6]],
+    references: [
+      coreProteinReferences[0], coreProteinReferences[1], coreProteinReferences[6],
+      { href: "https://www.efsa.europa.eu/en/topics/topic/dietary-reference-values", label: "EFSA referans değerler", publisher: "European Food Safety Authority", title: "Dietary reference values" },
+      { href: "https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2012.2557", label: "EFSA protein değerlendirmesi", publisher: "EFSA Journal · 2012", title: "Scientific Opinion on Dietary Reference Values for protein" },
+    ],
     relatedSlugs: ["protein-sadece-kas-icin-degildir", "protein-kalitesi-ne-demek"],
   },
 ] as const satisfies readonly ArticleRecord[];

@@ -73,39 +73,6 @@
   z-index: 3;
 }
 
-.heroRails {
-  inset: 0;
-  height: 100%;
-  pointer-events: none;
-  position: absolute;
-  width: 100%;
-  z-index: 2;
-}
-
-.heroRails path,
-.roleRail path {
-  fill: none;
-  stroke-linecap: round;
-}
-
-.heroRails path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 0;
-  stroke-width: clamp(2.2px, 0.23vw, 3.5px);
-}
-
-.heroRails path:nth-child(1),
-.roleRail path:nth-child(1) { stroke: var(--orange); }
-
-.heroRails path:nth-child(2),
-.roleRail path:nth-child(2) { stroke: var(--coral); }
-
-.heroRails path:nth-child(3),
-.roleRail path:nth-child(3) { stroke: var(--ochre); }
-
-.heroRails path:nth-child(4),
-.roleRail path:nth-child(4) { stroke: var(--olive); }
-
 .heroCopy {
   align-content: end;
   display: grid;
@@ -235,403 +202,194 @@
 }
 
 .roles {
-  background: #10120e;
-  color: var(--ivory);
-  min-height: 430svh;
+  background: var(--ivory);
+  color: var(--ink);
   overflow: clip;
+  padding: clamp(7rem, 9vw, 10rem) var(--atlas-gutter) clamp(7.5rem, 10vw, 11rem);
   position: relative;
 }
 
-.rolesSticky {
-  background: #10120e;
-  height: 100svh;
-  overflow: clip;
-  position: sticky;
-  top: 0;
+.rolesFrame {
+  column-gap: clamp(2rem, 4vw, 5rem);
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  margin: 0 auto;
+  max-width: 106rem;
+  position: relative;
+  row-gap: clamp(4.25rem, 6vw, 6.5rem);
 }
 
 .rolesIntro {
+  align-items: end;
   display: grid;
-  gap: clamp(1.35rem, 2vw, 2rem);
-  isolation: isolate;
-  left: var(--atlas-gutter);
-  max-width: min(30rem, 34vw);
-  position: absolute;
-  top: clamp(7rem, 12vh, 9.5rem);
-  transition: opacity 540ms ease, transform 780ms cubic-bezier(0.22, 1, 0.36, 1);
-  z-index: 6;
+  gap: clamp(1.5rem, 2.4vw, 2.5rem) clamp(2rem, 5vw, 6rem);
+  grid-column: 1 / 13;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-row: 1;
 }
 
-.rolesIntro::before {
-  background: radial-gradient(ellipse at 34% 48%, #10120e 0%, rgb(16 18 14 / 0.98) 64%, transparent 100%);
-  content: "";
-  inset: -2rem -6rem -2rem -2rem;
-  position: absolute;
-  z-index: -1;
-}
-
-.roleChapter,
-.roleProgress,
-.roleMobileCopy > span {
-  color: color-mix(in srgb, var(--ivory) 58%, transparent);
+.roleChapter {
+  color: color-mix(in srgb, var(--ink) 57%, transparent);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.68rem;
+  grid-column: 1 / -1;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
 .roles h2 {
-  font-size: clamp(3.3rem, 5.6vw, 6rem);
-  max-width: 8ch;
+  font-size: clamp(4.2rem, 6.25vw, 7.1rem);
+  grid-column: 1 / 8;
+  max-width: none;
+  scroll-margin-top: 6rem;
+}
+
+.roles h2 span {
+  display: block;
+}
+
+.roles h2 span:last-child {
+  font-style: italic;
+  margin-top: 0.08em;
 }
 
 .rolesLead {
-  color: color-mix(in srgb, var(--ivory) 74%, transparent);
-  font-size: clamp(0.94rem, 1.05vw, 1.08rem);
-  line-height: 1.72;
+  align-self: end;
+  color: color-mix(in srgb, var(--ink) 74%, transparent);
+  font-size: clamp(0.98rem, 1.05vw, 1.1rem);
+  grid-column: 9 / 13;
+  line-height: 1.68;
   max-width: 39ch;
+  padding-bottom: 0.35rem;
 }
 
-.roleStage,
-.roleAtlasVisual,
-.roleAtlasDim,
-.roleFocusLens,
-.roleMarkers {
-  inset: 0;
-  position: absolute;
-}
-
-.roleStage {
-  --role-focus-size: clamp(11rem, 19vw, 18rem);
-  --role-focus-x: 69%;
-  --role-focus-y: 49%;
-  --role-rail-x: 0%;
-  --role-rail-y: 0%;
-  background: #10120e;
-  color: var(--ivory);
-  min-height: 100svh;
-  overflow: hidden;
-}
-
-.roleAtlasVisual {
-  overflow: hidden;
-}
-
-.roleAtlasImage,
-.roleFocusImage {
-  object-fit: cover;
-  object-position: center;
-  will-change: transform;
-}
-
-.roleAtlasImage {
-  filter: saturate(0.42) brightness(0.72) contrast(1.05);
-  transform: scale(1.015);
-}
-
-.roleAtlasDim {
-  background:
-    linear-gradient(90deg, rgb(13 15 12 / 0.97) 0%, rgb(13 15 12 / 0.88) 25%, rgb(13 15 12 / 0.24) 52%, transparent 78%),
-    linear-gradient(0deg, rgb(13 15 12 / 0.92) 0%, transparent 31%),
-    linear-gradient(180deg, rgb(13 15 12 / 0.48) 0%, transparent 22%);
-  z-index: 2;
-}
-
-.roleFocusLens {
-  clip-path: circle(calc(var(--role-focus-size) / 2) at var(--role-focus-x) var(--role-focus-y));
-  filter: brightness(1.1) saturate(1.06);
-  transition: clip-path 820ms cubic-bezier(0.22, 1, 0.36, 1);
-  z-index: 3;
-}
-
-.roleFocusRing {
-  border: 1px solid color-mix(in srgb, var(--ivory) 64%, transparent);
-  border-radius: 50%;
-  height: var(--role-focus-size);
-  left: var(--role-focus-x);
-  pointer-events: none;
-  position: absolute;
-  top: var(--role-focus-y);
-  transform: translate(-50%, -50%);
-  transition:
-    height 820ms cubic-bezier(0.22, 1, 0.36, 1),
-    left 820ms cubic-bezier(0.22, 1, 0.36, 1),
-    top 820ms cubic-bezier(0.22, 1, 0.36, 1),
-    width 820ms cubic-bezier(0.22, 1, 0.36, 1);
-  width: var(--role-focus-size);
-  z-index: 4;
-}
-
-.roleFocusRing::after {
-  background: var(--coral);
-  border-radius: 50%;
-  content: "";
-  height: 0.44rem;
-  left: 50%;
-  position: absolute;
-  top: -0.22rem;
-  transform: translateX(-50%);
-  width: 0.44rem;
-}
-
-.roleRail {
-  height: 100%;
-  inset: 0;
-  overflow: visible;
-  pointer-events: none;
-  position: absolute;
-  transform: translate(var(--role-rail-x), var(--role-rail-y));
-  transition: transform 860ms cubic-bezier(0.22, 1, 0.36, 1);
-  width: 100%;
-  z-index: 4;
-}
-
-.roleRail path {
-  stroke-width: clamp(2px, 0.22vw, 3.2px);
-}
-
-.roleMarkers span {
-  border: 1px solid color-mix(in srgb, var(--ivory) 48%, transparent);
-  border-radius: 50%;
-  height: 0.8rem;
-  opacity: 0.34;
-  position: absolute;
-  transform: translate(-50%, -50%) scale(0.78);
-  transition: opacity 360ms ease, transform 540ms cubic-bezier(0.22, 1, 0.36, 1);
-  width: 0.8rem;
-}
-
-.roleMarkers span[data-role-marker="structure"] { left: 69%; top: 49%; }
-.roleMarkers span[data-role-marker="catalysis"] { left: 77%; top: 40%; }
-.roleMarkers span[data-role-marker="transport"] { left: 58%; top: 68%; }
-.roleMarkers span[data-role-marker="signal"] { left: 70%; top: 20%; }
-.roleMarkers span[data-role-marker="defense"] { left: 87%; top: 51%; }
-
-.roleWords {
-  bottom: clamp(9rem, 14vh, 12rem);
-  left: var(--atlas-gutter);
-  pointer-events: none;
-  position: absolute;
-  z-index: 5;
-}
-
-.roleWords p {
-  bottom: 0;
-  font-family: "Bodoni Moda Variable", serif;
-  font-size: clamp(5.4rem, 12.5vw, 12rem);
-  font-style: italic;
-  font-weight: 420;
-  letter-spacing: -0.04em;
-  line-height: 0.72;
-  opacity: 0;
-  position: absolute;
-  transform: translateY(0.18em);
-  transition: opacity 340ms ease, transform 680ms cubic-bezier(0.22, 1, 0.36, 1);
-  white-space: nowrap;
-}
-
-[data-active-protein-role="catalysis"] .rolesIntro,
-[data-active-protein-role="transport"] .rolesIntro,
-[data-active-protein-role="signal"] .rolesIntro,
-[data-active-protein-role="defense"] .rolesIntro {
-  opacity: 0.16;
-  transform: translateY(-0.65rem);
-}
-
-.roleCaption {
-  bottom: clamp(8.5rem, 13vh, 11rem);
-  min-height: 7.5rem;
-  position: absolute;
-  right: var(--atlas-gutter);
-  width: min(28rem, 31vw);
-  z-index: 6;
-}
-
-.roleCaption p {
-  color: color-mix(in srgb, var(--ivory) 86%, transparent);
-  font-size: clamp(0.98rem, 1.12vw, 1.14rem);
-  inset: 0;
-  line-height: 1.66;
-  opacity: 0;
-  position: absolute;
-  transform: translateY(1rem);
-  transition: opacity 300ms ease, transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.roleCaption span {
-  color: color-mix(in srgb, var(--ivory) 52%, transparent);
-  display: block;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.07em;
-  margin-bottom: 0.75rem;
-}
-
-.roleProgress {
-  position: absolute;
-  right: var(--atlas-gutter);
-  top: clamp(7.5rem, 13vh, 10rem);
-  z-index: 6;
-}
-
-.roleProgress span {
-  inset: 0 0 auto auto;
-  opacity: 0;
-  position: absolute;
-  transition: opacity 280ms ease;
-  white-space: nowrap;
-}
-
-.roleList {
-  background: #10120e;
-  border-top: 1px solid color-mix(in srgb, var(--ivory) 21%, transparent);
-  bottom: 0;
+.roleLedger {
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  left: 0;
-  position: absolute;
-  right: 0;
-  z-index: 8;
-}
-
-.roleList li {
-  border-right: 1px solid color-mix(in srgb, var(--ivory) 14%, transparent);
+  grid-column: 1 / 13;
+  grid-template-columns: clamp(5.5rem, 8vw, 9rem) minmax(0, 1fr);
+  grid-row: 2;
   min-width: 0;
   position: relative;
 }
 
-.roleList li:last-child {
-  border-right: 0;
-}
-
-.roleList li::before {
-  color: color-mix(in srgb, var(--ivory) 42%, transparent);
-  content: attr(data-role-index);
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.62rem;
-  left: clamp(1rem, 1.7vw, 1.75rem);
-  letter-spacing: 0.06em;
-  position: absolute;
-  top: 0.75rem;
-}
-
-.roleList button {
-  align-items: end;
-  background: transparent;
-  border: 0;
-  color: color-mix(in srgb, var(--ivory) 62%, transparent);
-  cursor: pointer;
-  display: flex;
-  font-family: "Bodoni Moda Variable", serif;
-  font-size: clamp(1.25rem, 1.65vw, 1.8rem);
-  min-height: clamp(4.8rem, 8vh, 6.1rem);
-  padding: 1.6rem clamp(1rem, 1.7vw, 1.75rem) 0.85rem;
+.roleSpine {
+  align-self: stretch;
+  background: color-mix(in srgb, var(--ink) 1.8%, var(--ivory));
+  border-right: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  grid-column: 1;
+  grid-row: 1;
+  overflow: hidden;
   position: relative;
-  text-align: left;
-  transition: color 280ms ease, font-style 280ms ease;
-  width: 100%;
 }
 
-.roleList button::after {
-  background: currentColor;
-  bottom: -1px;
-  content: "";
-  height: 3px;
-  left: 0;
+.roleSpine svg {
+  height: 100%;
+  inset: 0 auto 0 50%;
+  pointer-events: none;
   position: absolute;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
-  width: 100%;
+  transform: translateX(-50%);
+  width: min(100%, 7rem);
 }
 
-.roleList li:nth-child(1) button::after { background: var(--orange); }
-.roleList li:nth-child(2) button::after { background: var(--coral); }
-.roleList li:nth-child(3) button::after { background: var(--ochre); }
-.roleList li:nth-child(4) button::after { background: var(--olive); }
-.roleList li:nth-child(5) button::after { background: var(--orange); }
-
-.roleList button[aria-pressed="true"] {
-  color: var(--ivory);
-  font-style: italic;
+.roleSpineLine {
+  fill: none;
+  stroke-linecap: butt;
+  stroke-width: clamp(2px, 0.2vw, 3.2px);
 }
 
-.roleList button[aria-pressed="true"]::after {
-  transform: scaleX(1);
+.roleSpineLine:nth-child(1) { stroke: var(--orange); }
+.roleSpineLine:nth-child(2) { stroke: var(--coral); }
+.roleSpineLine:nth-child(3) { stroke: var(--ochre); }
+.roleSpineLine:nth-child(4) { stroke: var(--olive); }
+
+.roleList {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
 }
 
-.roleMobileSequence {
-  display: none;
+.roleList li {
+  --role-accent: var(--coral);
+  align-items: center;
+  display: grid;
+  gap: clamp(1.25rem, 2vw, 2.5rem);
+  grid-template-columns:
+    2.25rem
+    minmax(12rem, 0.78fr)
+    minmax(18rem, 1.2fr)
+    minmax(12rem, 0.72fr);
+  min-height: clamp(8.8rem, 10vw, 10.8rem);
+  padding: clamp(1.5rem, 2.2vw, 2.25rem) 0 clamp(1.5rem, 2.2vw, 2.25rem)
+    clamp(1.75rem, 3.7vw, 4.5rem);
+  position: relative;
 }
 
-[data-active-protein-role="structure"] .roleStage {
-  --role-focus-x: 69%;
-  --role-focus-y: 49%;
-  --role-rail-x: 0%;
-  --role-rail-y: -1%;
+.roleList li + li {
+  border-top: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
 }
 
-[data-active-protein-role="catalysis"] .roleStage {
-  --role-focus-size: clamp(9.5rem, 16vw, 15rem);
-  --role-focus-x: 77%;
-  --role-focus-y: 40%;
-  --role-rail-x: 7%;
-  --role-rail-y: -8%;
+.roleList li:nth-child(1) { --role-accent: var(--orange); }
+.roleList li:nth-child(2) { --role-accent: var(--coral); }
+.roleList li:nth-child(3) { --role-accent: var(--ochre); }
+.roleList li:nth-child(4) { --role-accent: var(--olive); }
+.roleList li:nth-child(5) { --role-accent: var(--orange); }
+
+.roleRowIndex,
+.roleRowLabel,
+.roleRowExample > span {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.065em;
+  text-transform: uppercase;
 }
 
-[data-active-protein-role="transport"] .roleStage {
-  --role-focus-size: clamp(10rem, 17vw, 16rem);
-  --role-focus-x: 58%;
-  --role-focus-y: 68%;
-  --role-rail-x: -11%;
-  --role-rail-y: 17%;
+.roleRowIndex {
+  align-self: start;
+  color: var(--role-accent);
+  padding-top: 0.2rem;
 }
 
-[data-active-protein-role="signal"] .roleStage {
-  --role-focus-size: clamp(8.5rem, 14vw, 13rem);
-  --role-focus-x: 70%;
-  --role-focus-y: 20%;
-  --role-rail-x: 2%;
-  --role-rail-y: -22%;
+.roleRowHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
 }
 
-[data-active-protein-role="defense"] .roleStage {
-  --role-focus-size: clamp(10rem, 17vw, 16rem);
-  --role-focus-x: 87%;
-  --role-focus-y: 51%;
-  --role-rail-x: 18%;
-  --role-rail-y: 1%;
+.roleRowLabel {
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
-[data-active-protein-role="structure"] .roleWords [data-role-word="structure"],
-[data-active-protein-role="catalysis"] .roleWords [data-role-word="catalysis"],
-[data-active-protein-role="transport"] .roleWords [data-role-word="transport"],
-[data-active-protein-role="signal"] .roleWords [data-role-word="signal"],
-[data-active-protein-role="defense"] .roleWords [data-role-word="defense"],
-[data-active-protein-role="structure"] .roleCaption [data-role-description="structure"],
-[data-active-protein-role="catalysis"] .roleCaption [data-role-description="catalysis"],
-[data-active-protein-role="transport"] .roleCaption [data-role-description="transport"],
-[data-active-protein-role="signal"] .roleCaption [data-role-description="signal"],
-[data-active-protein-role="defense"] .roleCaption [data-role-description="defense"] {
-  opacity: 1;
-  transform: translateY(0);
+.roleRowVerb {
+  font-family: "Bodoni Moda Variable", serif;
+  font-size: clamp(2.4rem, 3.3vw, 3.75rem);
+  font-weight: 430;
+  letter-spacing: -0.035em;
+  line-height: 0.94;
 }
 
-[data-active-protein-role="structure"] .roleProgress [data-role-progress="structure"],
-[data-active-protein-role="catalysis"] .roleProgress [data-role-progress="catalysis"],
-[data-active-protein-role="transport"] .roleProgress [data-role-progress="transport"],
-[data-active-protein-role="signal"] .roleProgress [data-role-progress="signal"],
-[data-active-protein-role="defense"] .roleProgress [data-role-progress="defense"] {
-  opacity: 1;
+.roleRowNote {
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+  font-size: clamp(0.9rem, 1vw, 1.02rem);
+  line-height: 1.65;
+  max-width: 48ch;
 }
 
-[data-active-protein-role="structure"] .roleMarkers [data-role-marker="structure"],
-[data-active-protein-role="catalysis"] .roleMarkers [data-role-marker="catalysis"],
-[data-active-protein-role="transport"] .roleMarkers [data-role-marker="transport"],
-[data-active-protein-role="signal"] .roleMarkers [data-role-marker="signal"],
-[data-active-protein-role="defense"] .roleMarkers [data-role-marker="defense"] {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1.35);
+.roleRowExample {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.roleRowExample > span {
+  color: var(--role-accent);
+}
+
+.roleRowExample p {
+  color: color-mix(in srgb, var(--ink) 64%, transparent);
+  font-size: clamp(0.78rem, 0.84vw, 0.88rem);
+  line-height: 1.55;
+  max-width: 28ch;
 }
 
 .flagshipSection {
@@ -962,11 +720,6 @@
   outline-offset: 0.35rem;
 }
 
-.roleList button:focus-visible {
-  outline: 3px solid var(--ivory);
-  outline-offset: -0.35rem;
-}
-
 .note a:focus-visible,
 .nextTopic > a:focus-visible {
   outline: 3px solid var(--ink);
@@ -978,29 +731,33 @@
     width: min(56rem, 66vw);
   }
 
-  .rolesIntro {
-    max-width: min(27rem, 38vw);
+  .roleList li {
+    grid-template-columns: 2rem minmax(11rem, 0.72fr) minmax(0, 1.28fr);
   }
 
-  .roleCaption {
-    width: min(24rem, 34vw);
+  .roleRowIndex {
+    grid-column: 1;
+    grid-row: 1 / 3;
+  }
+
+  .roleRowHeading {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+
+  .roleRowNote {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .roleRowExample {
+    grid-column: 3;
+    grid-row: 2;
   }
 
   .sourceSpine {
     gap: 4rem;
     grid-template-columns: minmax(17rem, 0.72fr) minmax(0, 1.28fr);
-  }
-}
-
-@media (max-width: 1023px), (max-height: 699px) {
-  .roles {
-    min-height: auto;
-  }
-
-  .rolesSticky {
-    height: auto;
-    min-height: max(46rem, 100svh);
-    position: relative;
   }
 }
 
@@ -1028,10 +785,6 @@
     display: none;
   }
 
-  .heroRails {
-    opacity: 0.68;
-  }
-
   .heroCopy {
     align-content: start;
     gap: 1.35rem;
@@ -1049,61 +802,30 @@
   }
 
   .roles {
-    min-height: auto;
-  }
-
-  .rolesSticky {
-    height: auto;
-    min-height: max(46rem, 100svh);
-    position: relative;
+    padding-block: 7rem 8.5rem;
   }
 
   .rolesIntro {
-    left: var(--atlas-gutter);
-    max-width: min(25rem, 48vw);
-    top: clamp(5.5rem, 9vh, 7rem);
+    grid-template-columns: 1fr;
   }
 
   .roles h2 {
-    font-size: clamp(3.3rem, 7.6vw, 5.25rem);
-    max-width: 8ch;
+    font-size: clamp(4rem, 8.2vw, 6rem);
+    grid-column: 1;
+    max-width: 10ch;
   }
 
-  .roleList {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+  .roleChapter,
+  .rolesLead {
+    grid-column: 1;
   }
 
-  .roleList button {
-    font-size: clamp(1rem, 2.35vw, 1.35rem);
-    min-height: 4.75rem;
-    padding-inline: 0.75rem;
+  .rolesLead {
+    max-width: 44ch;
   }
 
-  .roleList li::before {
-    left: 0.75rem;
-  }
-
-  .roleRail {
-    opacity: 0.78;
-  }
-
-  .roleCaption {
-    bottom: 7rem;
-    left: auto;
-    right: var(--atlas-gutter);
-    width: min(22rem, 42vw);
-  }
-
-  .roleWords {
-    bottom: 7.6rem;
-  }
-
-  .roleWords p {
-    font-size: clamp(4.6rem, 13.5vw, 8rem);
-  }
-
-  .roleProgress {
-    top: 6.4rem;
+  .roleLedger {
+    grid-template-columns: clamp(4.5rem, 8vw, 6.5rem) minmax(0, 1fr);
   }
 
   .flagship,
@@ -1155,6 +877,69 @@
   }
 }
 
+@media (max-width: 767px) {
+  .roles {
+    padding: 5.75rem var(--atlas-gutter) 7rem;
+  }
+
+  .rolesFrame {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2.5rem;
+  }
+
+  .rolesIntro,
+  .roleLedger {
+    grid-column: 1;
+  }
+
+  .rolesIntro {
+    grid-template-columns: 1fr;
+    grid-row: 1;
+  }
+
+  .roles h2 {
+    font-size: clamp(3.4rem, 12.5vw, 4.75rem);
+  }
+
+  .roleLedger {
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    grid-row: 2;
+  }
+
+  .roleSpine svg {
+    width: 2.8rem;
+  }
+
+  .roleList li {
+    align-items: start;
+    gap: 0.65rem 1rem;
+    grid-template-columns: 1.55rem minmax(0, 1fr);
+    min-height: 0;
+    padding: 1.5rem 0 1.65rem 1rem;
+  }
+
+  .roleRowIndex {
+    grid-column: 1;
+    grid-row: 1 / 4;
+  }
+
+  .roleRowHeading {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .roleRowNote {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .roleRowExample {
+    grid-column: 2;
+    grid-row: 3;
+  }
+}
+
 @media (max-width: 560px) {
   .hero {
     grid-template-rows: 52svh auto;
@@ -1166,10 +951,6 @@
 
   .heroImage {
     object-position: 64% 28%;
-  }
-
-  .heroRails {
-    display: none;
   }
 
   .heroTopline {
@@ -1199,115 +980,37 @@
     max-width: none;
   }
 
-  .rolesSticky {
-    min-height: auto;
-  }
-
   .rolesIntro {
     max-width: none;
-    padding: 6.5rem var(--atlas-gutter) 4.25rem;
-    position: relative;
-    inset: auto;
   }
 
   .roles h2 {
-    font-size: clamp(3.35rem, 14vw, 5.2rem);
-    max-width: 9ch;
+    font-size: clamp(3.25rem, 14vw, 4.45rem);
+    max-width: 10ch;
   }
 
   .rolesLead {
     max-width: 34ch;
   }
 
-  .roleStage {
-    display: none;
+  .roleRowHeading {
+    gap: 0.35rem;
   }
 
-  .roleList {
-    display: none;
+  .roleRowVerb {
+    font-size: clamp(2.05rem, 10vw, 2.8rem);
   }
 
-  .roleMobileSequence {
-    display: grid;
+  .roleRowNote {
+    font-size: 0.86rem;
   }
 
-  .roleMobileSequence > li {
-    align-items: end;
-    border-top: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
-    display: grid;
-    min-height: 76svh;
-    overflow: hidden;
-    position: relative;
+  .roleRowExample {
+    gap: 0.4rem;
   }
 
-  .roleMobileSequence > li::after {
-    background: linear-gradient(90deg, var(--orange), var(--coral), var(--ochre), var(--olive));
-    content: "";
-    height: 3px;
-    left: var(--atlas-gutter);
-    position: absolute;
-    right: var(--atlas-gutter);
-    top: 0;
-    transform: scaleX(0.22);
-    transform-origin: left;
-  }
-
-  .roleMobileVisual {
-    inset: 0;
-    position: absolute;
-  }
-
-  .roleMobileVisual img {
-    filter: brightness(0.67) saturate(0.82);
-    object-fit: cover;
-  }
-
-  .roleMobileVisual::after {
-    background:
-      linear-gradient(0deg, rgb(11 13 10 / 0.98) 0%, rgb(11 13 10 / 0.56) 48%, transparent 78%),
-      linear-gradient(90deg, rgb(11 13 10 / 0.5), transparent 74%);
-    content: "";
-    inset: 0;
-    position: absolute;
-  }
-
-  .roleMobileSequence > li[data-mobile-role="structure"] .roleMobileVisual img { object-position: 69% center; }
-  .roleMobileSequence > li[data-mobile-role="catalysis"] .roleMobileVisual img { object-position: 78% center; }
-  .roleMobileSequence > li[data-mobile-role="transport"] .roleMobileVisual img { object-position: 56% center; }
-  .roleMobileSequence > li[data-mobile-role="signal"] .roleMobileVisual img { object-position: 71% 22%; }
-  .roleMobileSequence > li[data-mobile-role="defense"] .roleMobileVisual img { object-position: 88% center; }
-
-  .roleMobileCopy {
-    display: grid;
-    gap: 0.8rem;
-    padding: 4rem var(--atlas-gutter) 3rem;
-    position: relative;
-    z-index: 2;
-  }
-
-  .roleMobileCopy h3 {
-    color: color-mix(in srgb, var(--ivory) 70%, transparent);
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 0.7rem;
-    font-weight: 450;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-  }
-
-  .roleMobileCopy strong {
-    font-family: "Bodoni Moda Variable", serif;
-    font-size: clamp(4.2rem, 18vw, 6.2rem);
-    font-style: italic;
-    font-weight: 420;
-    letter-spacing: -0.045em;
-    line-height: 0.82;
-  }
-
-  .roleMobileCopy p {
-    color: color-mix(in srgb, var(--ivory) 82%, transparent);
-    font-size: 0.94rem;
-    line-height: 1.65;
-    max-width: 34ch;
+  .roleRowExample p {
+    font-size: 0.76rem;
   }
 
   .flagship,
@@ -1385,15 +1088,38 @@
 
 @media (prefers-reduced-motion: reduce) {
   .heroImage,
-  .roleFocusLens,
-  .roleFocusRing,
-  .roleRail,
-  .roleMarkers span,
-  .roleWords p,
-  .roleCaption p,
-  .roleProgress span,
   .noteVisual img,
   .nextTopic > a span {
     transition-duration: 0.01ms !important;
   }
+}
+
+@media (max-width: 900px) {
+  .hero { padding-top: var(--publication-shell-height); min-height: auto; grid-template-rows: auto auto; }
+  .heroVisual { height: clamp(19rem, 62vw, 33rem); }
+  .heroImage { object-position: 64% 30%; }
+}
+@media (max-width: 767px) {
+  .heroCopy { padding-bottom: 3rem; }
+  .heroTopline > a { min-height: 2.75rem; display: inline-flex; align-items: center; }
+  .roles { padding-block: 4.5rem; }
+  .roles h2 { font-size: clamp(2.8rem, 12vw, 4rem); line-height: 1.03; }
+  .roleLedger { grid-template-columns: 1.8rem minmax(0, 1fr); }
+  .roleSpine svg { width: 1.8rem; }
+  .roleList li { padding-left: .75rem; gap: .75rem; grid-template-columns: 1.35rem minmax(0, 1fr); }
+  .roleRowNote { font-size: 1rem; line-height: 1.75; }
+  .roleRowExample p { font-size: .9rem; line-height: 1.65; }
+  .roleRowVerb { line-height: 1.1; }
+  .flagship, .flagshipSection { min-height: 0; }
+  .flagship { display: grid; padding: 0; }
+  .flagshipImage { position: relative !important; height: 22rem !important; object-position: 62% 25%; }
+  .flagshipShade { background: linear-gradient(180deg, transparent 10rem, #0b0c0a 22rem); }
+  .flagshipCopy { position: relative; inset: auto; padding: 1.5rem var(--atlas-gutter) 3.5rem; max-width: none; transform: none; }
+  .flagshipCopy h2 { font-size: clamp(2.7rem, 12vw, 4rem); line-height: 1.03; max-width: 12ch; }
+  .notes { padding-top: 4.5rem; }
+  .notesHeader h2, .sourceIntro h2 { font-size: clamp(2.8rem, 12vw, 4rem); line-height: 1.03; }
+  .noteRiver { gap: 3rem; margin-top: 3rem; }
+  .noteCopy { min-height: 0; padding: 2rem 0; }
+  .sourceSpine { padding-top: 4rem; gap: 2.5rem; }
+  .nextTopic { min-height: 0; padding-block: 4rem; }
 }

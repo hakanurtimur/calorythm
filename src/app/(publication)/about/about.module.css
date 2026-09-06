@@ -1,231 +1,124 @@
 .about {
   --about-gutter: clamp(1.25rem, 6.3vw, 7.5rem);
   background: var(--ivory);
+  color: var(--ink);
 }
-
-.about :where(h1, h2, h3, p, ol, ul, blockquote) {
-  margin: 0;
-}
-
-.about :where(h1, h2, h3) {
-  text-wrap: balance;
-}
-
-.about :where(p) {
-  text-wrap: pretty;
-}
+.about :where(h1, h2, h3, p, ol) { margin: 0; }
+.about :where(h1, h2, h3) { text-wrap: balance; }
+.about :where(p) { text-wrap: pretty; }
+.about :where(a) { color: inherit; text-decoration: none; }
+.about :where(a, summary):focus-visible { outline: 2px solid currentColor; outline-offset: 6px; }
+.about :where(em) { font-weight: inherit; }
+.eyebrow { font: 0.7rem/1.6 "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; }
 
 .manifesto {
-  align-content: end;
-  background: var(--coral);
-  display: grid;
-  gap: clamp(1.5rem, 3vw, 2.8rem);
-  grid-template-columns: minmax(0, 1.22fr) minmax(18rem, 0.78fr);
-  min-height: min(47rem, 84svh);
-  overflow: clip;
-  padding: clamp(10rem, 18vh, 13rem) var(--about-gutter) clamp(4rem, 9vh, 7rem);
   position: relative;
-}
-
-.manifesto::after {
-  background: var(--ink);
-  bottom: 0;
-  content: "";
-  height: clamp(0.8rem, 1.25vw, 1.2rem);
-  position: absolute;
-  right: 0;
-  width: clamp(7rem, 33vw, 32rem);
-}
-
-.manifesto > p:first-child {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: clamp(0.68rem, 0.82vw, 0.8rem);
-  grid-column: 1 / -1;
-  letter-spacing: 0.055em;
-  text-transform: uppercase;
-}
-
-.manifesto h1 {
-  font-family: "Bodoni Moda Variable", serif;
-  font-size: clamp(4rem, 8vw, 6rem);
-  font-weight: 480;
-  letter-spacing: -0.04em;
-  line-height: 0.86;
-  max-width: 12ch;
-}
-
-.manifesto > p:last-child {
-  align-self: end;
-  font-size: clamp(1.05rem, 1.45vw, 1.28rem);
-  line-height: 1.75;
-  max-width: 56ch;
-}
-
-.method,
-.contribution {
-  padding: clamp(6rem, 12vw, 10rem) var(--about-gutter);
-}
-
-.method > header,
-.contribution > header {
-  align-items: end;
+  isolation: isolate;
   display: grid;
-  gap: 2rem clamp(2rem, 7vw, 8rem);
-  grid-template-columns: minmax(18rem, 1.15fr) minmax(18rem, 0.85fr);
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  min-height: min(58rem, 100svh);
+  padding: calc(var(--publication-shell-height) + 5rem) var(--about-gutter) 7rem;
+  background: #efe3d9;
+  overflow: clip;
 }
+.coverArt { position: absolute; inset: var(--publication-shell-height) 0 0; z-index: -1; }
+.coverArt img { object-fit: cover; object-position: 60% center; animation: cover-arrive 1.2s cubic-bezier(.2,.65,.3,1) both; }
+.coverArt::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #efe3d9 0%, #efe3d9e6 25%, transparent 57%); }
+.coverCopy { width: 51%; max-width: 43rem; }
+.manifesto h1 { font: 480 clamp(4rem, 6.4vw, 7rem)/1 "Bodoni Moda Variable", serif; letter-spacing: -0.045em; margin: 2rem 0 1.8rem; }
+.deck { font-size: clamp(1.1rem, 1.55vw, 1.5rem); line-height: 1.5; letter-spacing: -0.025em; }
+.introduction { max-width: 39ch; margin-top: 1.2rem !important; font-size: 0.98rem; line-height: 1.8; color: #56534b; }
+.coverLink { display: inline-flex; align-items: center; justify-content: space-between; gap: 3rem; min-height: 3rem; border-bottom: 1px solid #8b8377; margin-top: 1.8rem; font-size: .85rem; font-weight: 650; }
+.coverLink span, .contactLink span { transition: transform .3s ease; }
+.coverLink:hover span, .contactLink:hover span { transform: translate(3px, -3px); }
+.coverFoot { position: absolute; bottom: 1.7rem; left: var(--about-gutter); right: var(--about-gutter); display: flex; justify-content: space-between; gap: 1rem; font: .62rem/1.5 "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .035em; }
+.coverFoot a { display: inline-flex; gap: 2rem; }
 
-.method h2,
-.contribution h2,
-.founder h2,
-.contact h2 {
-  font-family: "Bodoni Moda Variable", serif;
-  font-size: clamp(3rem, 5.7vw, 6rem);
-  font-weight: 470;
-  letter-spacing: -0.04em;
-  line-height: 0.92;
-}
+.method { padding: clamp(5rem, 9vw, 9rem) var(--about-gutter); display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(3rem, 9vw, 10rem); }
+.method > header { align-self: start; }
+.method h2 { font: 470 clamp(3rem, 5vw, 5.7rem)/1.02 "Bodoni Moda Variable", serif; letter-spacing: -.045em; margin: 1.5rem 0; scroll-margin-top: 8rem; }
+.method > header > p:last-child { max-width: 30ch; font-size: 1rem; line-height: 1.8; color: #65635a; }
+.method ol { list-style: none; padding: 0 0 0 2.8rem; position: relative; background: linear-gradient(90deg, var(--apricot) 0 2px, transparent 2px 7px, var(--coral) 7px 9px, transparent 9px 14px, var(--ochre) 14px 16px, transparent 16px 21px, var(--pistachio) 21px 23px, transparent 23px); }
+.method li { padding: 2rem 0 2.3rem; border-bottom: 1px solid #d9d3c9; }
+.method li:first-child { padding-top: 0; }
+.method li:last-child { padding-bottom: 0; border-bottom: 0; }
+.stepLabel { display: flex; gap: 1.2rem; font: .65rem/1.5 "IBM Plex Mono", monospace; color: #716d61; text-transform: uppercase; letter-spacing: .045em; }
+.stepLabel > span { color: #8e6030; }
+.method h3 { font: 460 clamp(1.8rem, 2.5vw, 2.8rem)/1.15 "Bodoni Moda Variable", serif; letter-spacing: -.025em; margin: .8rem 0; }
+.method li p { max-width: 48ch; font-size: .93rem; line-height: 1.8; color: #65635a; }
+.founder { margin: 0 var(--about-gutter); padding: 2.5rem 0 4.5rem; border-top: 1px solid #d9d3c9; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(3rem, 9vw, 10rem); }
+.founder h2 { font: .67rem/1.6 "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .04em; }
+.founder p { font-size: .9rem; line-height: 1.8; color: #65635a; max-width: 54ch; }
 
-.method > header p,
-.contribution > header p {
-  font-size: clamp(1rem, 1.25vw, 1.15rem);
-  line-height: 1.75;
-  max-width: 52ch;
-}
-
-.method ol,
-.contribution ul {
-  list-style: none;
-  margin-left: clamp(0rem, 21vw, 21rem);
-  margin-top: clamp(4rem, 9vw, 8rem);
-  padding: 0;
-}
-
-.method li,
-.contribution li {
-  border-top: 1px solid color-mix(in srgb, currentColor 38%, transparent);
-  display: grid;
-  gap: 1rem clamp(2rem, 6vw, 7rem);
-  grid-template-columns: minmax(11rem, 0.55fr) minmax(18rem, 1.45fr);
-  padding: clamp(2rem, 4.5vw, 4rem) 0;
-}
-
-.method li:last-child,
-.contribution li:last-child {
-  border-bottom: 1px solid color-mix(in srgb, currentColor 38%, transparent);
-}
-
-.method h3,
-.contribution h3 {
-  font-family: "Bodoni Moda Variable", serif;
-  font-size: clamp(1.65rem, 2.5vw, 2.6rem);
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  line-height: 1.05;
-}
-
-.method li p,
-.contribution li p {
-  line-height: 1.78;
-  max-width: 63ch;
-}
-
-.founder {
-  background: var(--butter);
-  display: grid;
-  gap: clamp(3rem, 8vw, 8rem);
-  grid-template-columns: minmax(17rem, 0.72fr) minmax(19rem, 1.28fr);
-  padding: clamp(6rem, 12vw, 10rem) var(--about-gutter);
-}
-
-.founder blockquote {
-  align-self: end;
-  font-family: "Bodoni Moda Variable", serif;
-  font-size: clamp(1.65rem, 3vw, 3.25rem);
-  letter-spacing: -0.025em;
-  line-height: 1.25;
-  max-width: 29ch;
-}
-
-.contribution {
-  background: var(--ink);
-  color: var(--ivory);
-  scroll-margin-top: 5rem;
-}
-
-.contactLink {
-  align-items: center;
-  border-bottom: 1px solid currentColor;
-  color: inherit;
-  display: inline-flex;
-  font-weight: 720;
-  gap: 1rem;
-  justify-content: space-between;
-  margin-left: clamp(0rem, 21vw, 21rem);
-  margin-top: clamp(3rem, 6vw, 5rem);
-  min-height: 3.5rem;
-  text-decoration: none;
-  width: min(21rem, 100%);
-}
-
-.contactLink:focus-visible {
-  outline: 3px solid var(--ivory);
-  outline-offset: 0.35rem;
-}
-
-.contact {
-  background: var(--olive);
-  display: grid;
-  gap: 2rem clamp(2rem, 7vw, 8rem);
-  grid-template-columns: minmax(17rem, 0.85fr) minmax(18rem, 1.15fr);
-  padding: clamp(4rem, 9vw, 7rem) var(--about-gutter);
-  scroll-margin-top: 5rem;
-}
-
-.contact h2 {
-  font-size: clamp(2.5rem, 4vw, 4.5rem);
-}
-
-.contact p {
-  align-self: end;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: clamp(0.74rem, 0.92vw, 0.88rem);
-  letter-spacing: 0.02em;
-  line-height: 1.75;
-  max-width: 66ch;
-}
+.contribution { background: var(--ink); color: var(--ivory); padding: clamp(4.5rem, 8vw, 8rem) var(--about-gutter); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(3rem, 9vw, 10rem); scroll-margin-top: var(--publication-shell-height); }
+.contributionIntro h2 { font: 470 clamp(3.5rem, 5vw, 5.7rem)/1.02 "Bodoni Moda Variable", serif; letter-spacing: -.04em; margin: 1.6rem 0 2rem; }
+.contributionIntro h2 em { color: var(--pistachio); }
+.contributionIntro > p:last-of-type { max-width: 37ch; line-height: 1.85; font-size: .98rem; color: #bcbcb0; }
+.contactLink { display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-size: .85rem; font-weight: 650; width: min(19rem, 100%); min-height: 3.5rem; margin-top: 2rem; border-bottom: 1px solid #77786a; }
+.contactLink:focus-visible { outline: 3px solid var(--ivory); outline-offset: 0.35rem; }
+.guidelines { padding-top: .2rem; min-width: 0; }
+.guidelines > h3 { font: 470 2rem/1.2 "Bodoni Moda Variable", serif; }
+.guidelines > p { font: .65rem/1.6 "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .03em; color: #abab9d; margin: .7rem 0 2rem; }
+.guidelines details { border-top: 1px solid #4a4b42; }
+.guidelines details:last-of-type { border-bottom: 1px solid #4a4b42; }
+.guidelines summary { display: flex; align-items: center; gap: 1.1rem; padding: 1.5rem 0; cursor: pointer; list-style: none; font-size: .95rem; transition: color .2s; }
+.guidelines summary::-webkit-details-marker { display: none; }
+.guidelines summary:hover { color: var(--pistachio); }
+.detailNumber { font: .6rem/1 "IBM Plex Mono", monospace; color: var(--apricot); }
+.guidelines details:nth-of-type(2) .detailNumber { color: var(--coral); }
+.guidelines details:nth-of-type(3) .detailNumber { color: var(--ochre); }
+.guidelines details:nth-of-type(4) .detailNumber { color: var(--pistachio); }
+.plus { margin-left: auto; width: 12px; height: 12px; position: relative; flex-shrink: 0; }
+.plus::before, .plus::after { content: ""; position: absolute; background: currentColor; }
+.plus::before { top: 5px; left: 0; width: 12px; height: 1px; }
+.plus::after { left: 5px; top: 0; width: 1px; height: 12px; transition: transform .25s; }
+.guidelines details[open] .plus::after { transform: scaleY(0); }
+.guidelines details > p { color: #bcbcb0; font-size: .9rem; line-height: 1.8; padding: 0 1.5rem 1.5rem 2rem; }
+.contact { margin-top: 2rem; scroll-margin-top: 8rem; }
+.contact h3 { font: .64rem/1.5 "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .04em; color: var(--pistachio); }
+.contact p { margin-top: .7rem; max-width: 46ch; font-size: .82rem; line-height: 1.8; color: #abab9d; }
+@keyframes cover-arrive { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 800px) {
-  .manifesto {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .method > header,
-  .contribution > header,
-  .method li,
-  .contribution li,
-  .founder,
-  .contact {
-    grid-template-columns: 1fr;
-  }
-
-  .method ol,
-  .contribution ul,
-  .contactLink {
-    margin-left: 0;
-  }
-
-  .manifesto h1 {
-    font-size: clamp(2rem, 10vw, 4rem);
-    max-width: 100%;
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
+  .about { --about-gutter: clamp(1.25rem, 6vw, 3rem); }
+  .manifesto { grid-template-columns: minmax(0, 1fr); min-height: auto; padding: calc(var(--publication-shell-height) + 2.2rem) var(--about-gutter) 0; }
+  .coverCopy { display: contents; }
+  .coverCopy > .eyebrow { grid-row: 1; }
+  .manifesto h1 { grid-row: 2; font-size: clamp(2.3rem, 11.8vw, 5.3rem); line-height: 1.02; letter-spacing: -.04em; min-width: 0; overflow-wrap: anywhere; margin: 1.25rem 0; }
+  .deck { grid-row: 3; font-size: clamp(1.1rem, 2.8vw, 1.4rem); max-width: 32ch; }
+  .desktopBreak { display: none; }
+  .introduction { grid-row: 5; max-width: 43ch; font-size: 1rem; margin-top: 1.5rem !important; }
+  .coverArt { position: relative; inset: auto; grid-row: 4; height: clamp(20rem, 102vw, 36rem); margin: 1rem calc(-1 * var(--about-gutter)) 0; }
+  .coverArt img { object-fit: cover; object-position: 100% center; }
+  .coverArt::after { background: linear-gradient(180deg, #efe3d9, transparent 10%); }
+  .coverLink { grid-row: 6; justify-self: start; min-width: 12rem; min-height: 3.5rem; font-size: .95rem; margin-top: 1rem; }
+  .coverFoot { position: relative; inset: auto; grid-row: 7; border-top: 1px solid #c9bfb2; margin-top: 2rem; padding: 1rem 0; flex-wrap: wrap; font-size: .62rem; align-items: center; }
+  .coverFoot a { gap: 1rem; min-height: 2.75rem; align-items: center; }
+  .method { grid-template-columns: minmax(0, 1fr); gap: 3rem; padding-top: 4.5rem; padding-bottom: 3.5rem; }
+  .method h2 br { display: none; }
+  .method h2 em::before { content: " "; }
+  .method > header > p:last-child { max-width: 40ch; }
+  .method ol { padding-left: 2.3rem; }
+  .method h3 { font-size: clamp(1.85rem, 7.5vw, 2.65rem); line-height: 1.15; text-wrap: pretty; }
+  .method li p, .founder p { font-size: 1rem; line-height: 1.8; }
+  .stepLabel { font-size: .7rem; }
+  .founder { grid-template-columns: minmax(0, 1fr); gap: 1.3rem; padding-bottom: 3.5rem; }
+  .contribution { grid-template-columns: minmax(0, 1fr); gap: 3.5rem; }
+  .contributionIntro h2 { font-size: clamp(3rem, 10vw, 5rem); }
+  .contributionIntro > p:last-of-type, .guidelines details > p { font-size: 1rem; }
+  .contactLink { min-height: 3.5rem; font-size: .95rem; }
+  .guidelines summary { font-size: 1rem; min-height: 4.5rem; }
+  .guidelines details > p { padding-left: 0; padding-right: 0; }
+  .contact p { font-size: .95rem; }
 }
-
-@media (max-height: 699px) and (orientation: landscape) {
-  .manifesto {
-    min-height: auto;
-    padding-bottom: 4rem;
-    padding-top: 7.5rem;
-  }
+@media (min-width: 801px) and (max-width: 1100px) {
+  .manifesto { min-height: 48rem; }
+  .manifesto h1 { font-size: clamp(3.25rem, 6.2vw, 4.3rem); }
+  .coverCopy { width: 53%; }
+  .coverArt img { object-position: 66% center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .coverArt img { animation: none; }
+  .about :where(a span, summary, .plus::after) { transition: none; }
 }

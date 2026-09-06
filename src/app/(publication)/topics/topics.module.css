@@ -332,3 +332,13 @@
     padding-top: 7.5rem;
   }
 }
+
+@media (max-width: 800px) {
+  .topicIntro { min-height: 0; padding: calc(var(--publication-shell-height) + 2.5rem) var(--topic-gutter) 3.5rem; gap: 2rem; }
+  .topicIntro > a { display: inline-flex; align-items: center; min-height: 2.75rem; font-size: .75rem; }
+  .topicIntro h1 { line-height: 1.06; }
+  .topicIntro p { font-size: 1.1rem; line-height: 1.75; }
+  .topicArticles, .emptyArchive { min-height: 0; padding-block: 4rem; }
+  .emptyArchive h2 { font-size: clamp(2.5rem, 11vw, 4rem); line-height: 1.07; max-width: 14ch; }
+  .emptyArchive { gap: 1.8rem; }
+}

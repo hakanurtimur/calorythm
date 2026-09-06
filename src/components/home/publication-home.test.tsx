@@ -174,7 +174,7 @@ describe("PublicationHome", () => {
       }),
     ).toBeVisible();
     expect(flagship).toHaveTextContent(
-      "Kas, proteinin en görünür hikâyesi. Oysa proteinler aynı anda yapı kurar, tepkimeleri hızlandırır, molekül taşır, sinyal iletir ve savunmaya katılır.",
+      "Protein ile kas arasındaki ilişki gerçektir. Ama proteinlerin bedendeki işi kasla sınırlı değildir.",
     );
     expect(
       within(flagship).getByRole("link", { name: "Hikâyeyi oku" }),

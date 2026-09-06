@@ -15,8 +15,6 @@ type EditorialNoteProps = Readonly<{
 }>;
 
 export function EditorialNote({ article }: EditorialNoteProps) {
-  const related = getRelatedArticles(article);
-
   return (
     <article className={styles.article} data-article-type={article.type}>
       <header className={styles.articleHeader}>
@@ -43,11 +41,21 @@ export function EditorialNote({ article }: EditorialNoteProps) {
         ))}
       </div>
 
+      <EditorialNoteEnd article={article} />
+    </article>
+  );
+}
+
+export function EditorialNoteEnd({ article }: EditorialNoteProps) {
+  const related = getRelatedArticles(article);
+
+  return (
+    <>
       <aside className={styles.disclaimer} aria-label="Yazının kapsamı">
         Bu yazı genel bilimsel açıklamadır; kişisel beslenme veya tedavi önerisi değildir.
       </aside>
 
-      <section className={styles.sources} aria-labelledby="kaynaklar-basligi">
+      <section className={styles.sources} aria-labelledby="kaynaklar-basligi" data-header-tone="dark">
         <h2 id="kaynaklar-basligi">Kaynaklar</h2>
         <ol aria-label="Kaynaklar">
           {article.references.map((reference) => (
@@ -74,6 +82,6 @@ export function EditorialNote({ article }: EditorialNoteProps) {
           ))}
         </ul>
       </section>
-    </article>
+    </>
   );
 }

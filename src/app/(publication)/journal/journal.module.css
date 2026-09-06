@@ -939,3 +939,15 @@
     transition: none;
   }
 }
+
+@media (max-width: 760px) {
+  .coverCopy h1 { line-height: 1; }
+  .coverPrinciple, .storyDeck, .noteCopy > p { font-size: 1rem; line-height: 1.75; }
+  .flagshipCopy h2, .noteCopy h2 { line-height: 1.03; letter-spacing: -.035em; max-width: none; }
+  .contentHeader h2 { line-height: 1.04; }
+  .noteFooter { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .noteFooter time { font-size: .72rem; }
+  .noteFooter a { min-height: 3rem; }
+  .storyFlow { margin-top: 2.5rem; gap: 3rem; }
+  .continueReading { margin-top: 3.5rem; }
+}

@@ -236,3 +236,11 @@
     padding-top: 7.5rem;
   }
 }
+
+@media (max-width: 767px) {
+  .sources, .related { padding-block: 4rem; }
+  .sources h2, .related h2 { font-size: clamp(2.5rem, 10.5vw, 3.5rem); line-height: 1.1; }
+  .sources a { font-size: 1rem; line-height: 1.7; overflow-wrap: anywhere; }
+  .sources small { font-size: .75rem; }
+  .related a { font-size: clamp(1.8rem, 7vw, 2.5rem); line-height: 1.18; padding-block: 1.5rem; }
+}

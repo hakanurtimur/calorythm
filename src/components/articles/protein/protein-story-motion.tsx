@@ -21,6 +21,23 @@ type NavigatorWithConnection = Navigator & {
 
 const registeredGsapInstances = new WeakSet<object>();
 
+function readPublicationShellOffset() {
+  const fallback = 4.9 * 16;
+  const rootStyles = window.getComputedStyle(document.documentElement);
+  const token = rootStyles
+    .getPropertyValue("--publication-shell-height")
+    .trim();
+  const numericValue = Number.parseFloat(token);
+
+  if (!Number.isFinite(numericValue)) return fallback;
+  if (token.endsWith("rem")) {
+    const rootFontSize = Number.parseFloat(rootStyles.fontSize);
+    return numericValue * (Number.isFinite(rootFontSize) ? rootFontSize : 16);
+  }
+
+  return numericValue;
+}
+
 async function loadProteinStoryRuntime(): Promise<ProteinStoryMotionRuntime> {
   const [{ gsap }, { ScrollTrigger }] = await Promise.all([
     import("gsap"),
@@ -46,14 +63,6 @@ export function resolveProteinMotionProfile({
 
   return "full";
 }
-
-const clampProgress = (progress: number) => Math.min(1, Math.max(0, progress));
-
-const progressState = (progress: number) => {
-  if (progress <= 0.001) return "start";
-  if (progress >= 0.999) return "end";
-  return "active";
-};
 
 export function ProteinStoryMotion({
   children,
@@ -97,36 +106,6 @@ export function ProteinStoryMotion({
       removeApproachObserver = undefined;
     };
 
-    const setRoleFromProgress = (scene: HTMLElement, progress: number) => {
-      const roleCopies = Array.from(
-        scene.querySelectorAll<HTMLElement>("[data-protein-role-copy]"),
-      );
-      const activeIndex = progress <= 0 || roleCopies.length === 0
-        ? -1
-        : Math.min(roleCopies.length - 1, Math.floor(progress * roleCopies.length));
-
-      roleCopies.forEach((role, index) => {
-        role.dataset.proteinRoleActive = String(index === activeIndex);
-      });
-    };
-
-    const publishProgress = (scene: HTMLElement, rawProgress: number) => {
-      const progress = clampProgress(rawProgress);
-      scene.style.setProperty("--protein-scene-progress", progress.toFixed(3));
-      scene.dataset.proteinMotionState = progressState(progress);
-      if (scene.dataset.proteinScene === "roles") setRoleFromProgress(scene, progress);
-    };
-
-    const clearAuthoredState = () => {
-      scope.querySelectorAll<HTMLElement>("[data-protein-scene]").forEach((scene) => {
-        scene.style.removeProperty("--protein-scene-progress");
-        delete scene.dataset.proteinMotionState;
-      });
-      scope.querySelectorAll<HTMLElement>("[data-protein-role-copy]").forEach((role) => {
-        delete role.dataset.proteinRoleActive;
-      });
-    };
-
     async function installMotion(installationGeneration: number) {
       const { gsap, ScrollTrigger } = await loadRuntime();
       if (
@@ -142,209 +121,151 @@ export function ProteinStoryMotion({
       }
 
       motionContext = gsap.context(() => {
-        const frame = scope.querySelector<HTMLElement>('[data-protein-scene="frame"]');
+        const cover = scope.querySelector<HTMLElement>('[data-protein-scene="cover"]');
         const roles = scope.querySelector<HTMLElement>('[data-protein-scene="roles"]');
-        const turnover = scope.querySelector<HTMLElement>('[data-protein-scene="turnover"]');
         const digestion = scope.querySelector<HTMLElement>('[data-protein-scene="digestion"]');
-        const reference = scope.querySelector<HTMLElement>('[data-protein-scene="reference"]');
-        const pattern = scope.querySelector<HTMLElement>('[data-protein-scene="pattern"]');
-        const resolution = scope.querySelector<HTMLElement>('[data-protein-scene="resolution"]');
-        if (!frame || !roles || !turnover || !digestion || !reference || !pattern || !resolution) {
-          return;
-        }
+        if (!cover || !roles || !digestion) return;
 
-        const frameStage = frame.querySelector<HTMLElement>('[data-protein-pin="frame"]');
         const digestionStage = digestion.querySelector<HTMLElement>(
           '[data-protein-pin="digestion"]',
         );
-        const patternStage = pattern.querySelector<HTMLElement>(
-          '[data-protein-pin="pattern"]',
+        const coverMaskPanels = cover.querySelectorAll<HTMLElement>(
+          "[data-protein-cover-mask-panel]",
         );
-        if (!frameStage || !digestionStage || !patternStage) return;
+        const coverStrands = cover.querySelectorAll<HTMLElement>(
+          "[data-protein-cover-strand]",
+        );
+        const coverTitle = cover.querySelector<HTMLElement>(
+          "[data-protein-cover-title]",
+        );
+        const roleLines = roles.querySelectorAll<HTMLElement>(
+          "[data-protein-role-line]",
+        );
+        const digestionImage = digestionStage?.querySelector<HTMLElement>(
+          '[data-protein-image-layer="digestion"]',
+        );
+        const digestionFragments = digestionStage?.querySelectorAll<HTMLElement>(
+          "[data-protein-digestion-fragment]",
+        );
+        const digestionFocus = digestionStage?.querySelector<HTMLElement>(
+          "[data-protein-digestion-focus]",
+        );
 
-        const frameTimeline = gsap.timeline({
-          defaults: { ease: "none" },
+        if (
+          !coverTitle
+          || !digestionStage
+          || !digestionImage
+          || !digestionFragments
+          || !digestionFocus
+          || coverMaskPanels.length !== 5
+          || coverStrands.length !== 5
+          || roleLines.length !== 5
+          || digestionFragments.length !== 3
+        ) return;
+
+        const coverTimeline = gsap.timeline({
+          defaults: { ease: "power3.out" },
           scrollTrigger: {
-            end: "+=92%",
-            onUpdate: ({ progress }) => publishProgress(frame, progress),
-            pin: frameStage,
-            pinSpacing: false,
-            scrub: 0.58,
-            start: "top top+=88",
-            trigger: frameStage,
+            invalidateOnRefresh: true,
+            once: true,
+            start: () => `top top+=${readPublicationShellOffset()}`,
+            trigger: cover,
           },
         });
-        frameTimeline
+        coverTimeline
+          .set(coverMaskPanels, { display: "block" }, 0)
           .fromTo(
-            frame.querySelector("[data-protein-frame-word]"),
-            { clipPath: "inset(0 21% 0 21%)", scale: 1.12 },
-            { clipPath: "inset(0 0% 0 0)", duration: 0.7, scale: 0.72 },
+            coverMaskPanels,
+            { scaleX: 1, transformOrigin: "right center" },
+            { duration: 0.72, scaleX: 0, stagger: 0.055 },
+            0,
           )
           .fromTo(
-            frame.querySelectorAll("[data-protein-frame-role]"),
-            { autoAlpha: 0.34, x: -18 },
-            { autoAlpha: 1, duration: 0.52, stagger: 0.065, x: 0 },
-            0.18,
-          );
-
-        const rolesTimeline = gsap.timeline({
-          defaults: { ease: "none" },
-          scrollTrigger: {
-            end: "bottom 30%",
-            onUpdate: ({ progress }) => publishProgress(roles, progress),
-            scrub: 0.5,
-            start: "top 78%",
-            trigger: roles,
-          },
-        });
-        rolesTimeline
-          .fromTo(
-            roles.querySelectorAll("[data-protein-score-rule]"),
-            { strokeDashoffset: 720 },
-            { duration: 0.64, stagger: 0.075, strokeDashoffset: 0 },
-          )
-          .fromTo(
-            roles.querySelectorAll("[data-protein-role-copy]"),
-            { autoAlpha: 0.58, x: 16 },
-            { autoAlpha: 1, duration: 0.52, stagger: 0.09, x: 0 },
+            coverTitle,
+            { yPercent: 12 },
+            { duration: 0.78, yPercent: 0 },
             0.08,
           );
 
-        const turnoverTimeline = gsap.timeline({
+        const handoffTimeline = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
-            end: "bottom 28%",
-            onUpdate: ({ progress }) => publishProgress(turnover, progress),
-            scrub: 0.52,
-            start: "top 76%",
-            trigger: turnover,
+            end: "top 48%",
+            endTrigger: roles,
+            invalidateOnRefresh: true,
+            scrub: 0.45,
+            start: "bottom 96%",
+            trigger: cover,
           },
         });
-        turnoverTimeline
+        handoffTimeline
           .fromTo(
-            turnover.querySelector("[data-protein-turnover-visual]"),
-            { clipPath: "inset(0 20% 0 0)", scale: 1.04 },
-            { clipPath: "inset(0 0% 0 0)", duration: 0.7, scale: 1 },
+            coverStrands,
+            {
+              scaleX: 1,
+              transformOrigin: "right center",
+              xPercent: 0,
+            },
+            {
+              duration: 0.22,
+              scaleX: 0.12,
+              stagger: 0.025,
+              xPercent: 28,
+            },
+            0,
           )
           .fromTo(
-            turnover.querySelectorAll("[data-protein-turnover-state]"),
-            { autoAlpha: 0.48, y: 18 },
-            { autoAlpha: 1, duration: 0.62, stagger: 0.12, y: 0 },
-            0.14,
+            roleLines,
+            { scaleX: 0, transformOrigin: "left center" },
+            { duration: 0.32, scaleX: 1, stagger: 0.045 },
+            0.68,
           );
 
         const digestionTimeline = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
-            end: "+=128%",
-            onUpdate: ({ progress }) => publishProgress(digestion, progress),
+            end: "+=78%",
+            invalidateOnRefresh: true,
             pin: digestionStage,
-            pinSpacing: false,
-            scrub: 0.62,
-            start: "top top+=88",
+            pinSpacing: true,
+            scrub: 0.55,
+            start: () => `top top+=${readPublicationShellOffset()}`,
             trigger: digestionStage,
           },
         });
         digestionTimeline
+          .set(digestionFragments, { display: "block" }, 0)
           .fromTo(
-            digestion.querySelector('[data-protein-image-layer="digestion"]'),
+            digestionImage,
+            { scale: 1.025, xPercent: -1.5 },
+            { duration: 1, scale: 1, xPercent: 0 },
+            0,
+          )
+          .fromTo(
+            digestionFragments,
             {
-              clipPath: "inset(0 18% 0 0)",
-              scale: 1.035,
-              xPercent: -2.5,
+              scaleX: 1,
+              transformOrigin: (index: number) => (
+                index % 2 === 0 ? "left center" : "right center"
+              ),
             },
-            {
-              clipPath: "inset(0 0% 0 0)",
-              duration: 0.92,
-              scale: 1,
-              xPercent: 0,
-            },
+            { duration: 0.58, scaleX: 0, stagger: 0.12 },
+            0.08,
           )
           .fromTo(
-            digestion.querySelector("[data-protein-digestion-focus]"),
-            { xPercent: 0 },
-            { duration: 0.44, xPercent: 112 },
-            0.12,
-          )
-          .to(
-            digestion.querySelector("[data-protein-digestion-focus]"),
-            { duration: 0.44, xPercent: 178 },
-          );
-
-        const referenceTimeline = gsap.timeline({
-          defaults: { ease: "none" },
-          scrollTrigger: {
-            end: "bottom 28%",
-            onUpdate: ({ progress }) => publishProgress(reference, progress),
-            scrub: 0.52,
-            start: "top 78%",
-            trigger: reference,
-          },
-        });
-        referenceTimeline.fromTo(
-          reference.querySelectorAll("[data-protein-reference-rail]"),
-          {
-            scaleX: 0.94,
-            transformOrigin: (index: number) => (
-              ["left center", "right center", "center"][index] ?? "center"
-            ),
-          },
-          { duration: 0.72, scaleX: 1, stagger: 0.13 },
-        );
-
-        const patternTimeline = gsap.timeline({
-          defaults: { ease: "none" },
-          scrollTrigger: {
-            end: "+=106%",
-            onUpdate: ({ progress }) => publishProgress(pattern, progress),
-            pin: patternStage,
-            pinSpacing: false,
-            scrub: 0.62,
-            start: "top top+=88",
-            trigger: patternStage,
-          },
-        });
-        patternTimeline
-          .fromTo(
-            pattern.querySelector('[data-protein-image-layer="pattern"]'),
-            { clipPath: "inset(3% 6% 3% 6%)", scale: 1.025 },
-            { clipPath: "inset(0% 0% 0% 0%)", duration: 0.9, scale: 1 },
-          )
-          .fromTo(
-            pattern.querySelectorAll("[data-protein-chord-row]"),
-            { xPercent: (index: number) => [5, -4, 3][index] ?? 0 },
-            { duration: 0.82, stagger: 0.09, xPercent: 0 },
+            digestionFocus,
+            { xPercent: -105 },
+            { duration: 0.84, xPercent: 235 },
             0.08,
           );
-
-        const resolutionTimeline = gsap.timeline({
-          defaults: { ease: "none" },
-          scrollTrigger: {
-            end: "bottom 55%",
-            onUpdate: ({ progress }) => publishProgress(resolution, progress),
-            scrub: 0.68,
-            start: "top 80%",
-            trigger: resolution,
-          },
-        });
-        resolutionTimeline.fromTo(
-          resolution.querySelectorAll("[data-protein-resolution-mark]"),
-          {
-            autoAlpha: 0.68,
-            scale: 0.84,
-            x: (index: number) => (index - 2) * 12,
-            y: (index: number) => (index % 2 === 0 ? -10 : 12),
-          },
-          { autoAlpha: 1, duration: 1, scale: 1, stagger: 0.08, x: 0, y: 0 },
-        );
       }, scope);
     }
 
     const armApproachObserver = (observerGeneration: number) => {
-      const frameScene = scope.querySelector<HTMLElement>(
-        '[data-protein-scene="frame"]',
+      const coverScene = scope.querySelector<HTMLElement>(
+        '[data-protein-scene="cover"]',
       );
-      if (!frameScene) return;
+      if (!coverScene) return;
 
       let armed = true;
       let observer: IntersectionObserver | undefined;
@@ -368,7 +289,7 @@ export function ProteinStoryMotion({
           },
           { rootMargin: "100% 0px" },
         );
-        observer.observe(frameScene);
+        observer.observe(coverScene);
         removeApproachObserver = () => {
           armed = false;
           observer?.disconnect();
@@ -383,7 +304,6 @@ export function ProteinStoryMotion({
       const nextGeneration = ++generation;
       clearApproachObserver();
       clearMotion();
-      clearAuthoredState();
       const profile = readProfile();
       scope.dataset.proteinMotion = profile;
       if (profile === "full") armApproachObserver(nextGeneration);
@@ -403,7 +323,6 @@ export function ProteinStoryMotion({
       connection?.removeEventListener("change", handleConstraintChange);
       clearApproachObserver();
       clearMotion();
-      clearAuthoredState();
     };
   }, [loadRuntime]);
 

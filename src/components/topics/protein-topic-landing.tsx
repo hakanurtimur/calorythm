@@ -5,39 +5,43 @@ import { ProteinTopicMotion } from "./protein-topic-motion";
 import styles from "./protein-topic-landing.module.css";
 
 const PROTEIN_HERO_SRC = "/images/topics/protein-atlas-hero-v1.webp";
-const PROTEIN_ROLE_ATLAS_SRC = "/images/topics/protein-role-atlas-v2.webp";
 const PROTEIN_FLAGSHIP_SRC = "/images/calorythm-protein-flagship-v1.webp";
 
 const proteinRoles = [
   {
+    example: "Kollajen · Keratin · Aktin",
     id: "structure",
     label: "Yapı",
     verb: "Kurar.",
-    note: "Kas lifinden hücre iskeletine; protein, bedenin biçim alan malzemelerinden biridir.",
+    note: "Kas lifinden hücre iskeletine, protein bedenin biçim alan malzemelerinden biridir.",
   },
   {
+    example: "Pepsin · Amilaz · ATP sentaz",
     id: "catalysis",
     label: "Kataliz",
     verb: "Hızlandırır.",
-    note: "Enzimlerin büyük bölümü proteindir. Tepkimeleri mümkün olan hızlara taşırlar.",
+    note: "Protein yapılı enzimler, biyokimyasal tepkimeleri mümkün olan hızlara taşır.",
   },
   {
+    example: "Hemoglobin · Albumin · Taşıyıcılar",
     id: "transport",
     label: "Taşıma",
     verb: "Taşır.",
-    note: "Hemoglobin oksijeni; başka proteinler yağ asitlerini, vitaminleri ve mineralleri taşır.",
+    note: "Hemoglobin oksijeni; taşıyıcı proteinler yağ asitlerini, vitaminleri ve mineralleri taşır.",
   },
   {
+    example: "İnsülin · Reseptörler",
     id: "signal",
     label: "Sinyal",
-    verb: "İletir.",
+    verb: "Haber verir.",
     note: "Reseptörler ve bazı hormonlar, hücrelerin birbirini duymasına yardım eder.",
   },
   {
+    example: "Antikorlar · Kompleman proteinleri",
     id: "defense",
     label: "Savunma",
     verb: "Tanır.",
-    note: "Antikorlar, bedenin tanıma ve yanıt verme sisteminin protein yapılı parçalarıdır.",
+    note: "Antikorlar, bedenin yabancıyı tanıma ve yanıt verme sisteminin parçalarıdır.",
   },
 ] as const;
 
@@ -65,6 +69,7 @@ const sources = [
 ] as const;
 
 const rhythmTones = ["orange", "coral", "ochre", "olive"] as const;
+const roleSpinePositions = [24, 43, 62, 81] as const;
 
 export function ProteinTopicLanding() {
   const articles = getArticlesForTopic("protein");
@@ -98,23 +103,6 @@ export function ProteinTopicLanding() {
             <span aria-hidden="true" className={styles.heroLight} data-protein-topic-hero-light="" />
           </div>
 
-          <svg
-            aria-hidden="true"
-            className={styles.heroRails}
-            preserveAspectRatio="none"
-            viewBox="0 0 1440 1000"
-          >
-            {rhythmTones.map((tone, index) => (
-              <path
-                d={`M ${1130 + index * 18} 588 C ${1020 + index * 8} 652 ${865 + index * 5} 677 ${735 + index * 2} 735 C 548 820 347 875 -90 ${930 + index * 18}`}
-                data-protein-hero-rail={tone}
-                key={tone}
-                pathLength="1"
-                vectorEffect="non-scaling-stroke"
-              />
-            ))}
-          </svg>
-
           <div className={styles.heroCopy} data-protein-topic-hero-copy="">
             <div className={styles.heroTopline} data-hero-copy-beat="">
               <Link href="/topics">Tüm konular</Link>
@@ -140,135 +128,71 @@ export function ProteinTopicLanding() {
         <section
           aria-labelledby="protein-rolleri-baslik"
           className={styles.roles}
-          data-header-tone="dark"
+          data-header-tone="light"
           data-protein-topic-scene="roles"
         >
-          <div className={styles.rolesSticky}>
-            <div className={styles.rolesIntro}>
-              <p className={styles.roleChapter}>Protein / Canlı atlas</p>
-              <h2 id="protein-rolleri-baslik">Kas, yalnızca en görünür hikâye.</h2>
+          <div className={styles.rolesFrame}>
+            <header className={styles.rolesIntro} data-protein-roles-intro="">
+              <p className={styles.roleChapter}>Protein / Bedendeki roller</p>
+              <h2 id="protein-rolleri-baslik">
+                <span>Tek bir ad.</span>
+                <span>Beş farklı iş.</span>
+              </h2>
               <p className={styles.rolesLead}>
-                Protein sözcüğü çoğu zaman tek bir görüntüye sıkışır. Oysa aynı
-                yapıtaşı, bedende birbirinden farklı işlerin parçasıdır.
+                Protein dediğimiz şey tek bir molekül değildir. Yapı kuran,
+                tepkimeleri hızlandıran, taşıyan, haber veren ve tanıyan büyük
+                bir molekül ailesidir.
               </p>
-            </div>
+            </header>
 
-            <figure
-              aria-label="Proteinin bedendeki görevlerini gösteren anatomik atlas"
-              className={styles.roleStage}
-              data-protein-role-theatre=""
-              data-protein-topic-role-stage=""
-            >
-              <div className={styles.roleAtlasVisual}>
-                <Image
-                  alt="Yapı, kataliz, taşıma, sinyal ve savunma görevlerinin farklı bölgelerde görünür olduğu taş beden atlası"
-                  className={styles.roleAtlasImage}
-                  data-protein-role-atlas-image=""
-                  fill
-                  sizes="(max-width: 700px) 100vw, 100vw"
-                  src={PROTEIN_ROLE_ATLAS_SRC}
-                />
-                <span aria-hidden="true" className={styles.roleAtlasDim} />
-                <div
-                  aria-hidden="true"
-                  className={styles.roleFocusLens}
-                  data-protein-role-focus-lens=""
-                >
-                  <Image
-                    alt=""
-                    className={styles.roleFocusImage}
-                    fill
-                    sizes="100vw"
-                    src={PROTEIN_ROLE_ATLAS_SRC}
-                  />
-                </div>
-                <span aria-hidden="true" className={styles.roleFocusRing} />
+            <div className={styles.roleLedger} data-protein-role-ledger="">
+              <div aria-hidden="true" className={styles.roleSpine}>
+                <svg preserveAspectRatio="none" viewBox="0 0 110 1000">
+                  {rhythmTones.map((tone, lineIndex) => (
+                    <line
+                      className={styles.roleSpineLine}
+                      data-protein-role-spine-line={tone}
+                      key={tone}
+                      vectorEffect="non-scaling-stroke"
+                      x1={roleSpinePositions[lineIndex]}
+                      x2={roleSpinePositions[lineIndex]}
+                      y1="0"
+                      y2="1000"
+                    />
+                  ))}
+                </svg>
               </div>
 
-              <svg
-                aria-hidden="true"
-                className={styles.roleRail}
-                data-protein-role-rail=""
-                preserveAspectRatio="none"
-                viewBox="0 0 1000 700"
-              >
-                <path d="M -80 466 C 160 466 238 456 354 410 C 470 364 548 348 690 350" />
-                <path d="M -80 482 C 168 482 246 470 360 422 C 476 374 554 360 696 358" />
-                <path d="M -80 498 C 176 498 254 484 366 434 C 482 384 560 372 702 366" />
-                <path d="M -80 514 C 184 514 262 498 372 446 C 488 394 566 384 708 374" />
-              </svg>
-
-              <div aria-hidden="true" className={styles.roleMarkers}>
-                {proteinRoles.map((role) => (
-                  <span data-role-marker={role.id} key={role.id} />
-                ))}
-              </div>
-
-              <div aria-hidden="true" className={styles.roleWords}>
-                {proteinRoles.map((role) => (
-                  <p data-role-word={role.id} key={role.id}>{role.verb}</p>
-                ))}
-              </div>
-
-              <figcaption className={styles.roleCaption}>
+              <ol aria-label="Proteinin bedendeki rolleri" className={styles.roleList}>
                 {proteinRoles.map((role, index) => (
-                  <p
-                    aria-hidden={index !== 0}
-                    data-role-description={role.id}
+                  <li
+                    data-protein-role-row={role.id}
+                    data-protein-topic-role={role.id}
                     key={role.id}
                   >
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    {role.note}
-                  </p>
+                    <span aria-hidden="true" className={styles.roleRowIndex}>
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className={styles.roleRowHeading}>
+                      <span className={styles.roleRowLabel}>
+                        {role.label}
+                      </span>
+                      <strong className={styles.roleRowVerb}>
+                        {role.verb}
+                      </strong>
+                    </span>
+                    <p className={styles.roleRowNote}>
+                      {role.note}
+                    </p>
+                    <div className={styles.roleRowExample}>
+                      <span>Örnekler</span>
+                      <p>{role.example}</p>
+                    </div>
+                  </li>
                 ))}
-              </figcaption>
-
-              <div aria-hidden="true" className={styles.roleProgress}>
-                {proteinRoles.map((role, index) => (
-                  <span data-role-progress={role.id} key={role.id}>
-                    {String(index + 1).padStart(2, "0")} / 05
-                  </span>
-                ))}
-              </div>
-            </figure>
-
-            <ol aria-label="Proteinin bedendeki rolleri" className={styles.roleList}>
-              {proteinRoles.map((role, index) => (
-                <li
-                  data-protein-topic-role={role.id}
-                  data-role-index={String(index + 1).padStart(2, "0")}
-                  key={role.id}
-                >
-                  <button
-                    aria-pressed={index === 0}
-                    data-role-id={role.id}
-                    type="button"
-                  >
-                    {role.label}
-                  </button>
-                </li>
-              ))}
-            </ol>
+              </ol>
+            </div>
           </div>
-
-          <ol
-            aria-label="Proteinin bedendeki rollerinin görsel akışı"
-            className={styles.roleMobileSequence}
-          >
-            {proteinRoles.map((role, index) => (
-              <li data-mobile-role={role.id} key={role.id}>
-                <div aria-hidden="true" className={styles.roleMobileVisual}>
-                  <Image alt="" fill sizes="100vw" src={PROTEIN_ROLE_ATLAS_SRC} />
-                </div>
-                <div className={styles.roleMobileCopy}>
-                  <span>{String(index + 1).padStart(2, "0")} / 05</span>
-                  <h3>{role.label}</h3>
-                  <strong>{role.verb}</strong>
-                  <p>{role.note}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
         </section>
 
         <section

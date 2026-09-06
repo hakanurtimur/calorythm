@@ -75,13 +75,13 @@ export type ProteinSource = Readonly<{
 export const proteinEvidenceStatuses = [
   {
     key: "established",
-    label: "Yerleşik",
+    label: "Temel ilke",
     statement:
       "Protein değerlendirmesinde amino asit bileşimi ve sindirilebilirlik birlikte önem taşır.",
   },
   {
     key: "contextual",
-    label: "Bağlama bağlı",
+    label: "Yorumlama",
     statement:
       "Amino asit örüntüsü, öğündeki diğer protein kaynakları ve günün genel beslenme düzeniyle birlikte yorumlanır.",
   },

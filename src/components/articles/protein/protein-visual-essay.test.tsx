@@ -18,23 +18,22 @@ function getFlagshipFixture() {
 const flagship = getFlagshipFixture();
 
 const expectedScenes = [
-  "frame",
+  "cover",
   "roles",
-  "turnover",
   "digestion",
+  "turnover",
   "reference",
   "pattern",
   "resolution",
 ] as const;
 
 const expectedSceneHeadings = [
-  "Kas, hikâyenin tamamı değil",
-  "Görünmeyen işler",
-  "Beden bitmiş bir yapı değildir",
+  "Tek bir ad. Beş farklı iş.",
   "Bir lokma, aynı biçimde kalmaz",
+  "Beden bitmiş bir yapı değildir",
   "“Yeterli” tek bir sayı değildir",
   "Miktarın yanında örüntü var",
-  "Bakım dili",
+  "Protein kas için de çalışır. Ama hikâye orada bitmez.",
 ] as const;
 
 const expectedSourceIds = [
@@ -74,7 +73,7 @@ function renderEssay() {
 afterEach(cleanup);
 
 describe("ProteinVisualEssay", () => {
-  it("renders the prologue and seven scenes in the approved reading order", () => {
+  it("renders a visual cover and six story scenes in the approved reading order", () => {
     renderEssay();
 
     expect(
@@ -88,10 +87,15 @@ describe("ProteinVisualEssay", () => {
       document.querySelectorAll<HTMLElement>("[data-protein-scene]"),
     );
     expect(scenes.map((scene) => scene.dataset.proteinScene)).toEqual(expectedScenes);
+    const storyScenes = scenes.filter(
+      (scene) => scene.dataset.proteinScene !== "cover",
+    );
     expect(
-      scenes.map((scene) => within(scene).getByRole("heading", { level: 2 }).textContent),
+      storyScenes.map(
+        (scene) => within(scene).getByRole("heading", { level: 2 }).textContent,
+      ),
     ).toEqual(expectedSceneHeadings);
-    expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(9);
+    expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(8);
     expect(screen.getByRole("heading", { level: 2, name: "Kaynaklar" })).toBeVisible();
     expect(
       screen.getByRole("heading", { level: 2, name: "İlgili okumalar" }),
@@ -101,17 +105,14 @@ describe("ProteinVisualEssay", () => {
         "Bu yazı sağlıklı yetişkinlerde protein fizyolojisini açıklar; çocuklar, gebeler, hastalık tedavisi görenler, kilo vermeye çalışanlar, kırılganlığı olan ileri yaştaki yetişkinler ve elit sporcular için kişisel protein alımı önermez.",
       ),
     ).toBeVisible();
-    expect(screen.getByText("02 / İşlevler")).toBeVisible();
-    expect(screen.getByText("05 / Referans değerler")).toBeVisible();
+    expect(screen.getByText("02 / Beş rol")).toBeVisible();
+    expect(screen.getByText("05 / Sayının bağlamı")).toBeVisible();
     expect(screen.getByText("07 / Sonuç")).toBeVisible();
   });
 
-  it("makes the five-role score understandable with or without its SVG", () => {
+  it("uses one semantic five-line score instead of duplicating the roles in an SVG", () => {
     renderEssay();
 
-    expect(
-      screen.getByRole("img", { name: "Proteinlerin bedendeki beş rolü" }),
-    ).toBeVisible();
     const list = screen.getByRole("list", { name: "Proteinlerin beş rolü" });
     expect(within(list).getAllByRole("listitem")).toHaveLength(5);
     expect(within(list).getByText(/Yapı/).closest("li")).toHaveTextContent("Kolajen");
@@ -125,16 +126,10 @@ describe("ProteinVisualEssay", () => {
     expect(within(list).getByText(/Savunma/).closest("li")).toHaveTextContent(
       "AntikorBelirli antijenleri tanır ve onlara bağlanır.",
     );
-    expect(
-      screen.getByRole("img", { name: "Proteinlerin bedendeki beş rolü" }),
-    ).toHaveAccessibleDescription(
-      "Beş yatay çizgi; proteinlerin yapı, kataliz, taşıma, sinyal ve savunma görevlerini örnekleriyle gösterir.",
-    );
-    expect(document.querySelectorAll("[data-protein-frame-role]")).toHaveLength(5);
-    expect(document.querySelectorAll("[data-protein-role]")).toHaveLength(5);
-    expect(cssRule(essayStyles, ".scoreRule {")).toMatch(
-      /stroke-dasharray:\s*720(?:px)?(?:;|$)/i,
-    );
+    expect(document.querySelectorAll("[data-protein-cover-strand]")).toHaveLength(5);
+    expect(document.querySelectorAll("[data-protein-role-line]")).toHaveLength(5);
+    expect(screen.queryByRole("img", { name: "Proteinlerin bedendeki beş rolü" }))
+      .not.toBeInTheDocument();
   });
 
   it("keeps turnover and digestion legible as three labelled static states", () => {
@@ -159,7 +154,7 @@ describe("ProteinVisualEssay", () => {
     ]);
     expect(
       screen.getByText(
-        "Protein dönüşümü şunu gösterir: vücuttaki protein yapıları sabit değildir; sürekli yenilenir.",
+        "Kas proteinleri de bu dönüşümün içindedir; vücuttaki protein yapıları sabit değildir, sürekli yenilenir.",
       ),
     ).toBeVisible();
     expect(digestionStates.map((state) => state.dataset.proteinDigestionState)).toEqual([
@@ -199,39 +194,44 @@ describe("ProteinVisualEssay", () => {
     expect(reference).not.toBeNull();
     expect(reference).toHaveTextContent("Referans ≠ hedef ≠ üst sınır.");
 
-    const rails = Array.from(
-      reference!.querySelectorAll<HTMLElement>("[data-protein-reference-rail]"),
+    const rows = Array.from(
+      reference!.querySelectorAll<HTMLElement>("[data-protein-reference-row]"),
     );
-    expect(rails.map((rail) => rail.dataset.proteinReferenceRail)).toEqual([
+    expect(rows.map((row) => row.dataset.proteinReferenceRow)).toEqual([
       "population",
       "sport",
       "assessment",
     ]);
-    expect(rails[0]).toHaveTextContent(/EFSA/i);
-    expect(rails[0]).toHaveTextContent(/sağlıklı yetişkin/i);
-    expect(rails[0]).toHaveTextContent("0,83 g/kg/gün");
-    expect(rails[0]).toHaveTextContent(/nüfus referansı/i);
-    expect(rails[0]).toHaveTextContent(
+    expect(
+      Array.from(
+        reference!.querySelectorAll<HTMLElement>("[data-protein-reference-card]"),
+      ).map((card) => card.dataset.proteinReferenceCard),
+    ).toEqual(["population", "sport", "assessment"]);
+    expect(rows[0]).toHaveTextContent(/EFSA/i);
+    expect(rows[0]).toHaveTextContent(/sağlıklı yetişkin/i);
+    expect(rows[0]).toHaveTextContent("0,83 g/kg/gün");
+    expect(rows[0]).toHaveTextContent(/nüfus referansı/i);
+    expect(rows[0]).toHaveTextContent(
       /kilogram vücut ağırlığı başına günlük 0,83 gram/i,
     );
-    expect(rails[0]).toHaveTextContent(
+    expect(rows[0]).toHaveTextContent(
       /EFSA’nın sağlıklı yetişkinler için belirlediği nüfus referans alımıdır \(PRI\)/i,
     );
-    expect(rails[0]).toHaveTextContent(/kişisel hedef|optimum|üst sınır/i);
-    expect(rails[1]).toHaveTextContent(/Sporcu beslenmesi bağlamı/i);
-    expect(rails[1]).toHaveTextContent(/2016 ortak uzman pozisyonu/i);
-    expect(rails[1]).toHaveTextContent("1,2–2,0 g/kg/gün");
-    expect(rails[1]).toHaveTextContent(/düzenli ve yapılandırılmış antrenman yapan sporcular/i);
-    expect(rails[1]).toHaveTextContent(/CALORYTHM kişisel önerisi değildir/i);
-    expect(rails[1]).toHaveTextContent(/antrenman türü ve dönemi, enerji alımı ve hedefler/i);
-    expect(rails[2]).toHaveTextContent(
+    expect(rows[0]).toHaveTextContent(/kişisel hedef|optimum|üst sınır/i);
+    expect(rows[1]).toHaveTextContent(/Sporcu beslenmesi bağlamı/i);
+    expect(rows[1]).toHaveTextContent(/2016 ortak uzman pozisyonu/i);
+    expect(rows[1]).toHaveTextContent("1,2–2,0 g/kg/gün");
+    expect(rows[1]).toHaveTextContent(/düzenli ve yapılandırılmış antrenman yapan sporcular/i);
+    expect(rows[1]).toHaveTextContent(/CALORYTHM kişisel önerisi değildir/i);
+    expect(rows[1]).toHaveTextContent(/antrenman türü ve dönemi, enerji alımı ve hedefler/i);
+    expect(rows[2]).toHaveTextContent(
       "Çocukluk, gebelik, kırılgan ileri yaş ve hastalık",
     );
-    expect(rails[2]).toHaveTextContent("Bağlama özgü değerler");
-    expect(rails[2]).toHaveTextContent(
+    expect(rows[2]).toHaveTextContent("Bağlama özgü değerler");
+    expect(rows[2]).toHaveTextContent(
       "Çocukluk ve gebelik için yaşa veya döneme özgü referanslar vardır. Kırılganlığı olan ileri yaştaki yetişkinlerde ve kronik böbrek hastalığında ise protein alımı bireysel klinik değerlendirme gerektirir.",
     );
-    expect(rails[2]).not.toHaveTextContent(/g\/kg|mg|gram/i);
+    expect(rows[2]).not.toHaveTextContent(/g\/kg|mg|gram/i);
     expect(reference).toHaveTextContent(
       /EFSA’nın sağlıklı yetişkinler için nüfus referansı, sporcu rehberliği ve klinik değerlendirme birbirinin yerine kullanılamaz/i,
     );
@@ -239,8 +239,12 @@ describe("ProteinVisualEssay", () => {
     const tableRegion = within(reference!).getByRole("region", {
       name: "Protein referans bağlamları tablosu",
     });
+    const mobileReferenceList = within(reference!).getByRole("list", {
+      name: "Protein referans bağlamları",
+    });
     expect(tableRegion).toHaveAttribute("data-protein-table-scroll");
     expect(within(tableRegion).getByRole("table")).toBeVisible();
+    expect(tableRegion).not.toContainElement(mobileReferenceList);
     expect(
       within(tableRegion).getByRole("rowheader", {
         name: "Sporcular için 2016 ortak pozisyonu",
@@ -251,12 +255,8 @@ describe("ProteinVisualEssay", () => {
         name: "Çocukluk, gebelik, kırılgan ileri yaş ve hastalık",
       }),
     ).toBeVisible();
-    expect(
-      within(tableRegion).getByText(
-        "Yaşa veya döneme özgü referans ya da bireysel klinik değerlendirme gerekir.",
-      ),
-    ).toBeVisible();
-    expect(within(reference!).getByText("Bu grafik ne söylüyor?")).toBeVisible();
+    expect(within(reference!).queryByText("Bu grafik ne söylüyor?")).not.toBeInTheDocument();
+    expect(reference!.querySelector("[data-protein-reference-rail]")).toBeNull();
     expect(reference).not.toHaveTextContent(/hesapla|hesaplayıcı/i);
     expect(
       reference!.querySelector(
@@ -284,8 +284,8 @@ describe("ProteinVisualEssay", () => {
       "researching",
     ]);
     expect(statuses.map((status) => status.textContent)).toEqual([
-      expect.stringContaining("Yerleşik"),
-      expect.stringContaining("Bağlama bağlı"),
+      expect.stringContaining("Temel ilke"),
+      expect.stringContaining("Yorumlama"),
       expect.stringContaining("Veri sınırı · 2013"),
     ]);
     expect(statuses[1]).toHaveTextContent(/öğündeki diğer protein kaynakları/i);
@@ -345,7 +345,7 @@ describe("ProteinVisualEssay", () => {
     expect(document.querySelector("[data-protein-resolution]")).toBeVisible();
   });
 
-  it("limits the client motion boundary to seven scenes and pins only scenes one, four, and six", () => {
+  it("keeps the cover and six scenes in one motion boundary and pins only digestion", () => {
     renderEssay();
 
     const article = screen.getByRole("article");
@@ -355,7 +355,7 @@ describe("ProteinVisualEssay", () => {
     expect(motionRoot).not.toBeNull();
     expect(prologue).not.toBeNull();
     expect(footer).not.toBeNull();
-    expect(motionRoot).not.toContainElement(prologue);
+    expect(motionRoot).toContainElement(prologue);
     expect(motionRoot).not.toContainElement(footer);
     expect(
       Array.from(motionRoot!.querySelectorAll<HTMLElement>("[data-protein-scene]")).map(
@@ -366,84 +366,78 @@ describe("ProteinVisualEssay", () => {
     const pins = Array.from(
       motionRoot!.querySelectorAll<HTMLElement>("[data-protein-pin]"),
     );
-    expect(pins.map((pin) => pin.dataset.proteinPin)).toEqual([
-      "frame",
-      "digestion",
-      "pattern",
-    ]);
+    expect(pins.map((pin) => pin.dataset.proteinPin)).toEqual(["digestion"]);
     expect(
       pins.map((pin) => pin.closest<HTMLElement>("[data-protein-scene]")?.dataset.proteinScene),
-    ).toEqual(["frame", "digestion", "pattern"]);
+    ).toEqual(["digestion"]);
     const digestionStills = screen.getByRole("list", {
       name: "Protein sindiriminin üç görünümü",
     });
-    const chord = article.querySelector<HTMLElement>('[data-protein-art="pattern"]');
-    expect(pins[1]).toContainElement(digestionStills);
-    expect(pins[1]).not.toBe(digestionStills);
-    expect(pins[2]).toContainElement(chord);
-    expect(pins[2]).not.toBe(chord);
-    expect(motionRoot!.querySelectorAll("[data-protein-frame-word]")).toHaveLength(1);
-    expect(motionRoot!.querySelectorAll("[data-protein-score-rule]")).toHaveLength(5);
+    expect(pins[0]).toContainElement(digestionStills);
+    expect(pins[0]).not.toBe(digestionStills);
+    expect(motionRoot!.querySelectorAll("[data-protein-cover-mask-panel]")).toHaveLength(5);
+    expect(motionRoot!.querySelectorAll("[data-protein-cover-strand]")).toHaveLength(5);
+    expect(motionRoot!.querySelectorAll("[data-protein-cover-title]")).toHaveLength(1);
+    expect(motionRoot!.querySelectorAll("[data-protein-frame-word]")).toHaveLength(0);
+    expect(motionRoot!.querySelectorAll("[data-protein-role-line]")).toHaveLength(5);
     expect(motionRoot!.querySelectorAll("[data-protein-role-copy]")).toHaveLength(5);
     expect(motionRoot!.querySelectorAll("[data-protein-turnover-visual]")).toHaveLength(1);
     expect(motionRoot!.querySelectorAll("[data-protein-digestion-visual]")).toHaveLength(1);
     expect(motionRoot!.querySelectorAll("[data-protein-digestion-focus]")).toHaveLength(1);
-    expect(motionRoot!.querySelectorAll("[data-protein-chord-row]")).toHaveLength(3);
-    expect(motionRoot!.querySelectorAll("[data-protein-resolution-mark]")).toHaveLength(5);
+    expect(motionRoot!.querySelectorAll("[data-protein-digestion-fragment]")).toHaveLength(3);
+    expect(motionRoot!.querySelectorAll("[data-protein-pattern-band]")).toHaveLength(3);
+    expect(motionRoot!.querySelectorAll("[data-protein-resolution-line]")).toHaveLength(5);
   });
 
-  it("uses the three responsive lazy protein-story images as the primary scene art", () => {
+  it("uses one eager cover and three responsive lazy scene images", () => {
     renderEssay();
 
     const art = Array.from(
       document.querySelectorAll<HTMLElement>("[data-protein-art]"),
     );
     expect(art.map((item) => item.dataset.proteinArt)).toEqual([
-      "material",
+      "cover",
       "digestion",
+      "material",
       "pattern",
     ]);
     const images = art.map((item) => item.querySelector<HTMLImageElement>("img"));
     expect(images.every(Boolean)).toBe(true);
     expect(images.map((image) => decodeURIComponent(image?.getAttribute("src") ?? ""))).toEqual([
-      expect.stringContaining("/images/protein-story/protein-material-v1.webp"),
+      expect.stringContaining("/images/protein-story/protein-cover-v2.webp"),
       expect.stringContaining("/images/protein-story/protein-digestion-v1.webp"),
+      expect.stringContaining("/images/protein-story/protein-material-v1.webp"),
       expect.stringContaining("/images/protein-story/protein-pattern-v1.webp"),
     ]);
-    images.forEach((image) => {
+    expect(images[0]).toHaveAttribute("loading", "eager");
+    expect(images[0]).toHaveAttribute("fetchpriority", "high");
+    images.slice(1).forEach((image) => {
       expect(image).toHaveAttribute("loading", "lazy");
+    });
+    images.forEach((image) => {
       expect(image).toHaveAttribute("width", "1586");
       expect(image).toHaveAttribute("height", "992");
       expect(image).toHaveAttribute("sizes", expect.stringMatching(/vw/));
-      expect(image).toHaveAttribute("alt", "");
     });
+    expect(images[0]).toHaveAttribute("alt", expect.stringMatching(/heykel|lif/i));
+    images.slice(1).forEach((image) => expect(image).toHaveAttribute("alt", ""));
     expect(images.map((image) => image?.getAttribute("sizes"))).toEqual([
-      "(min-width: 1024px) calc(100vw - 17rem), 100vw",
+      "(min-width: 1024px) 68vw, 100vw",
       "(min-width: 1024px) calc(100vw - 11rem), 100vw",
+      "(min-width: 1024px) calc(100vw - 17rem), 100vw",
       "(min-width: 1024px) calc(100vw - 23rem), 100vw",
     ]);
 
-    expect(art).toHaveLength(3);
+    expect(art).toHaveLength(4);
     expect(document.querySelectorAll("[data-protein-digestion-focus]")).toHaveLength(1);
-    expect(document.querySelectorAll("[data-protein-pattern-slice]")).toHaveLength(3);
-    const patternSliceImages = Array.from(
-      document.querySelectorAll<HTMLImageElement>("[data-protein-pattern-slice] img"),
-    );
-    expect(patternSliceImages).toHaveLength(3);
-    patternSliceImages.forEach((image) => {
-      expect(decodeURIComponent(image.src)).toContain(
-        "/images/protein-story/protein-pattern-v1.webp",
-      );
-      expect(image).toHaveAttribute("alt", "");
-      expect(image).toHaveAttribute("loading", "lazy");
-      expect(image).toHaveAttribute(
-        "sizes",
-        "(min-width: 1024px) calc(100vw - 23rem), 100vw",
-      );
-    });
-    expect(screen.getByText(/proteinlerin sürekli kurulmasını.*malzeme akışı/i)).toBeVisible();
-    expect(screen.getByText(/sindirimin ölçeği nasıl küçülttüğünü.*moleküler yapı çizimi değildir/i)).toBeVisible();
-    expect(screen.getByText(/şeritler farklı bileşim örüntülerini temsil eder/i)).toBeVisible();
+    expect(document.querySelectorAll("[data-protein-pattern-band]")).toHaveLength(3);
+    expect(document.querySelectorAll("[data-protein-pattern-band] img")).toHaveLength(0);
+    expect(
+      document.querySelector('[data-protein-art="pattern"]')?.querySelectorAll("img"),
+    ).toHaveLength(1);
+    expect(screen.getByText(/protein yapıları kurulur.*iş görür.*parçalanır/i)).toBeVisible();
+    expect(screen.getByText(/sindirim boyunca ölçek küçülür.*moleküler yapı çizimi değildir/i)).toBeVisible();
+    expect(screen.getByText(/şeritler bileşim örüntülerini yorumlar/i)).toBeVisible();
 
     expect(document.querySelector(".fiberBuilding, .fiberWorking, .fiberDismantling")).toBeNull();
     expect(essayStyles).not.toMatch(
@@ -451,7 +445,17 @@ describe("ProteinVisualEssay", () => {
     );
     expect(cssRule(essayStyles, ".materialImage {")).toMatch(/aspect-ratio:\s*16\s*\/\s*9/i);
     expect(cssRule(essayStyles, ".materialImage img {")).toMatch(/object-position:\s*right center/i);
-    expect(cssRule(essayStyles, ".patternSlices i {")).not.toMatch(/background-image|url\(/i);
+    expect(cssRule(essayStyles, ".digestionStage {")).toContain("display: grid");
+    expect(cssRule(essayStyles, ".digestionStage {")).toMatch(
+      /grid-template-columns:\s*minmax\(0,\s*1\.35fr\)\s+minmax\(17rem,\s*0\.55fr\)/i,
+    );
+    expect(cssRule(essayStyles, ".digestionFragments i {")).toMatch(
+      /transparent/i,
+    );
+    expect(cssRule(essayStyles, ".digestionFragments i {")).toMatch(
+      /mix-blend-mode:\s*multiply/i,
+    );
+    expect(cssRule(essayStyles, ".patternBands i {")).not.toMatch(/background-image|url\(/i);
     expect(cssRule(essayStyles, '.evidencePattern[data-evidence-pattern="contextual"] {'))
       .not.toMatch(/repeating-linear-gradient/i);
     expect(cssRule(essayStyles, '.evidencePattern[data-evidence-pattern="contextual"] {'))
@@ -471,17 +475,17 @@ describe("ProteinVisualEssay", () => {
 
     const article = screen.getByRole("article");
     expect(article).toHaveTextContent(
-      "Proteinler bedende tek bir işle sınırlı değildir; farklı dokularda farklı görevler üstlenir.",
+      "Kas bu tablonun yalnızca bir parçasıdır; proteinler farklı dokularda farklı görevler üstlenir.",
     );
     expect(article).toHaveTextContent(
-      "Protein dönüşümü şunu gösterir: vücuttaki protein yapıları sabit değildir; sürekli yenilenir.",
+      "Kas proteinleri de bu dönüşümün içindedir; vücuttaki protein yapıları sabit değildir, sürekli yenilenir.",
     );
-    expect(article).toHaveTextContent(/besinleri “tam” ya da “eksik” diye etiketlemek/i);
+    expect(article).toHaveTextContent(/değişmez bir “tam\/eksik” ya da “iyi\/kötü” rozeti/i);
     expect(article).toHaveTextContent(
-      "Şeritler farklı bileşim örüntülerini temsil eder; renk, uzunluk ve parça sayısı nicel değer ya da sıralama değildir.",
+      "Şeritler bileşim örüntülerini yorumlar; renk, uzunluk ve parça sayısı nicel değer ya da sıralama göstermez.",
     );
     const conclusion =
-      "Hangi bağlamda, hangi beslenme örüntüsü içinde ve ne amaçla? Protein için anlamlı yanıt, bu üç soruyu birlikte düşünmekle başlar.";
+      "Protein kas için de çalışır. Ama hikâye orada bitmez.";
     expect(article).toHaveTextContent(conclusion);
     expect(article).not.toHaveTextContent(/protein ailesi|sansasyonel|tamamlanmamış|kusursuz nesne/i);
 
@@ -495,8 +499,12 @@ describe("ProteinVisualEssay", () => {
       `EFSA’nın sağlıklı yetişkinler için 0,83 g/kg/gün nüfus referansı, kişisel hedef, optimum ya da üst sınır değildir. ${scopeBoundary}`,
     );
     expect(
-      flagship.body.find((section) => section.heading === "Bakım dili")?.paragraphs[0],
-    ).toBe(conclusion);
+      flagship.body.find(
+        (section) => section.heading === "Protein kas için de çalışır. Ama hikâye orada bitmez.",
+      )?.paragraphs[0],
+    ).toBe(
+      "Yediğimiz protein amino asitlere ayrılır; bu amino asitler sürekli yenilenen protein yapılarına katılabilir. Kas, proteinin bedendeki geniş rolünün yalnızca bir parçasıdır.",
+    );
 
     const patternBody = flagship.body.find(
       (section) => section.heading === "Miktarın yanında örüntü var",
@@ -529,7 +537,7 @@ describe("ProteinVisualEssay", () => {
     expect(essayStyles).not.toMatch(/visibility\s*:\s*hidden/i);
     expect(cssRule(essayStyles, ".tableScroll {")).toContain("overflow-x: auto");
 
-    const mobileStart = essayStyles.indexOf("@media (max-width: 640px)");
+    const mobileStart = essayStyles.indexOf("@media (max-width: 720px)");
     expect(mobileStart).toBeGreaterThanOrEqual(0);
     expect(cssRule(essayStyles, ".article {", mobileStart)).toContain(
       "--essay-gutter: clamp(1rem, 5vw, 1.45rem)",
@@ -537,11 +545,18 @@ describe("ProteinVisualEssay", () => {
     expect(cssRule(essayStyles, ".roleList li {", mobileStart)).toContain(
       "grid-template-columns: 2.1rem minmax(0, 0.75fr) minmax(0, 1.25fr)",
     );
+    expect(cssRule(essayStyles, ".referenceMatrix {", mobileStart)).toContain(
+      "display: none",
+    );
+    expect(cssRule(essayStyles, ".referenceCards {", mobileStart)).toContain(
+      "display: grid",
+    );
   });
 
   it("uses high-contrast text and focus tokens with distinct callout compositions", () => {
     expect(cssRule(essayStyles, ".prologue {")).toContain("overflow: clip");
-    expect(cssRule(essayStyles, ".resolutionQuestion {")).toContain("color: var(--ink)");
+    expect(cssRule(essayStyles, ".resolutionCopy {")).toContain("display: grid");
+    expect(cssRule(essayStyles, ".roleIndex {")).toContain("color: var(--ink)");
     expect(cssRule(essayStyles, ".tableScroll:focus-visible {")).toContain(
       "outline: 3px solid var(--ink)",
     );

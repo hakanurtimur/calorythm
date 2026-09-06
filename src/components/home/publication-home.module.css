@@ -1952,3 +1952,104 @@
     transition: none;
   }
 }
+
+/* Touch cover: give the conductor a real frame instead of cropping a desktop backdrop. */
+@media (max-width: 1023px) {
+  .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) {
+    height: auto !important;
+    min-height: 100svh;
+  }
+  .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) > div {
+    display: grid !important;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: 1.3rem 1rem;
+    align-content: space-between;
+    height: auto !important;
+    min-height: 100svh;
+    padding: calc(var(--publication-shell-height) + 2rem) var(--home-gutter) 4rem !important;
+    position: relative !important;
+  }
+  .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) article[data-copy-chapter="cover"] {
+    display: contents !important;
+  }
+  .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) article[data-copy-chapter]:not([data-copy-chapter="cover"]) {
+    display: none;
+  }
+  .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) article[data-copy-chapter="cover"] [data-copy-zone="headline"] {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: 21ch !important;
+    margin: 0;
+    font-size: clamp(2.45rem, 10.2vw, 4.5rem);
+    line-height: .98;
+  }
+  .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) [data-copy-zone="headline"] em {
+    margin: .1em 0 0;
+    font-size: 1.02em;
+  }
+  .publicationHome :global([data-cover-poster]) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    position: relative;
+    inset: auto;
+    height: clamp(16rem, 72vw, 32rem);
+    margin-inline: calc(-1 * var(--home-gutter));
+    width: calc(100% + 2 * var(--home-gutter));
+    opacity: 1;
+  }
+  .publicationHome :global([data-cover-poster]) img { object-position: 50% center; }
+  .publicationHome :global([data-cover-poster])::after {
+    background: linear-gradient(180deg, var(--ivory), transparent 12%, transparent 90%, var(--ivory));
+  }
+  .publicationHome :global([data-cover-poster]) svg { opacity: .8; }
+  .publicationHome :global([data-cover-poster]) [data-rhythm-band] { animation: none; filter: none; }
+  .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) article[data-copy-chapter="cover"] [data-copy-zone="caption"] {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: center;
+    background: none !important;
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    margin: 0 !important;
+    font-size: .9rem;
+  }
+  .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) [data-cover-signature] {
+    grid-column: 1;
+    grid-row: 3;
+    position: relative !important;
+    inset: auto !important;
+    width: 2.75rem;
+    align-self: center;
+  }
+  .flagshipCopy { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+  .flagshipLabel, .flagshipMetadata { white-space: normal; overflow-wrap: anywhere; }
+  .flagshipVisual { min-height: 0; }
+}
+@media (max-width: 767px) {
+  .noise { min-height: 0; grid-template-rows: auto auto; gap: 2rem; padding-top: 4.5rem; padding-bottom: 4.5rem; }
+  .noiseStatement h2 { font-size: clamp(2.5rem, 11.8vw, 3.8rem); line-height: 1.02; }
+  .noiseApostrophe { top: 1rem; right: -4.5rem; width: 16rem; height: 20rem; opacity: .28; }
+  .noiseStatement p { font-size: 1rem; }
+  .method { padding-block: 4rem; gap: 2rem; }
+  .publicationHome[data-motion-profile="static"] .folioBeat:first-child :where(h2, h3),
+  .publicationHome[data-motion-profile="reduced"] .folioBeat:first-child :where(h2, h3) {
+    font-size: clamp(2.5rem, 11.4vw, 3.8rem); line-height: 1.02; max-width: 14ch;
+  }
+  .publicationHome[data-motion-profile="static"] .folioBeatBody,
+  .publicationHome[data-motion-profile="reduced"] .folioBeatBody { font-size: 1rem; line-height: 1.75; }
+  .flagshipCopy { padding-bottom: 4rem; }
+  .flagshipCopy h2 { font-size: clamp(2.7rem, 12.4vw, 4rem); line-height: 1; letter-spacing: -.035em; }
+  .flagshipDeck { font-size: 1rem; }
+  .journal, .topicAtlas { padding-block: 4.5rem; }
+  .journalLineField { height: 5rem; }
+  .journalStory h3 { font-size: clamp(2.1rem, 9.4vw, 3.2rem); line-height: 1.1; }
+  .journalStory { grid-template-columns: 1.5rem minmax(0, 1fr); }
+  .journalStoryMeta { padding-right: 1.25rem; line-height: 1.6; }
+  .contributionCopy h2 { font-size: clamp(2.75rem, 12.3vw, 4.1rem); line-height: 1.02; }
+  .contributionStage { padding-top: 4.5rem; min-height: 55rem; }
+  .contributionBody { font-size: 1rem; line-height: 1.75; }
+}

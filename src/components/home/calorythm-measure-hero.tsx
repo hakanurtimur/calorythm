@@ -675,7 +675,7 @@ export function CalorythmMeasureHero({
 
         </svg>
         ) : (
-          <div className={styles.posterVisual}>
+          <div className={styles.posterVisual} data-cover-poster>
             <Image
               alt="Beslenmenin ritmini yöneten ve elma taşıyan mermer bir figür"
               className={styles.posterImage}
