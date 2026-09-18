@@ -21,6 +21,6 @@ describe("CALORYTHM publication landing", () => {
     ).toBeVisible();
     expect(
       screen.getByRole("link", { name: "Fikrini paylaş" }),
-    ).toHaveAttribute("href", "/about#katki");
+    ).toHaveAttribute("href", "mailto:calorythm2026@gmail.com");
   });
 });

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getEditorialContactUrl } from "@/lib/editorial-contact";
 import { BrandWordmark } from "@/components/brand/brand-wordmark";
 import { PublicationFooterMotion } from "./publication-footer-motion";
 import styles from "./publication-shell.module.css";
@@ -28,7 +29,7 @@ const footerGroups = [
     label: "Katkı",
     links: [
       { href: "/about#katki", label: "Katkı ilkeleri" },
-      { accent: true, href: "/about#katki", label: "Fikir gönder" },
+      { accent: true, href: getEditorialContactUrl(), label: "Fikir gönder" },
     ],
   },
 ] as const;

@@ -551,7 +551,7 @@ describe("CalorythmMeasureHero", () => {
     expect(requestAnimationFrame).not.toHaveBeenCalled();
   });
 
-  it("keeps one neutral raster pose and skips the scroll loop on static viewports", () => {
+  it("keeps one neutral pose and starts touch updates only when scrolling", () => {
     vi.stubGlobal("innerHeight", 844);
     vi.stubGlobal("innerWidth", 390);
     vi.stubGlobal(
@@ -569,7 +569,7 @@ describe("CalorythmMeasureHero", () => {
     const { container } = render(<CalorythmMeasureHero />);
     const hero = container.querySelector<HTMLElement>("[data-home-scene]")!;
 
-    expect(hero).toHaveAttribute("data-motion", "static");
+    expect(hero).toHaveAttribute("data-motion", "touch");
     expect(screen.getByRole("img")).toHaveAttribute("data-hero-visual", "poster");
     expect(container.querySelectorAll("[data-conductor-frame]")).toHaveLength(0);
     expect(hero.style.getPropertyValue("--conductor-energy")).toBe("0.0000");
@@ -630,7 +630,7 @@ describe("CalorythmMeasureHero", () => {
     expect(requestAnimationFrame).not.toHaveBeenCalled();
   });
 
-  it("tears down full motion when a resize crosses the static boundary", async () => {
+  it("switches from pointer inspection to touch inspection on a phone resize", async () => {
     vi.stubGlobal("innerHeight", 900);
     vi.stubGlobal("innerWidth", 1440);
     const motionQuery = new EventTarget() as EventTarget & {
@@ -652,13 +652,44 @@ describe("CalorythmMeasureHero", () => {
       vi.stubGlobal("innerWidth", 390);
       window.dispatchEvent(new Event("resize"));
     });
-    await waitFor(() => expect(hero).toHaveAttribute("data-motion", "static"));
+    await waitFor(() => expect(hero).toHaveAttribute("data-motion", "touch"));
 
     expect(screen.getByRole("img")).toHaveAttribute("data-hero-visual", "poster");
     expect(container.querySelectorAll("[data-conductor-frame]")).toHaveLength(0);
     expect(hero.style.getPropertyValue("--conductor-energy")).toBe("0.0000");
     requestAnimationFrame.mockClear();
     fireEvent.scroll(window);
-    expect(requestAnimationFrame).not.toHaveBeenCalled();
+    expect(requestAnimationFrame).toHaveBeenCalledTimes(1);
   });
+  it("reveals and reverses mobile anatomy with scroll, then removes listeners", () => {
+    installFullMotionEnvironment();
+    vi.stubGlobal("innerWidth", 390);
+    vi.stubGlobal("innerHeight", 844);
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    const { container, unmount } = render(<CalorythmMeasureHero />);
+    const hero = container.querySelector<HTMLElement>("[data-home-scene]")!;
+    let top = 0;
+    Object.defineProperty(hero, "offsetHeight", { value: 1844 });
+    vi.spyOn(hero, "getBoundingClientRect").mockImplementation(() => ({ top }) as DOMRect);
+    expect(hero).toHaveAttribute("data-mobile-scroll", "enabled");
+    expect(container.querySelector("[data-mobile-anatomy]")).toBeInTheDocument();
+    top = -800;
+    fireEvent.scroll(window);
+    act(() => frames.shift()!(16));
+    expect(hero.style.getPropertyValue("--anatomy-reveal")).toBe("1.0000");
+    expect(container.querySelector("[data-mobile-story]")).toHaveAttribute("aria-hidden", "false");
+    top = 0;
+    fireEvent.scroll(window);
+    act(() => frames.shift()!(32));
+    expect(hero.style.getPropertyValue("--anatomy-reveal")).toBe("0.0000");
+    expect(container.querySelector("[data-mobile-story]")).toHaveAttribute("aria-hidden", "true");
+    unmount();
+    fireEvent.scroll(window);
+    expect(frames).toHaveLength(0);
+  });
+
 });

@@ -1123,3 +1123,30 @@
   .sourceSpine { padding-top: 4rem; gap: 2.5rem; }
   .nextTopic { min-height: 0; padding-block: 4rem; }
 }
+
+@media (max-width: 767px) {
+  .page { --atlas-gutter: var(--mobile-gutter); }
+  .hero { position: relative; }
+  .heroVisual { height: clamp(28rem, 125vw, 42rem); }
+  .heroVisual::after { background: linear-gradient(0deg, #11130f, transparent 70%); }
+  .heroImage { object-position: 73% 30%; }
+  .heroCopy { margin-top: -8rem; gap: 1.5rem; padding-top: 0; }
+  .heroTopline { gap: .5rem; font-size: .6rem; }
+  .hero h1 { font-size: clamp(4.25rem, 21vw, 7rem); max-width: 9ch; }
+  .hero h1 span:last-child { font-size: .5em; line-height: 1.02; margin-top: .2em; margin-left: .55em; }
+  .heroDeck { font-size: 1rem; line-height: 1.75; max-width: 32ch; }
+  .heroActions { width: 100%; }
+  .heroActions > a { width: 100%; max-width: none; min-height: 3.5rem; }
+  .rolesIntro { gap: 1.5rem; }
+  .rolesLead { margin-left: 2rem; }
+  .roleLedger { margin-top: 2.5rem; }
+  .roleRowVerb { font-size: clamp(2.25rem, 10vw, 3.3rem); }
+  .flagshipImage { height: clamp(28rem, 125vw, 40rem) !important; }
+  .flagshipShade { background: linear-gradient(0deg, #0b0c0a 20%, transparent 80%); }
+  .flagshipCopy { margin-top: -7rem; padding-top: 0; }
+  .flagshipCopy h2 { font-size: clamp(3rem, 13vw, 4.5rem); line-height: 1; }
+  .notes { padding-bottom: 1rem; }
+  .noteVisual, .note:nth-child(even) .noteVisual { aspect-ratio: 1; }
+  .noteCopy h3 { font-size: clamp(2.5rem, 11.5vw, 4rem); }
+  .sourceIntro h2 { max-width: 12ch; }
+}

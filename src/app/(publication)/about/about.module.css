@@ -76,6 +76,8 @@
 .guidelines details[open] .plus::after { transform: scaleY(0); }
 .guidelines details > p { color: #bcbcb0; font-size: .9rem; line-height: 1.8; padding: 0 1.5rem 1.5rem 2rem; }
 .contact { margin-top: 2rem; scroll-margin-top: 8rem; }
+.contact a { color: var(--ivory); text-underline-offset: .2em; }
+.contact a:focus-visible { outline: 3px solid var(--ivory); outline-offset: .35rem; }
 .contact h3 { font: .64rem/1.5 "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .04em; color: var(--pistachio); }
 .contact p { margin-top: .7rem; max-width: 46ch; font-size: .82rem; line-height: 1.8; color: #abab9d; }
 @keyframes cover-arrive { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -121,4 +123,27 @@
 @media (prefers-reduced-motion: reduce) {
   .coverArt img { animation: none; }
   .about :where(a span, summary, .plus::after) { transition: none; }
+}
+
+@media (max-width: 767px) {
+  .about { --about-gutter: var(--mobile-gutter); }
+  .manifesto { padding-top: calc(var(--publication-shell-height) + 2rem); }
+  .manifesto h1 { font-size: clamp(3rem, 14.2vw, 5rem); line-height: .98; overflow-wrap: normal; margin-block: 1.5rem; }
+  .manifesto h1 em { display: inline-block; margin-left: .45em; }
+  .deck { max-width: 28ch; line-height: 1.65; font-size: 1rem; }
+  .coverArt { height: clamp(24rem, 114vw, 38rem); margin-top: .5rem; }
+  .coverArt img { object-position: 86% center; }
+  .introduction { margin-left: 2rem !important; margin-top: 1.5rem !important; }
+  .coverLink { margin-left: 2rem; width: calc(100% - 2rem); }
+  .coverFoot { font-size: .58rem; gap: .5rem; }
+  .method { gap: 2.5rem; }
+  .method h2 { font-size: clamp(3rem, 14vw, 4.8rem); line-height: 1; }
+  .method ol { padding-left: 2.3rem; }
+  .method h3 { font-size: clamp(2.1rem, 9.5vw, 3.4rem); }
+  .founder { gap: 1.5rem; padding-block: 2rem 4rem; }
+  .founder p { font-family: "Bodoni Moda Variable", serif; font-size: 1.65rem; line-height: 1.45; color: var(--ink); }
+  .contribution { padding-block: 4rem; }
+  .contributionIntro h2 { font-size: clamp(3.25rem, 15vw, 5rem); line-height: .98; }
+  .contactLink { width: 100%; }
+  .contact a { overflow-wrap: anywhere; }
 }

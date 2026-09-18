@@ -44,7 +44,7 @@ type CalorythmMeasureHeroProps = {
   characterPose?: CalorythmCharacterPose;
 };
 
-type HeroMotionProfile = "full" | "pending" | "reduced" | "static";
+type HeroMotionProfile = "full" | "pending" | "reduced" | "static" | "touch";
 
 type NavigatorWithConnection = Navigator & {
   connection?: EventTarget & { saveData?: boolean };
@@ -113,6 +113,10 @@ export function CalorythmMeasureHero({
         return "reduced";
       }
 
+      if (window.innerWidth < 1024 && window.innerHeight > window.innerWidth) {
+        return "touch";
+      }
+
       if (window.innerWidth < 1024 || window.innerHeight < 700) {
         return "static";
       }
@@ -159,7 +163,34 @@ export function CalorythmMeasureHero({
       hero.style.setProperty("--editorial-to-journal", "0.0000");
       hero.style.setProperty("--conductor-mix", "0.0000");
       hero.style.setProperty("--conductor-energy", "0.0000");
-      return;
+      if (motionProfile !== "touch") return;
+
+      let frame = 0;
+      const update = () => {
+        frame = 0;
+        const travel = Math.max(1, hero.offsetHeight - window.innerHeight);
+        const progress = clamp(-hero.getBoundingClientRect().top / travel);
+        const reveal = clamp((progress - 0.12) / 0.62);
+        hero.style.setProperty("--hero-progress", progress.toFixed(4));
+        hero.style.setProperty("--anatomy-reveal", reveal.toFixed(4));
+        hero.style.setProperty("--mobile-cover-opacity", (1 - clamp((progress - 0.12) / 0.2)).toFixed(4));
+        hero.style.setProperty("--mobile-story-opacity", clamp((progress - 0.35) / 0.2).toFixed(4));
+        hero.querySelector("[data-mobile-story]")?.setAttribute("aria-hidden", String(progress < 0.35));
+      };
+      const schedule = () => {
+        if (!frame) frame = window.requestAnimationFrame(update);
+      };
+      update();
+      window.addEventListener("scroll", schedule, { passive: true });
+      window.addEventListener("resize", schedule);
+      return () => {
+        window.cancelAnimationFrame(frame);
+        window.removeEventListener("scroll", schedule);
+        window.removeEventListener("resize", schedule);
+        hero.style.removeProperty("--anatomy-reveal");
+        hero.style.removeProperty("--mobile-cover-opacity");
+        hero.style.removeProperty("--mobile-story-opacity");
+      };
     }
 
     const visual = visualRef.current;
@@ -454,6 +485,7 @@ export function CalorythmMeasureHero({
             "data-conductor-to": "1",
           }
         : {})}
+      data-mobile-scroll={motionProfile === "touch" ? "enabled" : undefined}
       data-cursor="idle"
       data-header-tone="light"
       data-hero-visual={motionProfile === "full" ? "full" : "poster"}
@@ -676,36 +708,68 @@ export function CalorythmMeasureHero({
         </svg>
         ) : (
           <div className={styles.posterVisual} data-cover-poster>
-            <Image
-              alt="Beslenmenin ritmini yöneten ve elma taşıyan mermer bir figür"
-              className={styles.posterImage}
-              data-hero-visual="poster"
-              height={SOURCE_HEIGHT}
-              sizes="100vw"
-              src={CONDUCTOR_FRAMES[1].source}
-              width={SOURCE_WIDTH}
-            />
             <svg
-              aria-hidden="true"
-              className={styles.posterRhythmBands}
+              aria-label={motionProfile === "touch" ? "Mermer figür ve kaydırmayla açılan anatomik katmanı" : "Beslenmenin ritmini yöneten ve elma taşıyan mermer bir figür"}
+              className={styles.posterComposite}
+              data-hero-visual="poster"
               preserveAspectRatio="xMidYMid slice"
+              role="img"
               viewBox={`0 0 ${SOURCE_WIDTH} ${SOURCE_HEIGHT}`}
             >
-              {RHYTHM_LINES.map((line, index) => (
-                <path
-                  className={styles.rhythmBand}
-                  data-rhythm-band={line.id}
-                  d={INITIAL_BANDS[index]?.d}
-                  key={line.id}
-                  stroke={line.color}
-                  strokeLinecap="butt"
-                  strokeWidth={INITIAL_BANDS[index]?.strokeWidth ?? 20}
-                  vectorEffect="non-scaling-stroke"
-                />
-              ))}
+              <defs>
+                <mask
+                  className={styles.luminanceMask}
+                  id={svgId("poster-foreground")}
+                  maskUnits="userSpaceOnUse"
+                  width={SOURCE_WIDTH}
+                  height={SOURCE_HEIGHT}
+                >
+                  <image href={CONDUCTOR_FRAMES[1].mask} width={SOURCE_WIDTH} height={SOURCE_HEIGHT} />
+                </mask>
+                {motionProfile === "touch" ? (
+                  <mask className={styles.luminanceMask} id={svgId("mobile-anatomy")} maskUnits="userSpaceOnUse" width={SOURCE_WIDTH} height={SOURCE_HEIGHT}>
+                    <image href={CONDUCTOR_FRAMES[1].skeleton} width={SOURCE_WIDTH} height={SOURCE_HEIGHT} />
+                  </mask>
+                ) : null}
+              </defs>
+              <image href={CONDUCTOR_FRAMES[1].source} width={SOURCE_WIDTH} height={SOURCE_HEIGHT} />
+              <g data-composite-layer="poster-rhythm">
+                {RHYTHM_LINES.map((line, index) => (
+                  <path
+                    className={styles.rhythmBand}
+                    data-rhythm-band={line.id}
+                    d={INITIAL_BANDS[index]?.d}
+                    key={line.id}
+                    stroke={line.color}
+                    strokeLinecap="butt"
+                    strokeWidth={INITIAL_BANDS[index]?.strokeWidth ?? 20}
+                  />
+                ))}
+              </g>
+              <image
+                data-composite-layer="poster-foreground"
+                href={CONDUCTOR_FRAMES[1].source}
+                mask={`url(#${svgId("poster-foreground")})`}
+                width={SOURCE_WIDTH}
+                height={SOURCE_HEIGHT}
+              />
+              {motionProfile === "touch" ? (
+                <g className={styles.mobileAnatomy} data-mobile-anatomy>
+                  <rect fill="var(--ivory)" width={SOURCE_WIDTH} height={SOURCE_HEIGHT} />
+                  <rect fill="var(--ink)" mask={`url(#${svgId("mobile-anatomy")})`} width={SOURCE_WIDTH} height={SOURCE_HEIGHT} />
+                </g>
+              ) : null}
             </svg>
           </div>
         )}
+
+        {motionProfile === "touch" ? (
+          <h2 className={styles.mobileStory} data-mobile-story aria-hidden="true">
+            <span>Biz önce</span>
+            <em>neye dayandığına</em>
+            <span>bakıyoruz.</span>
+          </h2>
+        ) : null}
 
         <article className={styles.opening} data-copy-chapter="cover">
           <h1 data-copy-zone="headline">
@@ -788,7 +852,7 @@ export function CalorythmMeasureHero({
         </div>
 
         <div aria-hidden="true" className={styles.scrollCue}>
-          <span>Devam et</span>
+          <span>{motionProfile === "touch" ? "Kaydır · İçine bak" : "Devam et"}</span>
           <i />
         </div>
       </div>

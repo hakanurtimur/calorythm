@@ -1127,6 +1127,13 @@
   max-width: 55ch;
 }
 
+.topicStatus {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .topicList a > b {
   font-size: 1.4rem;
   font-weight: 450;
@@ -2004,7 +2011,7 @@
   .publicationHome :global([data-cover-poster])::after {
     background: linear-gradient(180deg, var(--ivory), transparent 12%, transparent 90%, var(--ivory));
   }
-  .publicationHome :global([data-cover-poster]) svg { opacity: .8; }
+  .publicationHome :global([data-cover-poster]) svg { opacity: 1; }
   .publicationHome :global([data-cover-poster]) [data-rhythm-band] { animation: none; filter: none; }
   .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) article[data-copy-chapter="cover"] [data-copy-zone="caption"] {
     grid-column: 2;
@@ -2052,4 +2059,230 @@
   .contributionCopy h2 { font-size: clamp(2.75rem, 12.3vw, 4.1rem); line-height: 1.02; }
   .contributionStage { padding-top: 4.5rem; min-height: 55rem; }
   .contributionBody { font-size: 1rem; line-height: 1.75; }
+}
+
+/* Phone art direction: keep the cover, specimen and editorial rhythm at full strength. */
+@media (max-width: 767px) {
+  .publicationHome { --home-gutter: var(--mobile-gutter); }
+
+  .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) > div {
+    align-content: start;
+    gap: 0 1rem;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    min-height: 100svh;
+    padding: calc(var(--publication-shell-height) + 1.6rem) var(--home-gutter) 3.5rem !important;
+  }
+  .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) article[data-copy-chapter="cover"] [data-copy-zone="headline"] {
+    font-size: clamp(2.9rem, 15.4vw, 5.5rem);
+    line-height: .96;
+    max-width: 11ch !important;
+    text-wrap: initial;
+    z-index: 3;
+  }
+  .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) [data-copy-zone="headline"] em {
+    margin-left: .12em;
+    font-size: 1.1em;
+    width: auto;
+    max-width: 100%;
+  }
+  .publicationHome :global([data-cover-poster]) {
+    align-self: center;
+    height: clamp(13rem, 65vw, 31rem);
+    margin-top: 1.25rem;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  .publicationHome :global([data-cover-poster]) img { object-position: 52% center; }
+  .publicationHome :global([data-cover-poster])::after {
+    background: linear-gradient(180deg, var(--ivory), transparent 8%, transparent 83%, var(--ivory));
+  }
+  .publicationHome :global([data-home-scene="hero"][data-hero-visual="poster"]) article[data-copy-chapter="cover"] [data-copy-zone="caption"] {
+    font-size: .85rem;
+    line-height: 1.6;
+  }
+
+  .noise { min-height: 44rem; padding-block: 3rem 4rem; gap: 14rem; }
+  .noiseApostrophe { width: 23rem; height: 28rem; right: -6rem; top: -4rem; opacity: .95; }
+  .noiseStatement { gap: 1.75rem; }
+  .noiseStatement h2 { font-size: clamp(2.8rem, 13.6vw, 4.6rem); max-width: 11ch; line-height: .98; }
+  .noiseStatement p { margin-left: 2rem; max-width: 29ch; }
+  .noiseStatement strong { font-size: .6rem; letter-spacing: .025em; line-height: 1.7; }
+
+  .publicationHome:is([data-motion-profile="static"], [data-motion-profile="reduced"]) .method {
+    gap: 0;
+    padding-block: 4.5rem;
+  }
+  .publicationHome:is([data-motion-profile="static"], [data-motion-profile="reduced"]) :is(.folioCopy, .folioCopyRail) {
+    display: contents;
+  }
+  .publicationHome:is([data-motion-profile="static"], [data-motion-profile="reduced"]) .folioBeat {
+    grid-column: 1;
+    gap: 1rem;
+    padding-block: 1.75rem;
+  }
+  .publicationHome:is([data-motion-profile="static"], [data-motion-profile="reduced"]) .folioBeat:first-child {
+    grid-row: 1;
+    padding-top: 0;
+  }
+  .publicationHome:is([data-motion-profile="static"], [data-motion-profile="reduced"]) .folioBeat:first-child h2 {
+    font-size: clamp(2.7rem, 12.7vw, 4.4rem);
+    line-height: 1;
+    max-width: 12ch;
+  }
+  .publicationHome:is([data-motion-profile="static"], [data-motion-profile="reduced"]) .folioFigure {
+    grid-row: 2;
+    aspect-ratio: 1;
+    width: calc(100% + 2 * var(--home-gutter));
+    margin: -.5rem calc(-1 * var(--home-gutter)) 1.5rem;
+  }
+  .publicationHome:is([data-motion-profile="static"], [data-motion-profile="reduced"]) .folioArtwork {
+    width: 165%;
+    right: -24%;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .folioPage { min-width: 0; width: 17%; }
+  .folioPageLabel { font-size: .28rem; gap: .15rem; }
+  .publicationHome:is([data-motion-profile="static"], [data-motion-profile="reduced"]) .folioBeat:not(:first-child) {
+    margin-left: 2rem;
+    padding-block: 1.75rem;
+  }
+  .publicationHome:is([data-motion-profile="static"], [data-motion-profile="reduced"]) .folioBeat h3 {
+    font-family: "Bodoni Moda Variable", serif;
+    font-size: clamp(2rem, 8.5vw, 3.3rem);
+    font-weight: 470;
+    line-height: 1.08;
+    max-width: 16ch;
+  }
+  .folioMeter { grid-column: 1; margin-top: 1rem; }
+
+  .flagshipStage { position: relative; }
+  .flagshipVisual { height: clamp(29rem, 135vw, 40rem); }
+  .flagshipImage { object-position: 66% center; }
+  .flagshipVisual::before { background: linear-gradient(180deg, transparent 50%, #151612 100%); }
+  .proteinRoles { align-content: start; padding-top: 1.5rem; gap: .4rem; grid-template-columns: repeat(3, max-content); }
+  .proteinRoles span { font-size: .6rem; }
+  .flagshipCopy { margin-top: -7rem; padding: 0 var(--home-gutter) 4rem; background: transparent; z-index: 2; }
+  .flagshipCopy h2 { font-size: clamp(3rem, 14vw, 5rem); line-height: .98; max-width: 10ch; }
+  .flagshipDeck { max-width: 31ch; margin-top: 1.75rem; }
+  .primaryLink { width: 100%; max-width: none; min-height: 3.5rem; }
+
+  .journal { padding-block: 4rem; }
+  .journalHeader { gap: 1.3rem; margin-bottom: 1.5rem; }
+  .journalHeader h2 { font-size: clamp(4.6rem, 23vw, 7.5rem); line-height: .95; }
+  .journalHeader > p:last-child { max-width: 29ch; margin-left: 2rem; font-size: 1rem; }
+  .journalStage { position: relative; gap: 0; }
+  .journalLineField { position: absolute; left: -1.25rem; top: 0; bottom: 0; width: 1.25rem; height: auto; opacity: .75; }
+  .journalLineField { background: linear-gradient(90deg, var(--orange) 0 1px, transparent 1px 4px, var(--coral) 4px 5px, transparent 5px 8px, var(--ochre) 8px 9px, transparent 9px 12px, var(--olive) 12px 13px, transparent 13px); }
+  .journalLineField svg { display: none; }
+  .journalStory { grid-template-columns: 1.5rem minmax(0, 1fr); padding-block: 2rem; }
+  .journalStory h3 { font-size: clamp(2.15rem, 10.4vw, 3.5rem); line-height: 1.04; letter-spacing: -.035em; }
+  .journalStoryDeck { font-size: 1rem; line-height: 1.75; }
+  .journalStoryFooter { gap: .3rem; font-size: .62rem; }
+  .journalIndexCta { margin-top: 1rem; min-height: 3.5rem; }
+
+  .topicAtlas { padding-block: 4rem 5rem; background: #eae8dd; }
+  .topicHeader { gap: 1.5rem; margin-bottom: 2.5rem; }
+  .topicHeader h2 { font-size: clamp(3.8rem, 18vw, 6rem); max-width: 8ch; line-height: .95; }
+  .topicHeader p { margin-left: 2rem; font-size: 1rem; }
+  .topicList { counter-reset: topic; }
+  .topicList li { counter-increment: topic; }
+  .topicList a { grid-template-columns: 1.5rem minmax(0, 1fr) auto; gap: .65rem 1rem; padding-block: 1.6rem; }
+  .topicList a::before { content: counter(topic, decimal-leading-zero); grid-column: 1; grid-row: 1; font: .65rem/2 "IBM Plex Mono", monospace; color: #6b6556; }
+  .topicList a > span { grid-column: 2; grid-row: 1; font-size: clamp(2rem, 9.7vw, 3.7rem); line-height: 1.03; }
+  .topicList a > p { grid-column: 2 / -1; font-size: .95rem; line-height: 1.7; }
+  .topicList a > b { grid-column: 3; grid-row: 1; font-size: 1.1rem; }
+  .topicStatus { font: .62rem/1.8 "IBM Plex Mono", monospace; color: #6b6556; }
+
+  .contribution { min-height: 0; }
+  .contributionStage { min-height: 0; padding: 4rem var(--home-gutter) 3rem; display: flex; flex-direction: column; }
+  .contributionStage::after { display: none; }
+  .contributionCopy { display: contents; }
+  .contributionCopy h2 { order: 0; position: relative; z-index: 4; font-size: clamp(2.8rem, 13.2vw, 4.8rem); max-width: 12ch; line-height: 1; }
+  .contributionFigure { order: 1; position: relative; inset: auto; opacity: 1; height: 22rem; width: calc(100% + 2 * var(--home-gutter)); margin: 0 calc(-1 * var(--home-gutter)) 1rem; }
+  .contributionFigureImage { object-fit: cover; object-position: 70% center; }
+  .contributionBody { order: 2; position: relative; z-index: 4; max-width: 32ch; }
+  .contributionCta { order: 3; position: relative; z-index: 4; margin-top: 1.75rem; width: 100%; max-width: none; }
+  .contributionLines { height: 28rem; inset: 13rem -1rem auto auto; width: 100%; opacity: .5; }
+  .contributionApostrophe { display: none; }
+}
+
+@supports (animation-timeline: view()) {
+  @media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+    .publicationHome[data-motion-profile="static"] .folioPage {
+      animation: mobile-folio-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+    }
+    .publicationHome[data-motion-profile="static"] .noiseApostrophe {
+      animation: mobile-mark-turn linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+  }
+}
+@keyframes mobile-folio-rise { from { translate: 0 3rem; rotate: 8deg; } to { translate: 0 0; rotate: 0deg; } }
+@keyframes mobile-mark-turn { from { rotate: -16deg; } to { rotate: 12deg; } }
+
+/* One touch-led inspection: marble opens into anatomy as the reader scrolls. */
+@media (max-width: 1023px) and (orientation: portrait) and (prefers-reduced-motion: no-preference) {
+  .publicationHome :global([data-home-scene="hero"][data-mobile-scroll="enabled"]) {
+    height: 220svh !important;
+  }
+  .publicationHome :global([data-home-scene="hero"][data-mobile-scroll="enabled"]) > div {
+    position: sticky !important;
+    top: min(0px, calc(100svh - 42rem)) !important;
+    height: max(100svh, 42rem) !important;
+    min-height: 42rem;
+  }
+  .publicationHome :global([data-mobile-scroll="enabled"]) [data-copy-zone="headline"] {
+    opacity: var(--mobile-cover-opacity, 1);
+  }
+  .publicationHome :global([data-mobile-story]) {
+    display: block;
+    grid-column: 1 / -1;
+    grid-row: 1;
+    align-self: start;
+    margin: 0;
+    max-width: 12ch;
+    font-size: clamp(2.7rem, 12.8vw, 5rem);
+    font-weight: 400;
+    letter-spacing: -.04em;
+    line-height: 1;
+    opacity: var(--mobile-story-opacity, 0);
+    pointer-events: none;
+    z-index: 10;
+  }
+  .publicationHome :global([data-mobile-story]) span,
+  .publicationHome :global([data-mobile-story]) em { display: block; }
+  .publicationHome :global([data-mobile-story]) em {
+    font-family: "Bodoni Moda Variable", serif;
+    margin: .12em 0 .12em .15em;
+    font-weight: 430;
+  }
+}
+
+@media (max-width: 1023px) and (max-height: 700px) and (orientation: portrait) and (prefers-reduced-motion: no-preference) {
+  .publicationHome :global([data-home-scene="hero"][data-mobile-scroll="enabled"]) > div {
+    top: 0 !important;
+    height: 100svh !important;
+    min-height: 0;
+    padding-top: calc(var(--publication-shell-height) + 1rem) !important;
+    padding-bottom: 2.5rem !important;
+  }
+  .publicationHome :global([data-mobile-scroll="enabled"]) article[data-copy-chapter="cover"] [data-copy-zone="headline"] {
+    font-size: clamp(2rem, 12.5vw, 3rem);
+  }
+  .publicationHome :global([data-mobile-scroll="enabled"]) [data-mobile-story] {
+    font-size: clamp(2rem, 10.8vw, 2.75rem);
+  }
+  .publicationHome :global([data-mobile-scroll="enabled"]) [data-cover-poster] {
+    height: 58vw;
+    max-height: 35svh;
+    margin-block: .5rem;
+  }
+  .publicationHome :global([data-mobile-scroll="enabled"]) article[data-copy-chapter="cover"] [data-copy-zone="caption"] {
+    gap: .25rem;
+    font-size: .7rem;
+  }
 }

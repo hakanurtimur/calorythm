@@ -122,3 +122,23 @@
   .takeaway h2 { font-size: clamp(2.3rem, 10vw, 3rem); line-height: 1.12; }
   .sourceLink, .breadcrumb a { display: inline-flex; align-items: center; min-height: 2.75rem; }
 }
+
+@media (max-width: 767px) {
+  .article { --article-gutter: var(--mobile-gutter); }
+  .cover { padding-top: calc(var(--publication-shell-height) + 1.5rem); }
+  .coverGrid { gap: 1.75rem; padding-top: 1rem; }
+  .cover h1 { font-size: clamp(2.65rem, 11.6vw, 4.5rem); line-height: 1.06; }
+  .cover h1 em { display: block; margin-top: .15em; }
+  .coverCopy { padding-top: 0; }
+  .metadata { font-size: .65rem; }
+  .coverArt { margin-inline: calc(-1 * var(--article-gutter)); }
+  .coverArt img { width: 100%; max-height: 27rem; object-fit: cover; }
+  .coverArt figcaption { padding-inline: var(--article-gutter); }
+  .chapterLinks { grid-template-columns: 1fr; }
+  .chapterLinks a { min-height: 3.5rem; padding-inline: 0; font-size: 1rem; }
+  .chapterLinks a + a { border-left: 0; border-top: 1px solid #bcb8ab; }
+  .comparison { padding-top: 4rem; }
+  .sectionIntro { margin-bottom: 2.5rem; }
+  .concept h3 { font-size: clamp(2.5rem, 11vw, 4rem); }
+  .value { font-size: clamp(4.5rem, 23vw, 6rem); }
+}

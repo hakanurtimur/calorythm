@@ -849,7 +849,7 @@
   }
 }
 
-@media (max-width: 899px) and (max-height: 699px) and (orientation: landscape) {
+@media (min-width: 761px) and (max-width: 899px) and (max-height: 699px) and (orientation: landscape) {
   .cover {
     min-height: 34rem;
     padding-bottom: 1rem;
@@ -950,4 +950,36 @@
   .noteFooter a { min-height: 3rem; }
   .storyFlow { margin-top: 2.5rem; gap: 3rem; }
   .continueReading { margin-top: 3.5rem; }
+}
+
+/* A phone-sized editorial cover, followed by full-bleed reading plates. */
+@media (max-width: 760px) {
+  .journal { --journal-gutter: var(--mobile-gutter); }
+  .cover { padding-top: calc(var(--publication-shell-height) + 2rem); }
+  .coverCopy { gap: 1.35rem; }
+  .coverCopy h1 { font-size: clamp(2.9rem, 12.8vw, 5rem); max-width: none; line-height: 1.01; }
+  .coverCopy h1 span:last-child { margin-left: .5em; }
+  .coverLead { max-width: 28ch; font-size: 1rem; }
+  .coverPrinciple { font-size: .9rem; line-height: 1.75; max-width: 36ch; }
+  .flagship { margin: 2rem calc(-1 * var(--journal-gutter)) 0; grid-template-rows: auto auto; }
+  .flagshipVisual { height: clamp(26rem, 118vw, 40rem); }
+  .flagshipVisual img { object-position: 66% center; }
+  .flagshipVisual::after { background: linear-gradient(0deg, #141611, transparent 60%); }
+  .coverRegister { right: var(--journal-gutter); top: 1.25rem; }
+  .flagshipCopy { margin-top: -6rem; padding: 0 var(--journal-gutter) 2rem; gap: 1.25rem; }
+  .flagshipCopy h2 { font-size: clamp(2.85rem, 13vw, 4.8rem); max-width: 11ch; line-height: 1; }
+  .storyMeta { gap: .5rem 1rem; }
+  .primaryCta { width: 100%; margin-top: .5rem; }
+  .coverFolio { padding-block: 1rem; margin-top: .5rem; }
+  .content { padding-block: 4rem; }
+  .contentHeader h2 { font-size: clamp(3.3rem, 15vw, 5rem); }
+  .evidenceLegend { font-size: .61rem; gap: 1rem; }
+  .storyFlow { gap: 4rem; }
+  .note { margin-inline: calc(-1 * var(--journal-gutter)); grid-template-rows: auto auto; }
+  .noteVisual { height: clamp(23rem, 100vw, 34rem); }
+  .noteCopy, .noteWarm .noteCopy, .noteDark .noteCopy { padding: 2rem var(--journal-gutter) 2.5rem; gap: 1.4rem; }
+  .noteCopy h2 { font-size: clamp(2.65rem, 12vw, 4.4rem); max-width: 13ch; }
+  .noteFooter { grid-template-columns: auto 1fr; align-items: center; }
+  .noteFooter time { max-width: 8ch; }
+  .noteCta { justify-self: stretch; }
 }

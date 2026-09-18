@@ -1,3 +1,4 @@
+import { getArticlesForTopic } from "@/lib/content-selectors";
 import Image from "next/image";
 import Link from "next/link";
 import { topics } from "@/content/topics";
@@ -164,8 +165,8 @@ export default function TopicsPage() {
               <ol aria-labelledby={headingId} className={styles.topicList}>
                 {territory.topics.map((topic, index) => {
                   const descriptionId = `${topic.slug}-topic-definition`;
-                  const statusId =
-                    topic.slug === "protein" ? `${topic.slug}-topic-status` : undefined;
+                  const statusId = `${topic.slug}-topic-status`;
+                  const articleCount = getArticlesForTopic(topic.slug).length;
 
                   return (
                     <li data-tone={topic.tone} key={topic.slug}>
@@ -182,9 +183,9 @@ export default function TopicsPage() {
                         <h3>{topic.title}</h3>
                         <p id={descriptionId}>{topic.definition}</p>
                         <span className={styles.topicStatus} id={statusId}>
-                          {topic.slug === "protein"
-                            ? "Açık dosya · 3 yayın"
-                            : "Konuyu keşfet"}
+                          {articleCount > 0
+                            ? `Açık dosya · ${articleCount} yayın`
+                            : "Henüz yazı yok"}
                         </span>
                         <b aria-hidden="true">↗</b>
                       </Link>

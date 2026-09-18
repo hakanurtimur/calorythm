@@ -75,19 +75,13 @@
   position: absolute;
 }
 
-.posterImage,
-.posterRhythmBands {
+.posterComposite {
   height: 100%;
   inset: 0;
-  object-fit: cover;
-  object-position: 58% center;
   position: absolute;
   width: 100%;
 }
 
-.posterRhythmBands {
-  pointer-events: none;
-}
 
 .hero[data-hero-visual="poster"] {
   height: 100svh;
@@ -455,6 +449,12 @@
 }
 
 @media (max-width: 767px) {
+  .opening h1,
+  .intro,
+  .coverSignature {
+    animation: none;
+  }
+
   .hero {
     height: 230svh;
   }
@@ -467,9 +467,6 @@
     opacity: 0.6;
   }
 
-  .posterImage {
-    object-position: 61% center;
-  }
 
   .opening,
   .method,
@@ -626,4 +623,17 @@
   .stage {
     padding: 8rem 1.25rem 3.5rem;
   }
+}
+
+.mobileAnatomy {
+  clip-path: inset(0 calc((1 - var(--anatomy-reveal, 0)) * 100%) 0 0);
+}
+
+.mobileStory {
+  display: none;
+}
+
+.hero[data-mobile-scroll="enabled"] .scrollCue {
+  white-space: nowrap;
+  width: max-content;
 }

@@ -431,7 +431,7 @@ describe("PublicationHome", () => {
     expect(contribution).not.toHaveTextContent("UzmanlıkAraştırmaYazarlık");
     expect(
       within(contribution).getByRole("link", { name: "Fikrini paylaş" }),
-    ).toHaveAttribute("href", "/about#katki");
+    ).toHaveAttribute("href", "mailto:calorythm2026@gmail.com");
   });
 
   it("uses editorial taxonomy without issue or first-publication framing", () => {

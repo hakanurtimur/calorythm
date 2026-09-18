@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getPublishedArticles } from "@/lib/content-selectors";
+import { getEditorialContactUrl } from "@/lib/editorial-contact";
+import { getArticlesForTopic, getPublishedArticles } from "@/lib/content-selectors";
 import { topics } from "@/content/topics";
 import { publicationHomeContent as copy } from "@/content/publication-home";
 import { CalorythmMeasureHero } from "./calorythm-measure-hero";
@@ -379,7 +380,7 @@ export function PublicationHome() {
             <li key={topic.slug}>
               <Link data-topic-row={topic.slug} href={`/topics/${topic.slug}`}>
                 <span>{topic.title}</span>
-                <p>{topic.definition}</p>
+                <p>{topic.definition}{getArticlesForTopic(topic.slug).length === 0 && <small className={styles.topicStatus}>Henüz yazı yok</small>}</p>
                 <b aria-hidden="true">↗</b>
               </Link>
             </li>
@@ -467,7 +468,7 @@ export function PublicationHome() {
             <Link
               className={styles.contributionCta}
               data-contribution-cta=""
-              href="/about#katki"
+              href={getEditorialContactUrl()}
             >
               <span>{copy.contribution.cta}</span>
               <span aria-hidden="true">↗</span>

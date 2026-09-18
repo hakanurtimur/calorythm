@@ -5,6 +5,21 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://calorythm-iota.vercel.app"),
+  openGraph: {
+    title: "CALORYTHM — Bağımsız beslenme bilimi yayını",
+    description: "Beslenme bilimini kaynak, bağlam ve güçlü görsel anlatımla keşfet.",
+    siteName: "CALORYTHM",
+    locale: "tr_TR",
+    type: "website",
+    images: [{ url: "/share-image", width: 1200, height: 630, alt: "CALORYTHM — Bağımsız beslenme bilimi yayını" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CALORYTHM — Bağımsız beslenme bilimi yayını",
+    description: "Beslenme bilimini kaynak, bağlam ve güçlü görsel anlatımla keşfet.",
+    images: ["/share-image"],
+  },
   title: { default: "CALORYTHM", template: "%s | CALORYTHM" },
   description:
     "Beslenme bilimini güvenilir kaynaklarla ele alan bağımsız dijital dergi.",

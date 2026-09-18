@@ -333,21 +333,16 @@ describe("publication routes", () => {
     expect(contribution).toHaveTextContent(/çıkar çatışması/i);
   });
 
-  it("keeps the unconfigured contribution CTA honest and actionable", async () => {
+  it("provides the editorial email when no contact override is configured", async () => {
     const { default: AboutPage } = await import("./(publication)/about/page");
-
     render(<AboutPage />);
-
-    expect(screen.getByRole("link", { name: "Başvuru bilgisi" })).toHaveAttribute(
-      "href",
-      "#iletisim-bilgisi",
+    expect(screen.getByRole("link", { name: "Katkı için iletişime geç" })).toHaveAttribute(
+      "href", "mailto:calorythm2026@gmail.com",
     );
-    const contactNote = document.querySelector("#iletisim-bilgisi");
-    expect(contactNote).toHaveTextContent(
-      "Katkı başvuruları henüz açılmadı.",
+    expect(screen.getByRole("link", { name: "calorythm2026@gmail.com" })).toHaveAttribute(
+      "href", "mailto:calorythm2026@gmail.com",
     );
-    expect(contactNote).not.toHaveTextContent("NEXT_PUBLIC_EDITORIAL_CONTACT_URL");
-    expect(screen.queryByRole("link", { name: "Katkı için iletişime geç" })).not.toBeInTheDocument();
+    expect(document.querySelector("#iletisim-bilgisi")).not.toHaveTextContent("henüz açılmadı");
   });
 
   it("uses the configured editorial contact destination without inventing another channel", async () => {

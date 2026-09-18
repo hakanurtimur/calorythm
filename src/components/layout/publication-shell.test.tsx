@@ -46,7 +46,7 @@ describe("PublicationHeader", () => {
     expect(screen.getByRole("link", { name: "Yayın" })).toHaveAttribute("href", "/about");
     expect(screen.getByRole("link", { name: "Fikir gönder" })).toHaveAttribute(
       "href",
-      "/about#katki",
+      "mailto:calorythm2026@gmail.com",
     );
     expect(screen.getAllByRole("link", { name: "CALORYTHM ana sayfa" })).toHaveLength(1);
     expect(container.querySelectorAll('[data-brand-wordmark="primary"]')).toHaveLength(1);
@@ -191,7 +191,7 @@ describe("PublicationFooter", () => {
     ).toHaveAttribute("href", "/about#katki");
     expect(within(contribution).getByRole("link", { name: "Fikir gönder" })).toHaveAttribute(
       "href",
-      "/about#katki",
+      "mailto:calorythm2026@gmail.com",
     );
   });
 

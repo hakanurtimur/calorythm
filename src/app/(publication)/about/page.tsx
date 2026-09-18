@@ -1,3 +1,4 @@
+import { editorialEmail, getEditorialContactUrl } from "@/lib/editorial-contact";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./about.module.css";
@@ -18,7 +19,7 @@ const contributionPrinciples = [
 ] as const;
 
 export default function AboutPage() {
-  const configuredContact = process.env.NEXT_PUBLIC_EDITORIAL_CONTACT_URL?.trim();
+  const contactUrl = getEditorialContactUrl();
 
   return (
     <main className={styles.about} id="ana-icerik" tabIndex={-1} data-header-tone="light">
@@ -63,8 +64,8 @@ export default function AboutPage() {
           <p className={styles.eyebrow}>Birlikte yayımlayalım</p>
           <h2 id="katki-basligi">Anlatmak<br /> istediğin bir<br /> <em>konu var mı?</em></h2>
           <p>Beslenme alanında çalışan, araştıran ya da yazan biriysen, fikrini duymak isteriz. Birlikte üzerinde çalışabileceğimiz iyi bir soruyla başlayabiliriz.</p>
-          <Link className={styles.contactLink} href={configuredContact || "#iletisim-bilgisi"}>
-            {configuredContact ? "Katkı için iletişime geç" : "Başvuru bilgisi"}<span aria-hidden="true">↗</span>
+          <Link className={styles.contactLink} href={contactUrl}>
+            Katkı için iletişime geç<span aria-hidden="true">↗</span>
           </Link>
         </div>
         <div className={styles.guidelines}>
@@ -78,7 +79,8 @@ export default function AboutPage() {
           ))}
           <div className={styles.contact} id="iletisim-bilgisi">
             <h3>İletişim bilgisi</h3>
-            {configuredContact ? <p>Yazı fikrini, kısa bir tanıtımını ve yararlanmak istediğin kaynakları katkı bağlantısı üzerinden paylaşabilirsin.</p> : <p>Katkı başvuruları henüz açılmadı. Başvuru kanalını hazır olduğunda burada paylaşacağız.</p>}
+            <p>Yazı fikrini, kısa bir tanıtımını ve yararlanmak istediğin kaynakları bizimle paylaşabilirsin.</p>
+            <p><a href={`mailto:${editorialEmail}`}>{editorialEmail}</a></p>
           </div>
         </div>
       </section>

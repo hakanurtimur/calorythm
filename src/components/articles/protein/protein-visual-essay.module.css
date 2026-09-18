@@ -1110,3 +1110,23 @@
 @media (min-width: 721px) and (max-width: 900px) {
   .roleList li { grid-template-columns: 2rem minmax(0, .6fr) minmax(0, .75fr) minmax(0, 1fr); }
 }
+
+/* Put the visual essay's artwork into the opening composition on phones. */
+@media (max-width: 720px) {
+  .article { --essay-gutter: var(--mobile-gutter); }
+  .prologue { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.4rem; padding: calc(var(--publication-shell-height) + 2rem) var(--essay-gutter) 2.5rem; }
+  .coverContent { display: contents; }
+  .eyebrow { grid-row: 1; }
+  .prologue h1 { grid-row: 2; font-size: clamp(2.9rem, 13.5vw, 4.7rem); line-height: .98; max-width: none; }
+  .deck { grid-row: 3; max-width: 31ch; line-height: 1.75; }
+  .coverArt { grid-row: 4; height: clamp(25rem, 116vw, 40rem); aspect-ratio: auto; width: calc(100% + 2 * var(--essay-gutter)); margin: -1rem calc(-1 * var(--essay-gutter)); }
+  .coverImage img { object-position: 70% center; }
+  .metadata { grid-row: 5; font-size: .6rem; padding-top: 1rem; border-top: 1px solid rgb(246 241 232 / .25); }
+  .scope { grid-row: 6; font-size: .8rem; line-height: 1.75; }
+  .coverStrands { display: none; }
+  .scene h2 { font-size: clamp(2.65rem, 12.5vw, 4.5rem); line-height: 1.02; }
+  .digestionArt, .materialSpecimen, .patternArt { margin-inline: calc(-1 * var(--essay-gutter)); }
+  .digestionArt figcaption, .materialSpecimen figcaption, .patternArt figcaption { padding-inline: var(--essay-gutter); }
+  .roleList li { padding-block: 1.6rem; }
+  .sourceNote { font-size: .8rem; line-height: 1.75; }
+}

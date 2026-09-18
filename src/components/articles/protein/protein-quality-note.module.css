@@ -151,3 +151,19 @@
   .summaryDetail { font-size: .95rem; }
   .readLink, .sourceLink, .breadcrumb a { min-height: 2.75rem; align-items: center; display: inline-flex; }
 }
+
+@media (max-width: 767px) {
+  .article { --quality-gutter: var(--mobile-gutter); }
+  .cover { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; padding: calc(var(--publication-shell-height) + 1.5rem) var(--quality-gutter) 2.5rem; }
+  .coverCopy { display: contents; }
+  .breadcrumb { grid-row: 1; margin-bottom: 0; }
+  .cover h1 { grid-row: 2; font-size: clamp(2.85rem, 13.5vw, 4.8rem); line-height: 1.02; max-width: 12ch; }
+  .deck { grid-row: 3; padding-top: 0; font-size: 1rem; line-height: 1.75; }
+  .coverArt { grid-row: 4; min-height: 0; aspect-ratio: 1.05; width: calc(100% + 2 * var(--quality-gutter)); margin-inline: calc(-1 * var(--quality-gutter)); }
+  .coverArt img { object-position: 58% center; }
+  .metadata { grid-row: 5; padding-top: 0; font-size: .65rem; }
+  .readLink { grid-row: 6; display: flex; width: 100%; max-width: none; margin-top: 0; min-height: 3.5rem; }
+  .opening { padding-block: 4rem; }
+  .patternArt { margin-inline: calc(-1 * var(--quality-gutter)); }
+  .patternArt figcaption { padding-inline: var(--quality-gutter); }
+}

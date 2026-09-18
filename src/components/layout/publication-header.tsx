@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getEditorialContactUrl } from "@/lib/editorial-contact";
 import { BrandWordmark } from "@/components/brand/brand-wordmark";
 import { PublicationHeaderSurface } from "./publication-header-surface";
 import { PublicationMenu } from "./publication-menu";
@@ -46,7 +47,7 @@ export function PublicationHeader({ tone = "transparent" }: PublicationHeaderPro
             {item.label}
           </Link>
         ))}
-        <Link className={styles.contributeLink} href="/about#katki">
+        <Link className={styles.contributeLink} href={getEditorialContactUrl()}>
           Fikir gönder
         </Link>
       </nav>

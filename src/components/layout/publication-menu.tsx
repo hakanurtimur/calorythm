@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { getEditorialContactUrl } from "@/lib/editorial-contact";
 import { useEffect, useRef, useState } from "react";
 import type { PublicationNavigationItem } from "./publication-header";
 import styles from "./publication-shell.module.css";
@@ -101,7 +102,7 @@ export function PublicationMenu({ items }: PublicationMenuProps) {
                 {item.label}
               </Link>
             ))}
-            <Link href="/about#katki" onClick={() => setIsOpen(false)}>
+            <Link href={getEditorialContactUrl()} onClick={() => setIsOpen(false)}>
               <span aria-hidden="true">04</span>
               Fikir gönder
             </Link>
