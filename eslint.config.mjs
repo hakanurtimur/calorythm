@@ -7,6 +7,7 @@ export default defineConfig([
   ...nextTypeScript,
   globalIgnores([
     ".next/**",
+    "videos/**",
     ".worktrees/**",
     ".playwright-cli/**",
     "output/**",

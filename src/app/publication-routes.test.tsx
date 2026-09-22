@@ -241,7 +241,7 @@ describe("publication routes", () => {
       images: [
         {
           alt: expect.stringMatching(/protein/i),
-          url: "https://calorythm-iota.vercel.app/images/topics/protein-atlas-hero-v1.webp",
+          url: "/images/topics/protein-atlas-hero-v1.webp",
         },
       ],
     });

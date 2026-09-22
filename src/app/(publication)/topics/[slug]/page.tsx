@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: TopicPageProps): Promise<Meta
           {
             alt: "CALORYTHM Protein Atlası kapak görseli",
             height: 941,
-            url: "https://calorythm-iota.vercel.app/images/topics/protein-atlas-hero-v1.webp",
+            url: "/images/topics/protein-atlas-hero-v1.webp",
             width: 1672,
           },
         ],
