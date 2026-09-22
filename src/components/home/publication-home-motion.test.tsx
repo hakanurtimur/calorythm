@@ -840,33 +840,8 @@ describe("PublicationHomeMotion", () => {
       start: "top 84%",
     });
     expect(fake.timelines[contributionTimelineIndex]?.config.scrollTrigger?.pin).toBeUndefined();
-    expect(findStep("[data-contribution-figure]")).toMatchObject({
-      from: expect.objectContaining({
-        clipPath: expect.stringContaining("100%"),
-        scale: expect.any(Number),
-        x: expect.any(Number),
-      }),
-      to: expect.objectContaining({
-        clipPath: "inset(0% 0% 0% 0%)",
-        scale: 1,
-        x: 0,
-      }),
-    });
-    expect(findStep("[data-contribution-line]")).toMatchObject({
-      from: expect.objectContaining({
-        attr: expect.objectContaining({ d: expect.any(Function) }),
-        drawSVG: "0% 0%",
-      }),
-      to: expect.objectContaining({
-        attr: expect.objectContaining({ d: expect.any(Function) }),
-        drawSVG: "0% 100%",
-        stagger: expect.any(Number),
-      }),
-    });
-    expect(findStep("[data-contribution-apostrophe]")).toMatchObject({
-      from: expect.objectContaining({ autoAlpha: 0, scale: expect.any(Number) }),
-      to: expect.objectContaining({ autoAlpha: 1, scale: 1 }),
-    });
+    expect(findStep("[data-contribution-figure]")).toBeUndefined();
+    expect(findStep("[data-contribution-apostrophe]")).toBeUndefined();
     expect(findStep("[data-contribution-copy]")).toMatchObject({
       from: expect.objectContaining({ clipPath: expect.stringContaining("100%"), y: expect.any(Number) }),
       to: expect.objectContaining({ clipPath: "inset(0% 0% 0% 0%)", y: 0 }),

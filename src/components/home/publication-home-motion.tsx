@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { contributionLinePaths } from "./publication-home-contribution-geometry";
 import {
   buildJournalLinePath,
   mapJournalRowCenterToViewBox,
@@ -547,61 +546,6 @@ export function PublicationHomeMotion({
           },
         });
         contribution
-          .fromTo(
-            "[data-contribution-figure]",
-            {
-              clipPath: "inset(0% 0% 0% 100%)",
-              scale: 1.045,
-              x: 64,
-            },
-            {
-              clipPath: "inset(0% 0% 0% 0%)",
-              duration: 0.68,
-              immediateRender: true,
-              scale: 1,
-              transformOrigin: "72% 58%",
-              x: 0,
-            },
-          )
-          .fromTo(
-            "[data-contribution-line]",
-            {
-              attr: {
-                d: (index: number) => contributionLinePaths[index]?.from ?? contributionLinePaths[0].from,
-              },
-              drawSVG: "0% 0%",
-            },
-            {
-              attr: {
-                d: (index: number) => contributionLinePaths[index]?.to ?? contributionLinePaths[0].to,
-              },
-              drawSVG: "0% 100%",
-              duration: 0.78,
-              immediateRender: true,
-              stagger: 0.045,
-            },
-            0.08,
-          )
-          .fromTo(
-            "[data-contribution-apostrophe]",
-            {
-              autoAlpha: 0,
-              rotate: 9,
-              scale: 0.78,
-              y: 26,
-            },
-            {
-              autoAlpha: 1,
-              duration: 0.46,
-              ease: "power2.out",
-              immediateRender: true,
-              rotate: 3,
-              scale: 1,
-              transformOrigin: "50% 18%",
-              y: 0,
-            },
-            0.3,
-          )
           .fromTo(
             "[data-contribution-copy]",
             { clipPath: "inset(0% 0% 100% 0%)", y: 30 },

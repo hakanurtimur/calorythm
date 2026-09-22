@@ -156,7 +156,7 @@ describe("PublicationFooter", () => {
     ).toHaveAttribute("href", "/");
     expect(container.querySelectorAll('[data-brand-wordmark="inverse"]')).toHaveLength(1);
     expect(footer).toHaveTextContent(
-      "Beslenme bilimini kaynak, bağlam ve güçlü görsel anlatımla yayımlayan bağımsız bir web dergisi.",
+      "Beslenmeninbi ritmi var.",
     );
   });
 

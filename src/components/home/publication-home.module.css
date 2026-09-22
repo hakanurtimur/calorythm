@@ -2286,3 +2286,19 @@
     font-size: .7rem;
   }
 }
+
+/* A short editorial invitation leads into the typographic publication signature. */
+.publicationHome .contributionInvitation { min-height: 0; height: auto; background: var(--ivory); color: var(--ink); }
+.publicationHome .contributionInvitation .contributionStage { min-height: 0; height: auto; padding: 5rem var(--home-gutter); display: block; position: relative; }
+.publicationHome .contributionInvitation .contributionStage::after { display: none; }
+.publicationHome .contributionInvitation .contributionCopy { position: relative; inset: auto; width: 100%; max-width: none; display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.5rem 5rem; margin: 0; padding: 0; }
+.publicationHome .contributionInvitation .contributionCopy h2 { grid-row: 1 / 3; max-width: 19ch; font-size: clamp(2rem,3.4vw,3.5rem); line-height: 1.1; }
+.publicationHome .contributionInvitation .contributionBody { max-width: 44ch; margin: 0; color: var(--ink); }
+.publicationHome .contributionInvitation .contributionCta { color: var(--ink); width: fit-content; margin-top: .5rem; }
+.publicationHome .contributionInvitation .contributionLines { display: none; }
+@media (max-width: 767px) {
+  .publicationHome .contributionInvitation .contributionStage { padding-block: 3.5rem; }
+  .publicationHome .contributionInvitation .contributionCopy { grid-template-columns: 1fr; gap: 1.5rem; }
+  .publicationHome .contributionInvitation .contributionCopy h2 { grid-row: auto; font-size: clamp(2rem,9vw,3rem); }
+}
+.publicationHome .contributionInvitation .contributionCta:focus-visible { outline-color: var(--ink); }

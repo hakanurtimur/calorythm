@@ -5,7 +5,6 @@ import { getArticlesForTopic, getPublishedArticles } from "@/lib/content-selecto
 import { topics } from "@/content/topics";
 import { publicationHomeContent as copy } from "@/content/publication-home";
 import { CalorythmMeasureHero } from "./calorythm-measure-hero";
-import { contributionLinePaths } from "./publication-home-contribution-geometry";
 import { buildJournalLinePath } from "./publication-home-journal-geometry";
 import { PublicationHomeMotion } from "./publication-home-motion";
 import styles from "./publication-home.module.css";
@@ -13,7 +12,6 @@ import styles from "./publication-home.module.css";
 const FLAGSHIP_SLUG = "protein-sadece-kas-icin-degildir";
 const FOLIO_BASE_SRC = "/images/calorythm-folio-base-branded-v2.webp";
 const PROTEIN_FLAGSHIP_SRC = "/images/calorythm-protein-flagship-v1.webp";
-const CONTRIBUTION_ECHO_SRC = "/images/calorythm-editorial-echo-v1.png";
 
 const proteinRoles = [
   { id: "structure", label: "Yapı" },
@@ -390,78 +388,12 @@ export function PublicationHome() {
 
       <section
         aria-labelledby="contribution-title"
-        className={styles.contribution}
-        data-header-tone="dark"
+        className={`${styles.contribution} ${styles.contributionInvitation}`}
+        data-header-tone="light"
         data-home-scene="contribution"
         data-motion-state="start"
       >
         <div className={styles.contributionStage} data-contribution-stage="">
-          <figure
-            aria-hidden="true"
-            className={styles.contributionFigure}
-            data-contribution-artwork="editorial-echo"
-            data-contribution-figure=""
-          >
-            <Image
-              alt=""
-              className={styles.contributionFigureImage}
-              data-contribution-figure-image=""
-              fill
-              sizes="(max-width: 767px) 100vw, 100vw"
-              src={CONTRIBUTION_ECHO_SRC}
-            />
-          </figure>
-
-          <svg
-            aria-hidden="true"
-            className={styles.contributionApostrophe}
-            data-contribution-apostrophe=""
-            focusable="false"
-            preserveAspectRatio="xMidYMid meet"
-            viewBox="0 0 140 250"
-          >
-            <defs>
-              <linearGradient
-                id="contribution-apostrophe-gradient"
-                x1="0"
-                x2="0"
-                y1="0"
-                y2="1"
-              >
-                <stop offset="0" stopColor="var(--orange)" />
-                <stop offset="0.33" stopColor="var(--coral)" />
-                <stop offset="0.66" stopColor="var(--ochre)" />
-                <stop offset="1" stopColor="var(--olive)" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 91 10 C 51 10 25 38 25 76 C 25 109 47 132 79 132 C 72 161 56 190 28 220 L 62 242 C 108 200 127 144 127 82 C 127 38 114 10 91 10 Z"
-              data-apostrophe-shape=""
-              fill="url(#contribution-apostrophe-gradient)"
-              vectorEffect="non-scaling-stroke"
-            />
-          </svg>
-
-          <svg
-            aria-hidden="true"
-            className={styles.contributionLines}
-            data-contribution-lines=""
-            focusable="false"
-            preserveAspectRatio="xMidYMid slice"
-            viewBox="0 0 1672 941"
-          >
-            {rhythmBandSequence.map(({ id, tone }, index) => (
-              <path
-                d={contributionLinePaths[index]?.to}
-                data-band-tone={tone}
-                data-contribution-line={id}
-                key={id}
-                pathLength="1"
-                vectorEffect="non-scaling-stroke"
-              />
-            ))}
-          </svg>
-
           <header className={styles.contributionCopy} data-contribution-copy="">
             <h2 id="contribution-title">{copy.contribution.title}</h2>
             <p className={styles.contributionBody}>{copy.contribution.body}</p>

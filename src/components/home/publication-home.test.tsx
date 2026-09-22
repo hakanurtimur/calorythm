@@ -35,7 +35,7 @@ describe("PublicationHome", () => {
       ["flagship", "dark"],
       ["journal", "light"],
       ["topics", "light"],
-      ["contribution", "dark"],
+      ["contribution", "light"],
     ]);
   });
 
@@ -355,83 +355,12 @@ describe("PublicationHome", () => {
     expect(footerInkMix).toBeGreaterThanOrEqual(64);
   });
 
-  it("turns the contribution finale into a dark editorial echo invitation", () => {
+  it("closes with a contribution invitation without repeating the editorial artwork", () => {
     const { container } = render(<PublicationHome />);
-    const contribution = container.querySelector<HTMLElement>(
-      '[data-home-scene="contribution"]',
-    )!;
-    const lines = Array.from(
-      contribution.querySelectorAll<SVGPathElement>("[data-contribution-line]"),
-    );
-    const figure = contribution.querySelector<HTMLElement>("[data-contribution-figure]");
-    const figureImage = figure?.querySelector<HTMLImageElement>(
-      "[data-contribution-figure-image]",
-    );
-    const renderedFigureSource = figureImage?.getAttribute("src") ?? "";
-    const figureSource = renderedFigureSource.startsWith("/_next/image")
-      ? new URL(renderedFigureSource, "http://localhost").searchParams.get("url") ?? ""
-      : renderedFigureSource;
-
-    expect(contribution).toHaveAttribute("aria-labelledby", "contribution-title");
-    expect(
-      within(contribution).getByRole("heading", {
-        name: "Beslenme üzerine iyi bir fikrin varsa, birlikte anlatalım.",
-      }),
-    ).toHaveAttribute("id", "contribution-title");
-    expect(contribution.querySelector("[data-contribution-stage]")).toBeInTheDocument();
-    expect(figure).toHaveAttribute("aria-hidden", "true");
-    expect(figure).toHaveAttribute("data-contribution-artwork", "editorial-echo");
-    expect(figureImage).toHaveAttribute("alt", "");
-    expect(figureSource).toBe(
-      "/images/calorythm-editorial-echo-v1.png",
-    );
-    expect(
-      existsSync(resolve(process.cwd(), "public", figureSource.replace(/^\//, ""))),
-    ).toBe(true);
-    expect(contribution.querySelector("[data-contribution-figure-mask]")).not.toBeInTheDocument();
-    expect(contribution.querySelector("mask")).not.toBeInTheDocument();
-    expect(contribution.querySelector('img[src*="conductor-baton"]')).not.toBeInTheDocument();
-    expect(figureImage).toHaveAttribute(
-      "data-contribution-figure-image",
-      "",
-    );
-    const apostrophe = contribution.querySelector<SVGElement>(
-      "[data-contribution-apostrophe]",
-    );
-    expect(apostrophe).toHaveAttribute(
-      "aria-hidden",
-      "true",
-    );
-    expect(apostrophe).toHaveAttribute("viewBox", "0 0 140 250");
-    expect(apostrophe?.querySelector("linearGradient")).toBeInTheDocument();
-    expect(apostrophe?.querySelector("path")).toHaveAttribute("data-apostrophe-shape", "");
-    expect(contribution.querySelector("[data-contribution-lines]")).toHaveAttribute(
-      "aria-hidden",
-      "true",
-    );
-    expect(contribution.querySelector("[data-contribution-lines]")).toHaveAttribute(
-      "focusable",
-      "false",
-    );
-    expect(lines.map((line) => [
-      line.getAttribute("data-contribution-line"),
-      line.getAttribute("data-band-tone"),
-    ])).toEqual([
-      ["claim", "orange"],
-      ["source", "coral"],
-      ["context", "ochre"],
-      ["editorial", "olive"],
-    ]);
-    lines.forEach((line) => {
-      expect(line).toHaveAttribute("pathLength", "1");
-      expect(line.getAttribute("d")).toMatch(/^M /);
-    });
-    expect(contribution).not.toHaveTextContent("Açık editorya");
-    expect(contribution).not.toHaveTextContent("Editoryal prova");
-    expect(contribution).not.toHaveTextContent("UzmanlıkAraştırmaYazarlık");
-    expect(
-      within(contribution).getByRole("link", { name: "Fikrini paylaş" }),
-    ).toHaveAttribute("href", "mailto:calorythm2026@gmail.com");
+    const contribution = container.querySelector<HTMLElement>('[data-home-scene="contribution"]')!;
+    expect(within(contribution).getByRole("heading", { name: "Beslenme üzerine iyi bir fikrin varsa, birlikte anlatalım." })).toBeVisible();
+    expect(contribution.querySelector("img")).not.toBeInTheDocument();
+    expect(within(contribution).getByRole("link", { name: "Fikrini paylaş" })).toHaveAttribute("href", "mailto:calorythm2026@gmail.com");
   });
 
   it("uses editorial taxonomy without issue or first-publication framing", () => {
