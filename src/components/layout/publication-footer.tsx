@@ -102,6 +102,10 @@ export function PublicationFooter() {
           <span aria-hidden="true" className={styles.footerLegalSeparator}> · </span>
           <span>Bağımsız yayın</span>
           <span aria-hidden="true" className={styles.footerLegalSeparator}> · </span>
+          <Link href="/kullanim-kosullari">Kullanım koşulları</Link>
+          <span aria-hidden="true" className={styles.footerLegalSeparator}> · </span>
+          <Link href="/gizlilik-politikasi">Gizlilik politikası</Link>
+          <span aria-hidden="true" className={styles.footerLegalSeparator}> · </span>
           <span>İçerikler kişisel sağlık önerisi değildir.</span>
         </div>
       </div>

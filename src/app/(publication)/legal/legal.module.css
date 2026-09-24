@@ -1,0 +1,37 @@
+.page {
+  background: var(--ivory);
+  color: var(--ink);
+  min-height: 70vh;
+  padding: clamp(8rem, 13vw, 13rem) max(1.5rem, calc((100vw - 980px) / 2)) clamp(5rem, 9vw, 9rem);
+}
+
+.eyebrow {
+  color: var(--olive);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: .8rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.page h1 {
+  font-size: clamp(3rem, 8vw, 6rem);
+  letter-spacing: -.055em;
+  line-height: 1;
+  margin: 1rem 0 2.5rem;
+}
+
+.page h2 {
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  letter-spacing: -.025em;
+  margin: 2.8rem 0 .7rem;
+}
+
+.page p,
+.page li {
+  font-size: clamp(1rem, 1.4vw, 1.14rem);
+  line-height: 1.7;
+  max-width: 68ch;
+}
+
+.page a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: .2em; }
+.page ul { padding-left: 1.3rem; }
